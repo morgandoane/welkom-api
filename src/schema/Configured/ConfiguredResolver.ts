@@ -1,20 +1,26 @@
-import { Loader } from './../Loader';
-import { Config } from './../Config/Config';
+import { Config, ConfigLoader } from './../Config/Config';
 import { FieldResolver, Resolver, ResolverInterface, Root } from 'type-graphql';
-import { createBaseResolver } from '../Base/BaseResolvers';
 import { Configured } from './Configured';
-
-const BaseResolver = createBaseResolver();
+import { Base } from '../Base/Base';
+import { User, UserLoader } from '../User/User';
 
 export const createConfiguredResolver = () => {
     @Resolver(() => Configured, { isAbstract: true })
-    abstract class ConfiguredResolver
-        extends BaseResolver
-        implements ResolverInterface<Configured>
-    {
+    abstract class ConfiguredResolver implements ResolverInterface<Configured> {
+        @FieldResolver(() => User)
+        async created_by(@Root() base: Base): Promise<User> {
+            return await UserLoader.load(base.created_by.toString());
+        }
+
+        @FieldResolver(() => User)
+        async modified_by(@Root() { modified_by }: Base): Promise<User> {
+            if (!modified_by) return null;
+            return await UserLoader.load(modified_by.toString());
+        }
+
         @FieldResolver(() => Config)
         async config(@Root() { config }: Configured): Promise<Config> {
-            return await Loader.Config.load(config.toString());
+            return await ConfigLoader.load(config.toString());
         }
     }
 

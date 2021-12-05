@@ -57,14 +57,15 @@ const createContext = async (
 
         const decoded = await authResult;
 
-        const roles = decoded[`${env.AUTH0_NAMEPSACE}/roles`];
+        // const roles = decoded[`${env.AUTH0_NAMEPSACE}/roles`];
 
-        const permissions = roles.includes(UserRole.Admin)
-            ? Object.values(Permission)
-            : decoded[`${env.AUTH0_NAMEPSACE}/permissions`];
+        // const permissions = roles.includes(UserRole.Admin)
+        //     ? Object.values(Permission)
+        //     : decoded[`${env.AUTH0_NAMEPSACE}/permissions`];
 
         // permissions and roles come from Auth0 Actions
-        return new Context(decoded, authToken, roles, permissions);
+        // return new Context(decoded, authToken, roles, permissions);
+        return new Context(decoded, authToken, [], []);
     } catch (err) {
         return new Context(null, authToken, [], []);
     }

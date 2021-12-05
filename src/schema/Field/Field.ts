@@ -35,7 +35,7 @@ class ValueBase {
 }
 
 @ObjectType()
-class BooleanValue extends ValueBase {
+export class BooleanValue extends ValueBase {
     @Field(() => FieldType)
     @prop({ required: true })
     type!: FieldType.Boolean;
@@ -46,7 +46,7 @@ class BooleanValue extends ValueBase {
 }
 
 @ObjectType()
-class CompanyValue extends ValueBase {
+export class CompanyValue extends ValueBase {
     @Field(() => FieldType)
     @prop({ required: true })
     type!: FieldType.Company;
@@ -57,7 +57,7 @@ class CompanyValue extends ValueBase {
 }
 
 @ObjectType()
-class DateValue extends ValueBase {
+export class DateValue extends ValueBase {
     @Field(() => FieldType)
     @prop({ required: true })
     type!: FieldType.Date;
@@ -68,7 +68,7 @@ class DateValue extends ValueBase {
 }
 
 @ObjectType()
-class NumberValue extends ValueBase {
+export class NumberValue extends ValueBase {
     @Field(() => FieldType)
     @prop({ required: true })
     type!: FieldType.Number;
@@ -79,7 +79,7 @@ class NumberValue extends ValueBase {
 }
 
 @ObjectType()
-class PercentageValue extends ValueBase {
+export class PercentageValue extends ValueBase {
     @Field(() => FieldType)
     @prop({ required: true })
     type!: FieldType.Percentage;
@@ -90,7 +90,7 @@ class PercentageValue extends ValueBase {
 }
 
 @ObjectType()
-class PersonValue extends ValueBase {
+export class PersonValue extends ValueBase {
     @Field(() => FieldType)
     @prop({ required: true })
     type!: FieldType.Person;
@@ -101,7 +101,7 @@ class PersonValue extends ValueBase {
 }
 
 @ObjectType()
-class TextValue extends ValueBase {
+export class TextValue extends ValueBase {
     @Field(() => FieldType)
     @prop({ required: true })
     type!: FieldType.Text;
@@ -112,7 +112,7 @@ class TextValue extends ValueBase {
 }
 
 @ObjectType()
-class IdentifierValue extends ValueBase {
+export class IdentifierValue extends ValueBase {
     @Field(() => FieldType)
     @prop({ required: true })
     type!: FieldType.Identifier;
@@ -135,6 +135,26 @@ export const FieldValueUnion = createUnionType({
             TextValue,
             IdentifierValue,
         ] as const,
+    resolveType: (value) => {
+        switch (value.type) {
+            case FieldType.Boolean:
+                return BooleanValue;
+            case FieldType.Company:
+                return CompanyValue;
+            case FieldType.Date:
+                return DateValue;
+            case FieldType.Identifier:
+                return IdentifierValue;
+            case FieldType.Number:
+                return NumberValue;
+            case FieldType.Percentage:
+                return PercentageValue;
+            case FieldType.Person:
+                return PersonValue;
+            case FieldType.Text:
+                return TextValue;
+        }
+    },
 });
 
 export type _FieldValueUnion =

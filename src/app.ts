@@ -8,8 +8,8 @@ import { buildSchema } from 'type-graphql';
 import { registerEnums } from './utils/registerEnums';
 
 // Resolvers
+import { CompanyResolvers } from './schema/Company/CompanyResolvers';
 import { ConfigResolvers } from './schema/Config/ConfigResolvers';
-import { createConfiguredResolver } from './schema/Configured/ConfiguredResolver';
 
 // Serve locally over https
 import https from 'https';
@@ -17,7 +17,6 @@ import fs from 'fs';
 import { mongoose } from '@typegoose/typegoose';
 import { AuthProvider } from './services/AuthProvider/AuthProvider';
 import createContext from './auth/middleware/ContextMiddleware';
-import { createBaseResolver } from './schema/Base/BaseResolvers';
 
 const httpsOptions = {
     key: fs.readFileSync('./cert/key.pem'),
@@ -28,9 +27,6 @@ const httpsOptions = {
     try {
         // Setup Express
         const app = express();
-
-        const BaseResolver = createBaseResolver();
-        const ConfiguredResolver = createConfiguredResolver();
 
         registerEnums();
 
@@ -44,7 +40,7 @@ const httpsOptions = {
 
         // Setup GraphQL with Apollo
         const schema = await buildSchema({
-            resolvers: [BaseResolver, ConfigResolvers, ConfiguredResolver],
+            resolvers: [CompanyResolvers, ConfigResolvers],
             validate: true,
         });
 

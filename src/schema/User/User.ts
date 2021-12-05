@@ -1,6 +1,12 @@
 import { Field, ObjectType } from 'type-graphql';
-import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
-import { Identity } from 'auth0';
+import {
+    DocumentType,
+    getModelForClass,
+    modelOptions,
+    mongoose,
+    prop,
+} from '@typegoose/typegoose';
+import DataLoader from 'dataloader';
 
 @ObjectType()
 @modelOptions({
@@ -91,3 +97,26 @@ export class User {
 }
 
 export const UserModel = getModelForClass(User);
+
+export const UserLoader = new DataLoader<string, DocumentType<User>>(
+    async (keys: readonly string[]) => {
+        let res: DocumentType<User>[] = [];
+        await UserModel.find(
+            {
+                _id: {
+                    $in: keys.map((k) => new mongoose.Types.ObjectId(k)),
+                },
+            },
+            (err, docs) => {
+                if (err) throw err;
+                else res = docs;
+            }
+        ).lean();
+
+        return keys.map(
+            (k) =>
+                res.find((d) => d._id.toString() === k) ||
+                new Error('could not find User with id' + k)
+        );
+    }
+);
