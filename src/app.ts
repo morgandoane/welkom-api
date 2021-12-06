@@ -10,6 +10,7 @@ import { registerEnums } from './utils/registerEnums';
 // Resolvers
 import { CompanyResolvers } from './schema/Company/CompanyResolvers';
 import { ConfigResolvers } from './schema/Config/ConfigResolvers';
+import { ItemResolvers } from './schema/Item/ItemResolvers';
 import { ItemClassResolver } from './schema/ItemClass/ItemClassResolvers';
 
 // Serve locally over https
@@ -41,7 +42,12 @@ const httpsOptions = {
 
         // Setup GraphQL with Apollo
         const schema = await buildSchema({
-            resolvers: [CompanyResolvers, ConfigResolvers, ItemClassResolver],
+            resolvers: [
+                CompanyResolvers,
+                ConfigResolvers,
+                ItemResolvers,
+                ItemClassResolver,
+            ],
             validate: true,
         });
 

@@ -19,7 +19,7 @@ export class ItemClassResolver extends BaseResolver {
         return await Paginate.paginate({
             model: ItemClassModel,
             query: deleted == undefined ? {} : { deleted },
-            sort: { date_created: -1 },
+            sort: { name: 1 },
             skip,
             take,
         });
