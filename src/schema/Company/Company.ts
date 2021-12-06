@@ -8,6 +8,7 @@ import {
     prop,
 } from '@typegoose/typegoose';
 import DataLoader from 'dataloader';
+import { Location } from '../Location/Location';
 
 @ObjectType()
 @modelOptions({
@@ -19,6 +20,9 @@ export class Company extends Configured {
     @Field()
     @prop({ required: true })
     name!: string;
+
+    @Field(() => [Location])
+    locations?: Location[];
 }
 
 export const CompanyModel = getModelForClass(Company);

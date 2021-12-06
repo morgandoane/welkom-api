@@ -116,7 +116,7 @@ export const UserLoader = new DataLoader<string, DocumentType<User>>(
         return keys.map(
             (k) =>
                 res.find((d) => d._id.toString() === k) ||
-                new Error('could not find User with id' + k)
+                new Error('could not find User with id ' + k)
         );
     }
 );

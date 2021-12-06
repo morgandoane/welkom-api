@@ -1,13 +1,16 @@
 import { createUnionType, Field, ObjectType } from 'type-graphql';
 import { Address } from '../Address/Address';
 import {
+    DocumentType,
     getModelForClass,
     modelOptions,
+    mongoose,
     prop,
     Ref,
 } from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
 import { Base } from '../Base/Base';
+import DataLoader from 'dataloader';
 
 @ObjectType()
 @modelOptions({
@@ -17,37 +20,39 @@ import { Base } from '../Base/Base';
 })
 export class Location extends Base {
     @Field(() => Company)
-    @prop({ required: true, ref: () => Company })
+    @prop({ required: true, ref: 'Company' })
     company!: Ref<Company>;
 
-    @Field(() => LocationIdentifier)
-    @prop({ required: true })
-    identifier!: LocationIdentifier_Address | LocationIdentifier_Name;
+    @Field(() => Address, { nullable: true })
+    @prop({ required: false })
+    address?: Address;
+
+    @Field({ nullable: true })
+    @prop({ required: false })
+    label?: string;
 }
-
-@ObjectType()
-export class LocationIdentifier_Address {
-    @Field(() => Address)
-    @prop({ required: true })
-    address!: Address;
-
-    @prop({ required: true })
-    type!: 'address';
-}
-
-@ObjectType()
-export class LocationIdentifier_Name {
-    @Field()
-    @prop({ required: true })
-    name!: string;
-
-    @prop({ required: true })
-    type!: 'name';
-}
-
-export const LocationIdentifier = createUnionType({
-    name: 'LocationIdentifier',
-    types: () => [LocationIdentifier_Address, LocationIdentifier_Name] as const,
-});
 
 export const LocationModel = getModelForClass(Location);
+
+export const LocationLoader = new DataLoader<string, DocumentType<Location>>(
+    async (keys: readonly string[]) => {
+        let res: DocumentType<Location>[] = [];
+        await LocationModel.find(
+            {
+                _id: {
+                    $in: keys.map((k) => new mongoose.Types.ObjectId(k)),
+                },
+            },
+            (err, docs) => {
+                if (err) throw err;
+                else res = docs;
+            }
+        );
+
+        return keys.map(
+            (k) =>
+                res.find((d) => d._id.toString() === k) ||
+                new Error('could not find Location with id' + k)
+        );
+    }
+);

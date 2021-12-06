@@ -1,8 +1,8 @@
 import { prop } from '@typegoose/typegoose';
-import { Field, ObjectType } from 'type-graphql';
+import { Field, InputType } from 'type-graphql';
 
-@ObjectType()
-export class Coordinate {
+@InputType()
+export class CoordinateInput {
     @Field()
     @prop({ required: true })
     lat!: number;
@@ -12,8 +12,8 @@ export class Coordinate {
     lon!: number;
 }
 
-@ObjectType()
-export class Address {
+@InputType()
+export class AddressInput {
     @Field()
     @prop({ required: true })
     line_1!: string;
@@ -38,7 +38,7 @@ export class Address {
     @prop({ required: false })
     country?: string;
 
-    @Field(() => Coordinate, { nullable: true })
+    @Field(() => CoordinateInput, { nullable: true })
     @prop({ required: false })
-    coordinate?: Coordinate;
+    coordinate?: CoordinateInput;
 }

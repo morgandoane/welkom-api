@@ -1,3 +1,4 @@
+import { LocationLoader, LocationModel } from './../Location/Location';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { CompanyFilter } from './CompanyFilter';
 import { CompanyList } from './CompanyList';
@@ -6,9 +7,18 @@ import { Context } from '@src/auth/context';
 import { CreateCompanyInput, UpdateCompanyInput } from './CompanyInput';
 import { createConfiguredResolver } from '../Configured/ConfiguredResolver';
 import { Company, CompanyModel } from './Company';
-import { Arg, Mutation, Resolver, Ctx, Query } from 'type-graphql';
+import {
+    Arg,
+    Mutation,
+    Resolver,
+    Ctx,
+    Query,
+    FieldResolver,
+    Root,
+} from 'type-graphql';
 import { Paginate } from '../Paginate';
 import { FilterQuery } from 'mongoose';
+import { Location } from '../Location/Location';
 
 const ConfiguredResolver = createConfiguredResolver();
 
@@ -45,7 +55,7 @@ export class CompanyResolvers extends ConfiguredResolver {
     ): Promise<Company> {
         const configured = await data.validate(context);
         const doc: Company = { ...configured, name: data.name };
-        return await (await CompanyModel.create(doc)).toJSON();
+        return await CompanyModel.create(doc);
     }
 
     @Mutation(() => Company)
@@ -64,5 +74,13 @@ export class CompanyResolvers extends ConfiguredResolver {
         doc.date_modified = context.base.date_modified;
         await doc.save();
         return doc;
+    }
+
+    @FieldResolver(() => [Location])
+    async locations(@Root() { _id }: Company): Promise<Location[]> {
+        return await LocationModel.find({
+            company: _id,
+            deleted: false,
+        }).lean();
     }
 }
