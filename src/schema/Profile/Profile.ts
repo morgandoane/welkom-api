@@ -1,4 +1,4 @@
-import { prop } from '@typegoose/typegoose';
+import { modelOptions, prop, Severity } from '@typegoose/typegoose';
 import { User } from 'auth0';
 import { Field, ObjectType } from 'type-graphql';
 
@@ -24,6 +24,11 @@ export class UserMetaData {
     phone_number?: string;
 }
 
+@modelOptions({
+    options: {
+        allowMixed: Severity.ALLOW,
+    },
+})
 @ObjectType()
 export class ProfileIdentityData {
     @Field({ nullable: true })
@@ -51,6 +56,11 @@ export class ProfileIdentityData {
     request_language?: string | undefined;
 }
 
+@modelOptions({
+    options: {
+        allowMixed: Severity.ALLOW,
+    },
+})
 @ObjectType()
 export class ProfileIdentity {
     @Field()
@@ -78,6 +88,11 @@ export class ProfileIdentity {
     profileData?: ProfileIdentityData;
 }
 
+@modelOptions({
+    options: {
+        allowMixed: Severity.ALLOW,
+    },
+})
 @ObjectType()
 export class Profile implements User<AppMetaData, UserMetaData> {
     @Field()

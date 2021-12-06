@@ -1,3 +1,4 @@
+import { Company, CompanyLoader } from './../Company/Company';
 import { loaderResult } from './../../utils/loaderResult';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { CreateOrderInput, UpdateOrderInput } from './OrderInputs';
@@ -6,7 +7,15 @@ import { Paginate } from './../Paginate';
 import { OrderFilter } from './OrderFilter';
 import { OrderList } from './OrderList';
 import { Order, OrderModel, OrderLoader } from './Order';
-import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
+import {
+    Arg,
+    Ctx,
+    FieldResolver,
+    Mutation,
+    Query,
+    Resolver,
+    Root,
+} from 'type-graphql';
 import { createConfiguredResolver } from '../Configured/ConfiguredResolver';
 import { ObjectId } from 'mongoose';
 
@@ -48,5 +57,17 @@ export class OrderResolvers extends ConfiguredResolvers {
         const newDoc = await data.validateInput(context, doc);
         await OrderModel.findOneAndUpdate({ _id: newDoc._id }, newDoc).lean();
         return newDoc;
+    }
+
+    @FieldResolver(() => Company)
+    async vendor(@Root() { vendor }: Order): Promise<Company> {
+        if (!vendor) return null;
+        return loaderResult(await CompanyLoader.load(vendor.toString()));
+    }
+
+    @FieldResolver(() => Company)
+    async customer(@Root() { customer }: Order): Promise<Company> {
+        if (!customer) return null;
+        return loaderResult(await CompanyLoader.load(customer.toString()));
     }
 }
