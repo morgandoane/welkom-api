@@ -1,10 +1,8 @@
-import { Permission } from '@src/auth/permissions';
 import express from 'express';
 import jwksClient from 'jwks-rsa';
 import jwt from 'jsonwebtoken';
 import { env } from '@src/config';
 import { Context } from '../context';
-import { UserRole } from '../UserRole';
 
 const client = jwksClient({
     jwksUri: `https://${env.AUTH0_DOMAIN}/.well-known/jwks.json`,

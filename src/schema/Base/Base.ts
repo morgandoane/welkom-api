@@ -1,6 +1,6 @@
-import { mongoose, prop, Ref } from '@typegoose/typegoose';
+import { Profile } from './../Profile/Profile';
+import { mongoose, prop } from '@typegoose/typegoose';
 import { Field, ID, ObjectType } from 'type-graphql';
-import { User } from '../User/User';
 
 @ObjectType()
 export class Base {
@@ -16,13 +16,13 @@ export class Base {
     @prop({ required: false })
     date_modified?: Date;
 
-    @Field(() => User)
+    @Field(() => Profile)
     @prop({ required: true })
-    created_by!: Ref<User>;
+    created_by!: string;
 
-    @Field(() => User, { nullable: true })
+    @Field(() => Profile, { nullable: true })
     @prop({ required: false })
-    modified_by?: Ref<User>;
+    modified_by?: string;
 
     @Field()
     @prop({ required: true, default: false })

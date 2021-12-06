@@ -13,7 +13,6 @@ import {
     Mutation,
     Query,
     Resolver,
-    ResolverInterface,
     Root,
 } from 'type-graphql';
 import { FilterQuery } from 'mongoose';
@@ -23,10 +22,7 @@ import { CreateItemInput, UpdateItemInpiut } from './ItemInput';
 const ConfiguredResolver = createConfiguredResolver();
 
 @Resolver(() => Item)
-export class ItemResolvers
-    extends ConfiguredResolver
-    implements ResolverInterface<Item>
-{
+export class ItemResolvers extends ConfiguredResolver {
     @Query(() => ItemList)
     async items(
         @Arg('filter') { skip, take, name, class: item_class }: ItemFilter

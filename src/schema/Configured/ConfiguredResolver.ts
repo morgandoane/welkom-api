@@ -1,21 +1,22 @@
+import { Profile } from './../Profile/Profile';
 import { Config, ConfigLoader } from './../Config/Config';
-import { FieldResolver, Resolver, ResolverInterface, Root } from 'type-graphql';
+import { FieldResolver, Resolver, Root } from 'type-graphql';
 import { Configured } from './Configured';
 import { Base } from '../Base/Base';
-import { User, UserLoader } from '../User/User';
+import { UserLoader } from '@src/services/AuthProvider/AuthProvider';
 
 export const createConfiguredResolver = () => {
     @Resolver(() => Configured, { isAbstract: true })
-    abstract class ConfiguredResolver implements ResolverInterface<Configured> {
-        @FieldResolver(() => User)
-        async created_by(@Root() base: Base): Promise<User> {
-            return await UserLoader.load(base.created_by.toString());
+    abstract class ConfiguredResolver {
+        @FieldResolver(() => Profile)
+        async created_by(@Root() base: Base): Promise<Profile> {
+            return await UserLoader.load(base.created_by);
         }
 
-        @FieldResolver(() => User)
-        async modified_by(@Root() { modified_by }: Base): Promise<User> {
+        @FieldResolver(() => Profile)
+        async modified_by(@Root() { modified_by }: Base): Promise<Profile> {
             if (!modified_by) return null;
-            return await UserLoader.load(modified_by.toString());
+            return await UserLoader.load(modified_by);
         }
 
         @FieldResolver(() => Config)

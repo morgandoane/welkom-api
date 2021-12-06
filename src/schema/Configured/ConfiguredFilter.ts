@@ -17,11 +17,11 @@ export class ConfiguredFilter extends PaginateArg {
     @Field({ nullable: true })
     deleted?: boolean;
 
-    @Field(() => ObjectIdScalar, { nullable: true })
-    created_by?: ObjectId;
+    @Field({ nullable: true })
+    created_by?: string;
 
-    @Field(() => ObjectIdScalar, { nullable: true })
-    modified_by?: ObjectId;
+    @Field({ nullable: true })
+    modified_by?: string;
 
     @Field(() => DateRangeInput, { nullable: true })
     date_created?: DateRangeInput;

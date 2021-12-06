@@ -23,12 +23,10 @@ export class Context {
     }
 
     public get base(): Base {
-        const split = this.jwt.sub.split('|');
-        const id = split[split.length - 1];
         return {
             _id: new mongoose.Types.ObjectId(),
-            created_by: new mongoose.Types.ObjectId(id),
-            modified_by: new mongoose.Types.ObjectId(id),
+            created_by: this.jwt.sub,
+            modified_by: this.jwt.sub,
             date_created: new Date(),
             date_modified: new Date(),
             deleted: false,

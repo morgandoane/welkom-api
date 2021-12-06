@@ -6,6 +6,7 @@ import {
     modelOptions,
     mongoose,
     prop,
+    Severity,
 } from '@typegoose/typegoose';
 import { Field, ObjectType } from 'type-graphql';
 import { Base } from '../Base/Base';
@@ -30,6 +31,9 @@ export enum ConfigKey {
 @modelOptions({
     schemaOptions: {
         collection: 'configs',
+    },
+    options: {
+        allowMixed: Severity.ALLOW,
     },
 })
 export class Config extends Base {

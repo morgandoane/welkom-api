@@ -23,10 +23,7 @@ import { FilterQuery, ObjectId } from 'mongoose';
 const BaseResolver = createBaseResolver();
 
 @Resolver(() => Location)
-export class LocationResolvers
-    extends BaseResolver
-    implements ResolverInterface<Location>
-{
+export class LocationResolvers extends BaseResolver {
     @FieldResolver(() => Company)
     async company(@Root() { company }: Location): Promise<Company> {
         return loaderResult(await CompanyLoader.load(company.toString()));

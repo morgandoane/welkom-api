@@ -1,15 +1,15 @@
+import { Profile } from './../Profile/Profile';
 import { ProcedureStepResponse } from '../ProcedureStep/ProcedureStep';
 import { getModelForClass, prop, Ref } from '@typegoose/typegoose';
 import { Configured } from '../Configured/Configured';
 import { Procedure } from '../Procedure/Procedure';
 import { Field, ObjectType } from 'type-graphql';
-import { User } from '../User/User';
 
 @ObjectType()
 export class ProcedureAssignment {
-    @Field(() => User)
+    @Field(() => Profile)
     @prop({ required: true })
-    user: Ref<User>;
+    user: string;
 
     @Field({ nullable: true })
     @prop({ required: false })

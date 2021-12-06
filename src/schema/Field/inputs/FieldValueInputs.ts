@@ -1,6 +1,5 @@
 import { ObjectIdScalar } from './../../ObjectIdScalar';
 import { ObjectId } from 'mongodb';
-import { DateRangeInput } from './../../DateRange/DateRangeInput';
 import { CompanyLoader } from './../../Company/Company';
 import { loaderResult } from './../../../utils/loaderResult';
 import { mongoose } from '@typegoose/typegoose';
@@ -20,7 +19,7 @@ import { Field, InputType } from 'type-graphql';
 import { FieldType } from '../Field';
 import { Glyph } from '../types/IdentifierField/IdentifierField';
 import { UserInputError } from 'apollo-server-errors';
-import { UserLoader } from '@src/schema/User/User';
+import { UserLoader } from '@src/services/AuthProvider/AuthProvider';
 
 @InputType()
 export class FieldValueInput {
@@ -51,8 +50,8 @@ export class FieldValueInput {
     @Field({ nullable: true })
     percentage_value?: number;
 
-    @Field(() => ObjectIdScalar, { nullable: true })
-    person_value?: ObjectId;
+    @Field({ nullable: true })
+    person_value?: string;
 
     @Field({ nullable: true })
     text_value?: string;
@@ -120,7 +119,7 @@ export class FieldValueInput {
                 const res: PersonValue = {
                     key: this.key,
                     type: this.type,
-                    value: new mongoose.Types.ObjectId(this.person_value),
+                    value: this.person_value,
                 };
                 return res;
             }

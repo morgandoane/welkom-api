@@ -1,7 +1,6 @@
 import { Company } from './../Company/Company';
 import { createUnionType, Field, ObjectType } from 'type-graphql';
 import { prop, Ref } from '@typegoose/typegoose';
-import { User } from '../User/User';
 
 export enum FieldType {
     Boolean = 'Boolean',
@@ -97,7 +96,7 @@ export class PersonValue extends ValueBase {
 
     @Field(() => String, { nullable: true })
     @prop({ required: false })
-    value!: FieldValueType<Ref<User>>;
+    value!: FieldValueType<string>;
 }
 
 @ObjectType()
