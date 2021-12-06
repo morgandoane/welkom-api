@@ -1,3 +1,4 @@
+import { getBaseLoader } from './../Loader';
 import { _FieldUnion } from './../Field/_FieldUnion';
 import { FieldUnion } from './../Field/FieldUnion';
 import {
@@ -81,25 +82,4 @@ export class Config extends Base {
 
 export const ConfigModel = getModelForClass(Config);
 
-export const ConfigLoader = new DataLoader<string, DocumentType<Config>>(
-    async (keys: readonly string[]) => {
-        let res: DocumentType<Config>[] = [];
-        await ConfigModel.find(
-            {
-                _id: {
-                    $in: keys.map((k) => new mongoose.Types.ObjectId(k)),
-                },
-            },
-            (err, docs) => {
-                if (err) throw err;
-                else res = docs;
-            }
-        ).lean();
-
-        return keys.map(
-            (k) =>
-                res.find((d) => d._id.toString() === k) ||
-                new Error('Could not find Config with id ' + k)
-        );
-    }
-);
+export const ConfigLoader = getBaseLoader(ConfigModel);

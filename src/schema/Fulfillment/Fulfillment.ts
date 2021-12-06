@@ -6,7 +6,7 @@ import { Lot } from '../Lot/Lot';
 
 @ObjectType()
 export class Fulfillment extends Configured {
-    @Field(() => Lot)
+    @Field(() => [Lot])
     @prop({ required: true, ref: () => Lot })
     lots!: Ref<Lot>[];
 

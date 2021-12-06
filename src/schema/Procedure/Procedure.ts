@@ -1,3 +1,4 @@
+import { getBaseLoader } from './../Loader';
 import { ProcedureStep } from '../ProcedureStep/ProcedureStep';
 import { getModelForClass, prop, Ref } from '@typegoose/typegoose';
 import { Configured } from '../Configured/Configured';
@@ -20,3 +21,5 @@ export class Procedure extends Configured {
 }
 
 export const ProcedureModel = getModelForClass(Procedure);
+
+const ProcedureLoader = getBaseLoader(ProcedureModel);

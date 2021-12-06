@@ -7,14 +7,14 @@ import { Location } from '../Location/Location';
 import { createUnionType, Field, ObjectType } from 'type-graphql';
 
 @ObjectType()
-class BolAppointmentBase {
+export class BolAppointmentBase {
     @Field({ nullable: true })
     @prop({ required: false })
     date?: Date;
 }
 
 @ObjectType()
-class BolAppointment_Company extends BolAppointmentBase {
+export class BolAppointment_Company extends BolAppointmentBase {
     @prop({ required: true })
     type!: 'Company';
 
@@ -24,7 +24,7 @@ class BolAppointment_Company extends BolAppointmentBase {
 }
 
 @ObjectType()
-class BolAppointment_Location extends BolAppointmentBase {
+export class BolAppointment_Location extends BolAppointmentBase {
     @prop({ required: true })
     type!: 'Location';
 
@@ -36,6 +36,14 @@ class BolAppointment_Location extends BolAppointmentBase {
 export const BolAppointment = createUnionType({
     name: 'BolAppointment',
     types: () => [BolAppointment_Company, BolAppointment_Location] as const,
+    resolveType: (value) => {
+        switch (value.type) {
+            case 'Company':
+                return BolAppointment_Company;
+            case 'Location':
+                return BolAppointment_Location;
+        }
+    },
 });
 
 @ObjectType()
@@ -48,9 +56,9 @@ export class Bol extends Configured {
     @prop({ required: false })
     to?: BolAppointment_Company | BolAppointment_Location;
 
-    @Field(() => ItemContent, { nullable: true })
-    @prop({ required: false })
-    content?: ItemContent;
+    @Field(() => [ItemContent], { nullable: true })
+    @prop({ required: true, type: () => ItemContent })
+    contents!: ItemContent[];
 
     @Field(() => [Fulfillment])
     @prop({ required: true })

@@ -55,7 +55,7 @@ export class ItemResolvers extends ConfiguredResolver {
             ...configured,
             english: data.english,
             spanish: data.spanish,
-            item_class: new mongoose.Types.ObjectId(data.item_class.toString()),
+            item_class: new mongoose.Types.ObjectId(data.config.toString()),
             unit_class: data.unit_class,
         };
         return await (await ItemModel.create(doc)).toJSON();

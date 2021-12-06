@@ -1,3 +1,4 @@
+import { getBaseLoader } from './../Loader';
 import { RecipeStep } from '../RecipeStep/RecipeStep';
 import { getModelForClass, prop } from '@typegoose/typegoose';
 import { Configured } from '../Configured/Configured';
@@ -28,3 +29,5 @@ export class Recipe extends Configured {
 }
 
 export const RecipeModel = getModelForClass(Recipe);
+
+export const RecipeLoader = getBaseLoader(RecipeModel);

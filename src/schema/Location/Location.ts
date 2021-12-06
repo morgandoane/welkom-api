@@ -1,3 +1,4 @@
+import { getBaseLoader } from './../Loader';
 import { createUnionType, Field, ObjectType } from 'type-graphql';
 import { Address } from '../Address/Address';
 import {
@@ -34,25 +35,4 @@ export class Location extends Base {
 
 export const LocationModel = getModelForClass(Location);
 
-export const LocationLoader = new DataLoader<string, DocumentType<Location>>(
-    async (keys: readonly string[]) => {
-        let res: DocumentType<Location>[] = [];
-        await LocationModel.find(
-            {
-                _id: {
-                    $in: keys.map((k) => new mongoose.Types.ObjectId(k)),
-                },
-            },
-            (err, docs) => {
-                if (err) throw err;
-                else res = docs;
-            }
-        );
-
-        return keys.map(
-            (k) =>
-                res.find((d) => d._id.toString() === k) ||
-                new Error('could not find Location with id' + k)
-        );
-    }
-);
+export const LocationLoader = getBaseLoader(LocationModel);

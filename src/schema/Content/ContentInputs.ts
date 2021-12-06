@@ -1,3 +1,5 @@
+import { mongoose } from '@typegoose/typegoose';
+import { ProceduralLotContent } from './../Lot/extensions/ProceduralLot/ProceduralLot';
 import { LocationLoader } from './../Location/Location';
 import { ItemLoader } from './../Item/Item';
 import { UnitLoader } from './../Unit/Unit';
@@ -92,6 +94,21 @@ export class LotContentInput extends ContentInput {
         return {
             ...content,
             lot: lot._id,
+        };
+    }
+}
+
+export class ProceduralLotContentInput extends LotContentInput {
+    @Field(() => ObjectIdScalar, { nullable: true })
+    step?: ObjectId;
+
+    async validateProceduralLotContent(): Promise<ProceduralLotContent> {
+        const content = await this.validateLotContent();
+        return {
+            ...content,
+            step: this.step
+                ? new mongoose.Types.ObjectId(this.step.toString())
+                : undefined,
         };
     }
 }

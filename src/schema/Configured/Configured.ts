@@ -12,8 +12,8 @@ import { FieldValueUnion, _FieldValueUnion } from '../Field/Field';
 @ObjectType()
 export class Configured extends Base {
     @Field(() => Config)
-    @prop({ required: true, ref: () => Config })
-    config: Ref<Config>;
+    @prop({ required: false, ref: () => Config })
+    config?: Ref<Config>;
 
     @Field(() => [FieldValueUnion])
     @prop({ required: true })

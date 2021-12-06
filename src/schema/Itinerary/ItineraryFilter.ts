@@ -1,0 +1,58 @@
+import { DateRangeInput } from './../DateRange/DateRangeInput';
+import { ObjectIdScalar } from './../ObjectIdScalar';
+import { Itinerary } from './Itinerary';
+import { ConfiguredFilter } from './../Configured/ConfiguredFilter';
+import { Field, InputType } from 'type-graphql';
+import { DocumentType } from '@typegoose/typegoose';
+import { FilterQuery, ObjectId } from 'mongoose';
+import { endOfDay, startOfDay } from 'date-fns';
+
+@InputType()
+export class ItineraryFilter extends ConfiguredFilter {
+    @Field(() => ObjectIdScalar, { nullable: true })
+    item?: ObjectId;
+
+    @Field(() => ObjectIdScalar, { nullable: true })
+    location?: ObjectId;
+
+    @Field(() => DateRangeInput, { nullable: true })
+    stop_date?: DateRangeInput;
+
+    public serializeItineraryFilter(): FilterQuery<DocumentType<Itinerary>> {
+        const query = this.serializeConfiguredFilter() as FilterQuery<
+            DocumentType<Itinerary>
+        >;
+
+        if (this.item) {
+            query['bols.content.item'] = this.item;
+        }
+
+        if (this.location) {
+            query.$or = [
+                ...query.$or,
+                { ['bols.from.location']: this.item },
+                { ['bols.to.location']: this.item },
+            ];
+        }
+
+        if (this.stop_date) {
+            query.$or = [
+                ...query.$or,
+                {
+                    ['bols.from.date']: {
+                        $gte: startOfDay(this.stop_date.start),
+                        $lte: endOfDay(this.stop_date.end),
+                    },
+                },
+                {
+                    ['bols.to.date']: {
+                        $gte: startOfDay(this.stop_date.start),
+                        $lte: endOfDay(this.stop_date.end),
+                    },
+                },
+            ];
+        }
+
+        return query;
+    }
+}

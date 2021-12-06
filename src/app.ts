@@ -8,14 +8,25 @@ import { buildSchema } from 'type-graphql';
 import { registerEnums } from './utils/registerEnums';
 
 // Resolvers
+import { BolResolvers } from './schema/Bol/BolResolvers';
 import { CompanyResolvers } from './schema/Company/CompanyResolvers';
 import { ConfigResolvers } from './schema/Config/ConfigResolvers';
+import { FulfillmentResolvers } from './schema/Fulfillment/FulfillmentResolvers';
 import { ItemResolvers } from './schema/Item/ItemResolvers';
 import { ItemClassResolver } from './schema/ItemClass/ItemClassResolvers';
+import { ItineraryResolvers } from './schema/Itinerary/ItineraryResolvers';
 import { LocationResolvers } from './schema/Location/LocationResolvers';
+import { LotResolvers } from './schema/Lot/LotResolvers';
 import { OrderResolvers } from './schema/Order/OrderResolvers';
 import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
 import { UnitResolvers } from './schema/Unit/UnitResolvers';
+import {
+    ContentResolver,
+    ItemContentResolver,
+    ItemPluralContentResolver,
+    LotContentResolver,
+    OrderContentResolver,
+} from './schema/Content/ContentResolvers';
 
 // Serve locally over https
 import https from 'https';
@@ -47,11 +58,20 @@ const httpsOptions = {
         // Setup GraphQL with Apollo
         const schema = await buildSchema({
             resolvers: [
+                BolResolvers,
                 CompanyResolvers,
                 ConfigResolvers,
+                ContentResolver,
+                FulfillmentResolvers,
                 ItemResolvers,
                 ItemClassResolver,
+                ItemContentResolver,
+                ItemPluralContentResolver,
+                ItineraryResolvers,
                 LocationResolvers,
+                LotResolvers,
+                LotContentResolver,
+                OrderContentResolver,
                 OrderResolvers,
                 ProfileResolvers,
                 UnitResolvers,

@@ -1,20 +1,18 @@
+import { getBaseLoader } from './../Loader';
 import { FieldValueUnion } from '../Field/Field';
 import { Configured } from '../Configured/Configured';
-import { Unit } from '../Unit/Unit';
 import { Item } from '../Item/Item';
 import {
-    DocumentType,
     getModelForClass,
     index,
     modelOptions,
-    mongoose,
     prop,
     Ref,
 } from '@typegoose/typegoose';
 import { Location } from '../Location/Location';
 import { Company } from '../Company/Company';
 import { Field, ObjectType } from 'type-graphql';
-import DataLoader from 'dataloader';
+import { LotContent } from '../Content/Content';
 
 @ObjectType()
 @index({ code: 1 })
@@ -49,42 +47,6 @@ export class Lot extends Configured {
     contents!: LotContent[];
 }
 
-@ObjectType()
-export class LotContent {
-    @Field(() => Item)
-    @prop({ required: true, ref: () => Item })
-    item!: Ref<Item>;
-
-    @Field(() => Unit)
-    @prop({ required: true, ref: () => Unit })
-    unit!: Ref<Unit>;
-
-    @Field()
-    @prop({ required: true })
-    quantity!: number;
-}
-
 export const LotModel = getModelForClass(Lot);
 
-export const LotLoader = new DataLoader<string, DocumentType<Lot>>(
-    async (keys: readonly string[]) => {
-        let res: DocumentType<Lot>[] = [];
-        await LotModel.find(
-            {
-                _id: {
-                    $in: keys.map((k) => new mongoose.Types.ObjectId(k)),
-                },
-            },
-            (err, docs) => {
-                if (err) throw err;
-                else res = docs;
-            }
-        );
-
-        return keys.map(
-            (k) =>
-                res.find((d) => d._id.toString() === k) ||
-                new Error('could not find Lot with id' + k)
-        );
-    }
-);
+export const LotLoader = getBaseLoader(LotModel);
