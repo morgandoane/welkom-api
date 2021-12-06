@@ -5,6 +5,7 @@ import {
     getModelForClass,
     modelOptions,
     mongoose,
+    pre,
     prop,
     Severity,
 } from '@typegoose/typegoose';
@@ -27,6 +28,11 @@ export enum ConfigKey {
     Shipment = 'Shipment',
 }
 
+@pre<Config>('save', async function () {
+    if (this.active == true) {
+        await ConfigModel.updateMany({ key: this.key }, { active: false });
+    }
+})
 @ObjectType()
 @modelOptions({
     schemaOptions: {
@@ -40,6 +46,10 @@ export class Config extends Base {
     @Field(() => ConfigKey)
     @prop({ required: true, enum: ConfigKey })
     key!: ConfigKey;
+
+    @Field()
+    @prop({ required: true, default: true })
+    active?: boolean;
 
     @Field(() => [FieldUnion])
     @prop({ required: true })

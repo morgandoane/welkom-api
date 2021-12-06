@@ -15,6 +15,7 @@ import { ItemClassResolver } from './schema/ItemClass/ItemClassResolvers';
 import { LocationResolvers } from './schema/Location/LocationResolvers';
 import { OrderResolvers } from './schema/Order/OrderResolvers';
 import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
+import { UnitResolvers } from './schema/Unit/UnitResolvers';
 
 // Serve locally over https
 import https from 'https';
@@ -53,6 +54,7 @@ const httpsOptions = {
                 LocationResolvers,
                 OrderResolvers,
                 ProfileResolvers,
+                UnitResolvers,
             ],
             validate: true,
         });

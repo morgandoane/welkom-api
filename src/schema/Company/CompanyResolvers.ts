@@ -36,7 +36,9 @@ export class CompanyResolvers extends ConfiguredResolver {
         @Arg('filter') filter: CompanyFilter
     ): Promise<CompanyList> {
         const { skip, take, name } = filter;
-        const query: FilterQuery<Company> = { ...filter.serialize() };
+        const query: FilterQuery<Company> = {
+            ...filter.serializeConfiguredFilter(),
+        };
         if (name !== undefined) query.name = { $regex: new RegExp(name, 'i') };
 
         return await Paginate.paginate({

@@ -15,7 +15,7 @@ export class OrderFilter extends ConfiguredFilter {
     @Field(() => DateRangeInput, { nullable: true }) due?: DateRangeInput;
 
     public serializeOrderFilter(): FilterQuery<DocumentType<Order>> {
-        const base = this.serialize();
+        const base = this.serializeConfiguredFilter();
         const res = { ...base } as FilterQuery<DocumentType<Order>>;
         if (this.customer) res.customer = this.customer.toString();
         if (this.vendor) res.vendor = this.vendor.toString();
