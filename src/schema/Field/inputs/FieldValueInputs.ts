@@ -17,7 +17,6 @@ import {
 import { BooleanMethod } from './../types/BooleanField/BooleanField';
 import { Field, InputType } from 'type-graphql';
 import { FieldType } from '../Field';
-import { Glyph } from '../types/IdentifierField/IdentifierField';
 import { UserInputError } from 'apollo-server-errors';
 import { UserLoader } from '@src/services/AuthProvider/AuthProvider';
 
@@ -41,8 +40,8 @@ export class FieldValueInput {
     @Field(() => Date, { nullable: true })
     date_value?: Date;
 
-    @Field(() => [Glyph], { nullable: true })
-    identifier_value?: Glyph[];
+    @Field({ nullable: true })
+    identifier_value?: string;
 
     @Field({ nullable: true })
     number_value?: number;
@@ -90,9 +89,7 @@ export class FieldValueInput {
                 const res: IdentifierValue = {
                     key: this.key,
                     type: this.type,
-                    value: this.identifier_value
-                        ? this.identifier_value.join()
-                        : '',
+                    value: this.identifier_value,
                 };
                 return res;
             }
@@ -143,7 +140,7 @@ export class FieldValueInput {
             | string
             | Date
             | number
-            | Glyph[]
+            | string[]
             | ObjectId
         > = {
             Boolean: this.boolean_value,

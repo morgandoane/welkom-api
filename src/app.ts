@@ -13,6 +13,7 @@ import { ConfigResolvers } from './schema/Config/ConfigResolvers';
 import { ItemResolvers } from './schema/Item/ItemResolvers';
 import { ItemClassResolver } from './schema/ItemClass/ItemClassResolvers';
 import { LocationResolvers } from './schema/Location/LocationResolvers';
+import { OrderResolvers } from './schema/Order/OrderResolvers';
 import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
 
 // Serve locally over https
@@ -47,9 +48,10 @@ const httpsOptions = {
             resolvers: [
                 CompanyResolvers,
                 ConfigResolvers,
-                LocationResolvers,
                 ItemResolvers,
                 ItemClassResolver,
+                LocationResolvers,
+                OrderResolvers,
                 ProfileResolvers,
             ],
             validate: true,

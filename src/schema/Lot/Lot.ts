@@ -3,15 +3,18 @@ import { Configured } from '../Configured/Configured';
 import { Unit } from '../Unit/Unit';
 import { Item } from '../Item/Item';
 import {
+    DocumentType,
     getModelForClass,
     index,
     modelOptions,
+    mongoose,
     prop,
     Ref,
 } from '@typegoose/typegoose';
 import { Location } from '../Location/Location';
 import { Company } from '../Company/Company';
 import { Field, ObjectType } from 'type-graphql';
+import DataLoader from 'dataloader';
 
 @ObjectType()
 @index({ code: 1 })
@@ -62,3 +65,26 @@ export class LotContent {
 }
 
 export const LotModel = getModelForClass(Lot);
+
+export const LotLoader = new DataLoader<string, DocumentType<Lot>>(
+    async (keys: readonly string[]) => {
+        let res: DocumentType<Lot>[] = [];
+        await LotModel.find(
+            {
+                _id: {
+                    $in: keys.map((k) => new mongoose.Types.ObjectId(k)),
+                },
+            },
+            (err, docs) => {
+                if (err) throw err;
+                else res = docs;
+            }
+        );
+
+        return keys.map(
+            (k) =>
+                res.find((d) => d._id.toString() === k) ||
+                new Error('could not find Lot with id' + k)
+        );
+    }
+);

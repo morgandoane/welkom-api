@@ -3,11 +3,14 @@ import { Field, ObjectType } from 'type-graphql';
 import { Configured } from '../Configured/Configured';
 import { UnitClass } from '../Unit/Unit';
 import {
+    DocumentType,
     getModelForClass,
     modelOptions,
+    mongoose,
     prop,
     Ref,
 } from '@typegoose/typegoose';
+import DataLoader from 'dataloader';
 
 @ObjectType()
 @modelOptions({
@@ -34,3 +37,26 @@ export class Item extends Configured {
 }
 
 export const ItemModel = getModelForClass(Item);
+
+export const ItemLoader = new DataLoader<string, DocumentType<Item>>(
+    async (keys: readonly string[]) => {
+        let res: DocumentType<Item>[] = [];
+        await ItemModel.find(
+            {
+                _id: {
+                    $in: keys.map((k) => new mongoose.Types.ObjectId(k)),
+                },
+            },
+            (err, docs) => {
+                if (err) throw err;
+                else res = docs;
+            }
+        );
+
+        return keys.map(
+            (k) =>
+                res.find((d) => d._id.toString() === k) ||
+                new Error('could not find Item with id' + k)
+        );
+    }
+);

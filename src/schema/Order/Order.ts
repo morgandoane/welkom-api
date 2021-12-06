@@ -1,13 +1,16 @@
 import { Field, ObjectType } from 'type-graphql';
 import { ItemContent } from '../Content/Content';
 import {
+    DocumentType,
     getModelForClass,
     modelOptions,
+    mongoose,
     prop,
     Ref,
 } from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
 import { Configured } from '../Configured/Configured';
+import DataLoader from 'dataloader';
 
 @ObjectType()
 @modelOptions({
@@ -15,7 +18,7 @@ import { Configured } from '../Configured/Configured';
         collection: 'orders',
     },
 })
-export class _Order extends Configured {
+export class Order extends Configured {
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
     customer?: Ref<Company>;
@@ -33,4 +36,27 @@ export class _Order extends Configured {
     due?: Date;
 }
 
-export const OrderModel = getModelForClass(_Order);
+export const OrderModel = getModelForClass(Order);
+
+export const OrderLoader = new DataLoader<string, DocumentType<Order>>(
+    async (keys: readonly string[]) => {
+        let res: DocumentType<Order>[] = [];
+        await OrderModel.find(
+            {
+                _id: {
+                    $in: keys.map((k) => new mongoose.Types.ObjectId(k)),
+                },
+            },
+            (err, docs) => {
+                if (err) throw err;
+                else res = docs;
+            }
+        );
+
+        return keys.map(
+            (k) =>
+                res.find((d) => d._id.toString() === k) ||
+                new Error('could not find Order with id' + k)
+        );
+    }
+);

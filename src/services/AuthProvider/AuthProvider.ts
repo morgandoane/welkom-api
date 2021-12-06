@@ -2,7 +2,7 @@ import { Profile } from './../../schema/Profile/Profile';
 import { env } from '@src/config';
 import { ManagementClient } from 'auth0';
 import DataLoader from 'dataloader';
-import { getModelForClass } from '@typegoose/typegoose';
+import { getModelForClass, mongoose } from '@typegoose/typegoose';
 
 export const AuthProvider = new ManagementClient({
     domain: env.AUTH0_DOMAIN,
@@ -33,7 +33,12 @@ export const UserLoader = new DataLoader<string, Profile>(
             for (const id of missingKeys) {
                 const fromAuth0 = await AuthProvider.getUser({ id });
                 additionalDocs.push(
-                    await (await ProfileModel.create(fromAuth0)).toJSON()
+                    await (
+                        await ProfileModel.create({
+                            ...fromAuth0,
+                            _id: new mongoose.Types.ObjectId(),
+                        })
+                    ).toJSON()
                 );
             }
 
