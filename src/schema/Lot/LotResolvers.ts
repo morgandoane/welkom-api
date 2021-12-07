@@ -11,8 +11,8 @@ const ConfiguredResolver = createConfiguredResolver();
 @Resolver(() => Lot)
 export class LotResolvers extends ConfiguredResolver {
     @FieldResolver(() => Item)
-    async item(@Root() { item }: Lot): Promise<Item> {
-        return loaderResult(await ItemLoader.load(item.toString()));
+    async item(@Root() lot: Lot): Promise<Item> {
+        return loaderResult(await ItemLoader.load(lot.item.toString()));
     }
 
     @FieldResolver(() => Company)

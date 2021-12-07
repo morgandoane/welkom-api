@@ -1,33 +1,50 @@
+import { Bol } from './../Bol/Bol';
 import { LotModel } from './../Lot/Lot';
 import { ItemLoader } from './../Item/Item';
 import { CompanyLoader } from './../Company/Company';
-import { mongoose } from '@typegoose/typegoose';
+import { DocumentType, mongoose, Ref } from '@typegoose/typegoose';
 import { LocationLoader } from './../Location/Location';
 import { loaderResult } from './../../utils/loaderResult';
 import { Context } from './../../auth/context';
 import { ObjectIdScalar } from './../ObjectIdScalar';
-import { ObjectId } from 'mongoose';
-import { ConfiguredInput } from './../Configured/ConfiguredInput';
+import { ObjectId, UpdateQuery } from 'mongoose';
+import {
+    ConfiguredInput,
+    UpdateConfiguredInput,
+} from './../Configured/ConfiguredInput';
 import { Field, InputType } from 'type-graphql';
-import { Fulfillment } from './Fulfillment';
+import { Fulfillment, FulfillmentType } from './Fulfillment';
 import { Lot } from '../Lot/Lot';
 
 @InputType()
 export class FulfillmentInput extends ConfiguredInput {
+    @Field(() => ObjectIdScalar)
+    bol!: ObjectId;
+
+    @Field(() => FulfillmentType)
+    type!: FulfillmentType;
+
     @Field(() => [FulfillmentLotFinder])
     lots!: FulfillmentLotFinder[];
 
     @Field(() => ObjectIdScalar)
     location!: ObjectId;
 
+    @Field(() => ObjectIdScalar)
+    company!: ObjectId;
+
     public async validateFulfillment(context: Context): Promise<Fulfillment> {
         const configured = await this.validate(context);
 
         loaderResult(await LocationLoader.load(this.location.toString()));
+        loaderResult(await CompanyLoader.load(this.company.toString()));
 
         const fulfillment: Fulfillment = {
             ...configured,
+            bol: new mongoose.Types.ObjectId(this.bol.toString()),
+            type: this.type,
             location: new mongoose.Types.ObjectId(this.location.toString()),
+            company: new mongoose.Types.ObjectId(this.company.toString()),
             lots: [],
         };
 
@@ -36,6 +53,19 @@ export class FulfillmentInput extends ConfiguredInput {
         }
 
         return fulfillment;
+    }
+}
+
+@InputType()
+export class UpdateFulfillmentInput extends UpdateConfiguredInput {
+    public async serializeFulfillmentUpdate(): Promise<
+        UpdateQuery<Fulfillment>
+    > {
+        const update: UpdateQuery<DocumentType<Fulfillment>> = {
+            ...(await this.serializeConfiguredUpdate()),
+        };
+
+        return update;
     }
 }
 

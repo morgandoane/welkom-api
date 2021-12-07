@@ -1,11 +1,12 @@
+import { Bol } from './../Bol/Bol';
 import { Context } from './../../auth/context';
-import { CreateItineraryInput } from './ItineraryInputs';
+import { CreateItineraryInput, UpdateItineraryInput } from './ItineraryInputs';
 import { loaderResult } from './../../utils/loaderResult';
 import { Company, CompanyLoader } from './../Company/Company';
 import { Paginate } from './../Paginate';
 import { ItineraryFilter } from './ItineraryFilter';
 import { ItineraryList } from './ItineraryList';
-import { Itinerary, ItineraryModel } from './Itinerary';
+import { Itinerary, ItineraryModel, ItineraryLoader } from './Itinerary';
 import {
     Arg,
     Ctx,
@@ -44,9 +45,34 @@ export class ItineraryResolvers extends ConfiguredResolvers {
         return res.toJSON();
     }
 
+    @Mutation(() => Itinerary)
+    async updateItinerary(
+        @Ctx() context: Context,
+        @Arg('id') id: string,
+        @Arg('data', () => UpdateItineraryInput) data: UpdateItineraryInput
+    ): Promise<Itinerary> {
+        const doc = loaderResult(await ItineraryLoader.load(id));
+        const newDoc = await data.validateUpdate(context, doc);
+        await newDoc.save();
+        return newDoc;
+    }
+
     @FieldResolver(() => Company)
     async carrier(@Root() { carrier }: Itinerary): Promise<Company> {
         if (!carrier) return null;
         return loaderResult(await CompanyLoader.load(carrier.toString()));
+    }
+
+    @FieldResolver(() => [Bol])
+    async bols(
+        @Root() itinerary: Itinerary,
+        @Arg('show_deleted', () => Boolean, { defaultValue: false })
+        show_deleted: boolean
+    ): Promise<Bol[]> {
+        if (show_deleted) {
+            return itinerary.bols;
+        } else {
+            return itinerary.bols.filter((bol) => bol.deleted !== true);
+        }
     }
 }

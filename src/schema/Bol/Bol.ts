@@ -61,10 +61,8 @@ export class Bol extends Configured {
     contents!: ItemContent[];
 
     @Field(() => [Fulfillment])
-    @prop({ required: true })
-    shipments!: Fulfillment[];
+    shipments?: Fulfillment[];
 
     @Field(() => [Fulfillment])
-    @prop({ required: true })
-    receipts!: Fulfillment[];
+    receipts?: Fulfillment[];
 }

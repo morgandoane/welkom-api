@@ -5,6 +5,7 @@ import { ConfigKey } from '@src/schema/Config/Config';
 import { FieldType } from '@src/schema/Field/Field';
 import { BooleanMethod } from '@src/schema/Field/types/BooleanField/BooleanField';
 import { Glyph } from '@src/schema/Field/types/IdentifierField/IdentifierField';
+import { FulfillmentType } from '@src/schema/Fulfillment/Fulfillment';
 import { UnitClass } from '@src/schema/Unit/Unit';
 import { registerEnumType } from 'type-graphql';
 
@@ -17,4 +18,5 @@ export const registerEnums = (): void => {
     registerEnumType(Glyph, { name: 'Glyph' });
     registerEnumType(UnitClass, { name: 'UnitClass' });
     registerEnumType(BolAppointmentType, { name: 'BolAppointmentType' });
+    registerEnumType(FulfillmentType, { name: 'FulfillmentType' });
 };
