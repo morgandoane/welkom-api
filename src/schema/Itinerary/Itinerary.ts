@@ -1,3 +1,4 @@
+import { Base } from './../Base/Base';
 import { getBaseLoader } from './../Loader';
 import { Company } from './../Company/Company';
 import { Field, ObjectType } from 'type-graphql';
@@ -8,7 +9,6 @@ import {
     prop,
     Ref,
 } from '@typegoose/typegoose';
-import { Configured } from '../Configured/Configured';
 
 @ObjectType()
 @modelOptions({
@@ -16,10 +16,10 @@ import { Configured } from '../Configured/Configured';
         collection: 'itineraries',
     },
 })
-export class Itinerary extends Configured {
+export class Itinerary extends Base {
     @Field(() => [Bol])
-    @prop({ required: true, type: () => Bol })
-    bols: Bol[];
+    @prop({ required: true, ref: () => Bol })
+    bols: Ref<Bol>[];
 
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })

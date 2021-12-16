@@ -15,6 +15,7 @@ import {
     OrderContent,
 } from './Content';
 import { LotLoader } from '../Lot/Lot';
+import { BucketLotContent } from '../Lot/extensions/BucketLot/BucketLot';
 
 @InputType()
 export class ContentInput {
@@ -98,17 +99,22 @@ export class LotContentInput extends ContentInput {
     }
 }
 
+@InputType()
 export class ProceduralLotContentInput extends LotContentInput {
-    @Field(() => ObjectIdScalar, { nullable: true })
-    step?: ObjectId;
-
     async validateProceduralLotContent(): Promise<ProceduralLotContent> {
         const content = await this.validateLotContent();
         return {
             ...content,
-            step: this.step
-                ? new mongoose.Types.ObjectId(this.step.toString())
-                : undefined,
+        };
+    }
+}
+
+@InputType()
+export class BucketLotContentInput extends LotContentInput {
+    async validateBucketLotContent(): Promise<BucketLotContent> {
+        const content = await this.validateLotContent();
+        return {
+            ...content,
         };
     }
 }

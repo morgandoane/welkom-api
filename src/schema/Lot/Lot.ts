@@ -1,6 +1,5 @@
+import { Base } from './../Base/Base';
 import { getBaseLoader } from './../Loader';
-import { FieldValueUnion } from '../Field/Field';
-import { Configured } from '../Configured/Configured';
 import { Item } from '../Item/Item';
 import {
     getModelForClass,
@@ -21,7 +20,7 @@ import { LotContent } from '../Content/Content';
         collection: 'lots',
     },
 })
-export class Lot extends Configured {
+export class Lot extends Base {
     @Field()
     @prop({ required: true })
     code!: string;
@@ -37,10 +36,6 @@ export class Lot extends Configured {
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
     company?: Ref<Company>;
-
-    @Field(() => [FieldValueUnion])
-    @prop({ required: true })
-    field_values!: Array<typeof FieldValueUnion>;
 
     @Field(() => [LotContent])
     @prop({ required: true, type: () => LotContent })

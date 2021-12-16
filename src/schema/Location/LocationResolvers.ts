@@ -1,6 +1,6 @@
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { Context } from '@src/auth/context';
-import { LocationInput } from './LocationInput';
+import { CreateLocationInput, UpdateLocationInput } from './LocationInput';
 import { Paginate } from './../Paginate';
 import { LocationFIlter } from './LocationFilter';
 import { LocationList } from './LocationList';
@@ -10,7 +10,6 @@ import { Location, LocationModel } from './Location';
 import {
     Resolver,
     FieldResolver,
-    ResolverInterface,
     Root,
     Query,
     Arg,
@@ -49,7 +48,7 @@ export class LocationResolvers extends BaseResolver {
 
     @Mutation(() => Location)
     async createLocation(
-        @Arg('data') data: LocationInput,
+        @Arg('data') data: CreateLocationInput,
         @Ctx() { base }: Context
     ): Promise<Location> {
         return await (
@@ -60,7 +59,7 @@ export class LocationResolvers extends BaseResolver {
     @Mutation(() => Location)
     async updateLocation(
         @Arg('id', () => ObjectIdScalar) _id: ObjectId,
-        @Arg('data') data: LocationInput,
+        @Arg('data') data: UpdateLocationInput,
         @Ctx() { base }: Context
     ): Promise<Location> {
         return await (

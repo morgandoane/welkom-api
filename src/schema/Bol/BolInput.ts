@@ -1,17 +1,12 @@
 import { Context } from './../../auth/context';
-import {
-    ConfiguredInput,
-    UpdateConfiguredInput,
-} from './../Configured/ConfiguredInput';
 import { ItemContentInput } from './../Content/ContentInputs';
 import { LocationLoader } from './../Location/Location';
 import { CompanyLoader } from './../Company/Company';
 import { loaderResult } from './../../utils/loaderResult';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { Field, InputType } from 'type-graphql';
-import { ObjectId, UpdateQuery } from 'mongoose';
+import { ObjectId } from 'mongoose';
 import { Bol, BolAppointment_Company, BolAppointment_Location } from './Bol';
-import { DocumentType } from '@typegoose/typegoose';
 
 export enum BolAppointmentType {
     Company = 'Company',
@@ -50,7 +45,7 @@ export class BolAppointmentInput {
 }
 
 @InputType()
-export class CreateBolInput extends ConfiguredInput {
+export class CreateBolInput {
     @Field(() => BolAppointmentInput, { nullable: true })
     from?: BolAppointmentInput;
 
@@ -60,13 +55,8 @@ export class CreateBolInput extends ConfiguredInput {
     @Field(() => [ItemContentInput], { nullable: true })
     contents?: ItemContentInput[];
 
-    public async validateBol(context: Context): Promise<Bol> {
-        const configured = await this.validate(context);
-
-        const bol: Bol = {
-            ...configured,
-            contents: [],
-        };
+    public async validateBol(context: Context): Promise<Partial<Bol>> {
+        const bol: Partial<Bol> = {};
 
         if (this.from) {
             bol.from = await this.from.validate();
@@ -82,12 +72,15 @@ export class CreateBolInput extends ConfiguredInput {
             }
         }
 
+        bol.modified_by = context.base.modified_by;
+        bol.date_modified = context.base.date_modified;
+
         return bol;
     }
 }
 
 @InputType()
-export class UpdateBolInput extends UpdateConfiguredInput {
+export class UpdateBolInput {
     @Field(() => BolAppointmentInput, { nullable: true })
     from?: BolAppointmentInput;
 
@@ -97,23 +90,19 @@ export class UpdateBolInput extends UpdateConfiguredInput {
     @Field(() => [ItemContentInput], { nullable: true })
     contents?: ItemContentInput[];
 
-    public async serializeBolUpdate(): Promise<UpdateQuery<Bol>> {
-        const bolUpdate: UpdateQuery<DocumentType<Bol>> = {
-            ...(await this.serializeConfiguredUpdate()),
-            from:
-                this.from !== undefined
-                    ? await this.from.validate()
-                    : undefined,
-            to: this.to !== undefined ? await this.to.validate() : undefined,
-            contents:
-                this.contents !== undefined
-                    ? await Promise.all(
-                          this.contents.map((content) =>
-                              content.validateItemContent()
-                          )
-                      )
-                    : undefined,
-        };
+    public async serializeBolUpdate(): Promise<Partial<Bol>> {
+        const bolUpdate: Partial<Bol> = {};
+
+        if (this.from) bolUpdate.from = await this.from.validate();
+
+        if (this.to) bolUpdate.to = await this.to.validate();
+
+        if (this.contents) {
+            this.contents = [];
+            for (const content of this.contents) {
+                bolUpdate.contents.push(await content.validateItemContent());
+            }
+        }
 
         return bolUpdate;
     }

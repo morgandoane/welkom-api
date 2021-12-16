@@ -2,7 +2,8 @@
   "name": "welkom-api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js", "_moduleAliases": {
+  "main": "index.js",
+  "_moduleAliases": {
     "@src": "src"
   },
   "scripts": {
@@ -40,6 +41,7 @@
     "express": "^4.17.1",
     "graphql": "^15.5.1",
     "graphql-middleware": "^6.1.2",
+    "graphql-upload": "^13.0.0",
     "jsonwebtoken": "^8.5.1",
     "jwks-rsa": "^2.0.4",
     "jwt-decode": "^3.1.2",

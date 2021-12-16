@@ -1,6 +1,6 @@
 import { Profile } from './../Profile/Profile';
 import { mongoose, prop } from '@typegoose/typegoose';
-import { Field, ID, ObjectType } from 'type-graphql';
+import { Directive, Field, ID, ObjectType } from 'type-graphql';
 
 @ObjectType()
 export class Base {

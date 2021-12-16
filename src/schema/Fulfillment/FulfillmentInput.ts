@@ -1,23 +1,18 @@
-import { Bol } from './../Bol/Bol';
 import { LotModel } from './../Lot/Lot';
 import { ItemLoader } from './../Item/Item';
 import { CompanyLoader } from './../Company/Company';
-import { DocumentType, mongoose, Ref } from '@typegoose/typegoose';
+import { mongoose } from '@typegoose/typegoose';
 import { LocationLoader } from './../Location/Location';
 import { loaderResult } from './../../utils/loaderResult';
 import { Context } from './../../auth/context';
 import { ObjectIdScalar } from './../ObjectIdScalar';
-import { ObjectId, UpdateQuery } from 'mongoose';
-import {
-    ConfiguredInput,
-    UpdateConfiguredInput,
-} from './../Configured/ConfiguredInput';
+import { ObjectId } from 'mongoose';
 import { Field, InputType } from 'type-graphql';
 import { Fulfillment, FulfillmentType } from './Fulfillment';
 import { Lot } from '../Lot/Lot';
 
 @InputType()
-export class FulfillmentInput extends ConfiguredInput {
+export class FulfillmentInput {
     @Field(() => ObjectIdScalar)
     bol!: ObjectId;
 
@@ -34,13 +29,11 @@ export class FulfillmentInput extends ConfiguredInput {
     company!: ObjectId;
 
     public async validateFulfillment(context: Context): Promise<Fulfillment> {
-        const configured = await this.validate(context);
-
         loaderResult(await LocationLoader.load(this.location.toString()));
         loaderResult(await CompanyLoader.load(this.company.toString()));
 
         const fulfillment: Fulfillment = {
-            ...configured,
+            ...context.base,
             bol: new mongoose.Types.ObjectId(this.bol.toString()),
             type: this.type,
             location: new mongoose.Types.ObjectId(this.location.toString()),
@@ -53,19 +46,6 @@ export class FulfillmentInput extends ConfiguredInput {
         }
 
         return fulfillment;
-    }
-}
-
-@InputType()
-export class UpdateFulfillmentInput extends UpdateConfiguredInput {
-    public async serializeFulfillmentUpdate(): Promise<
-        UpdateQuery<Fulfillment>
-    > {
-        const update: UpdateQuery<DocumentType<Fulfillment>> = {
-            ...(await this.serializeConfiguredUpdate()),
-        };
-
-        return update;
     }
 }
 
@@ -93,7 +73,7 @@ export class FulfillmentLotFinder {
             : loaderResult(await LocationLoader.load(this.location.toString()));
 
         const match = await LotModel.findOne({
-            item: item._id,
+            item: item._id.toString(),
             company: company._id,
             location: location ? location._id : undefined,
             code: this.code,
@@ -106,7 +86,6 @@ export class FulfillmentLotFinder {
                 code: this.code,
                 item: item._id,
                 company: company._id,
-                field_values: [],
                 contents: [],
             };
 

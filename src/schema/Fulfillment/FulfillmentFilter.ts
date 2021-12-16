@@ -1,13 +1,12 @@
+import { BaseFilter } from './../Base/BaseFilter';
 import { ObjectIdScalar } from './../ObjectIdScalar';
-import { ConfiguredFilter } from './../Configured/ConfiguredFilter';
 import { Field, InputType } from 'type-graphql';
 import { Fulfillment, FulfillmentType } from './Fulfillment';
-import { DocumentType, Ref } from '@typegoose/typegoose';
+import { DocumentType } from '@typegoose/typegoose';
 import { FilterQuery, ObjectId } from 'mongoose';
-import { Item } from '../Item/Item';
 
 @InputType()
-export class FulfillmentFilter extends ConfiguredFilter {
+export class FulfillmentFilter extends BaseFilter {
     @Field(() => FulfillmentType, { nullable: true })
     type?: FulfillmentType;
 
@@ -23,7 +22,7 @@ export class FulfillmentFilter extends ConfiguredFilter {
     public serializeFulfillmentFilter(): FilterQuery<
         DocumentType<Fulfillment>
     > {
-        const query = this.serializeConfiguredFilter() as FilterQuery<
+        const query = this.serializeBaseFilter() as FilterQuery<
             DocumentType<Fulfillment>
         >;
 

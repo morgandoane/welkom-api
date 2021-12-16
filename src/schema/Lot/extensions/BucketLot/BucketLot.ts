@@ -1,12 +1,27 @@
-import { ObjectType } from 'type-graphql';
+import { getBaseLoader } from './../../../Loader';
+import { Field, ObjectType } from 'type-graphql';
 import { LotModel } from '../../Lot';
-import { getDiscriminatorModelForClass } from '@typegoose/typegoose';
+import {
+    getDiscriminatorModelForClass,
+    getModelForClass,
+    prop,
+} from '@typegoose/typegoose';
 import { Lot } from '../../Lot';
+import { LotContent } from '@src/schema/Content/Content';
 
 @ObjectType()
-export class BucketLot extends Lot {}
+export class BucketLotContent extends LotContent {}
 
-export const ProceduralLotModel = getDiscriminatorModelForClass(
+@ObjectType()
+export class BucketLot extends Lot {
+    @Field(() => BucketLotContent)
+    @prop({ required: true, type: () => BucketLotContent })
+    contents!: BucketLotContent[];
+}
+
+export const BucketLotModel = getDiscriminatorModelForClass(
     LotModel,
     BucketLot
 );
+
+export const BucketLotLoader = getBaseLoader(BucketLotModel);

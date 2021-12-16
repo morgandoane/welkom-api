@@ -1,10 +1,10 @@
+import { Base } from './../Base/Base';
 import { Field, ObjectType } from 'type-graphql';
 import { getModelForClass, prop, Ref } from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
-import { Configured } from '../Configured/Configured';
 
 @ObjectType()
-export class Expense extends Configured {
+export class Expense extends Base {
     @Field()
     @prop({ required: true })
     amount!: number;

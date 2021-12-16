@@ -1,3 +1,4 @@
+import { AppStorage } from './../../services/CloudStorage/CloudStorage';
 import express from 'express';
 import jwksClient from 'jwks-rsa';
 import jwt from 'jsonwebtoken';
@@ -27,8 +28,10 @@ const createContext = async (
     try {
         const token = req.headers.authorization;
 
+        const storage = AppStorage;
+
         if (!token) {
-            return new Context(null, authToken, [], []);
+            return new Context(null, authToken, [], [], storage);
         }
 
         const authResult = await new Promise<jwt.JwtPayload>(
@@ -63,9 +66,9 @@ const createContext = async (
 
         // permissions and roles come from Auth0 Actions
         // return new Context(decoded, authToken, roles, permissions);
-        return new Context(decoded, authToken, [], []);
+        return new Context(decoded, authToken, [], [], storage);
     } catch (err) {
-        return new Context(null, authToken, [], []);
+        return new Context(null, authToken, [], [], null);
     }
 };
 

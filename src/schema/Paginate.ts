@@ -4,7 +4,7 @@ import { FilterQuery } from 'mongoose';
 export interface _PaginateArg<T> {
     model: ModelType<DocumentType<T>>;
     query: FilterQuery<T>;
-    sort: Partial<Record<keyof T, -1 | 1>>;
+    sort: Partial<Record<string, -1 | 1>>;
     skip: number;
     take: number;
 }

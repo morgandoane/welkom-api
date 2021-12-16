@@ -1,4 +1,5 @@
-import { Bol } from './../Bol/Bol';
+import { createBaseResolver } from './../Base/BaseResolvers';
+import { Bol, BolLoader } from './../Bol/Bol';
 import { Context } from './../../auth/context';
 import { CreateItineraryInput, UpdateItineraryInput } from './ItineraryInputs';
 import { loaderResult } from './../../utils/loaderResult';
@@ -16,12 +17,11 @@ import {
     Resolver,
     Root,
 } from 'type-graphql';
-import { createConfiguredResolver } from '../Configured/ConfiguredResolver';
 
-const ConfiguredResolvers = createConfiguredResolver();
+const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Itinerary)
-export class ItineraryResolvers extends ConfiguredResolvers {
+export class ItineraryResolvers extends BaseResolvers {
     @Query(() => ItineraryList)
     async itineraries(
         @Arg('filter', () => ItineraryFilter) filter: ItineraryFilter
@@ -69,10 +69,16 @@ export class ItineraryResolvers extends ConfiguredResolvers {
         @Arg('show_deleted', () => Boolean, { defaultValue: false })
         show_deleted: boolean
     ): Promise<Bol[]> {
+        const bols = await (
+            await loaderResult(
+                BolLoader.loadMany(itinerary.bols.map((b) => b.toString()))
+            )
+        ).map((result) => loaderResult(result));
+
         if (show_deleted) {
-            return itinerary.bols;
+            return bols;
         } else {
-            return itinerary.bols.filter((bol) => bol.deleted !== true);
+            return bols.filter((bol) => bol.deleted !== true);
         }
     }
 }

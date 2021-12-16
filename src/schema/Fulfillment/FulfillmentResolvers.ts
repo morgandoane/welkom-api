@@ -1,3 +1,4 @@
+import { createBaseResolver } from './../Base/BaseResolvers';
 import { Item, ItemLoader } from './../Item/Item';
 import { Company, CompanyLoader } from './../Company/Company';
 import { UserInputError } from 'apollo-server-errors';
@@ -7,7 +8,7 @@ import { Paginate } from './../Paginate';
 import { FulfillmentFilter } from './FulfillmentFilter';
 import { FulfillmentList } from './FulfillmentList';
 import { Lot, LotLoader } from './../Lot/Lot';
-import { FulfillmentInput, UpdateFulfillmentInput } from './FulfillmentInput';
+import { FulfillmentInput } from './FulfillmentInput';
 import { Location, LocationLoader } from './../Location/Location';
 import { loaderResult } from './../../utils/loaderResult';
 import { Fulfillment, FulfillmentModel } from './Fulfillment';
@@ -20,12 +21,11 @@ import {
     Resolver,
     Root,
 } from 'type-graphql';
-import { createConfiguredResolver } from '../Configured/ConfiguredResolver';
 
-const ConfiguredResolver = createConfiguredResolver();
+const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Fulfillment)
-export class FulfillmentResolvers extends ConfiguredResolver {
+export class FulfillmentResolvers extends BaseResolvers {
     @Query(() => FulfillmentList)
     async fulfillments(
         @Arg('filter') filter: FulfillmentFilter
@@ -50,22 +50,6 @@ export class FulfillmentResolvers extends ConfiguredResolver {
         if (!itinerary) throw new UserInputError('Failed to find BOL');
         const doc = await data.validateFulfillment(context);
         const res = await FulfillmentModel.create(doc);
-
-        return res.toJSON();
-    }
-
-    @Mutation(() => Fulfillment)
-    async updateFulfillment(
-        @Arg('id') id: string,
-        @Arg('data') data: UpdateFulfillmentInput
-    ): Promise<Fulfillment> {
-        const res = await FulfillmentModel.findOneAndUpdate(
-            { _id: id },
-            await data.serializeFulfillmentUpdate(),
-            {
-                new: true,
-            }
-        );
 
         return res.toJSON();
     }

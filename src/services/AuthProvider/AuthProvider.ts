@@ -1,4 +1,4 @@
-import { Profile } from './../../schema/Profile/Profile';
+import { Profile, ProfileModel } from './../../schema/Profile/Profile';
 import { env } from '@src/config';
 import { ManagementClient } from 'auth0';
 import DataLoader from 'dataloader';
@@ -13,8 +13,9 @@ export const AuthProvider = new ManagementClient({
 
 export const UserLoader = new DataLoader<string, Profile>(
     async (keys: readonly string[]) => {
-        const ProfileModel = getModelForClass(Profile);
-        const docs = await ProfileModel.find({ user_id: { $in: [...keys] } });
+        const docs = await ProfileModel.find({
+            $or: [{ user_id: { $in: [...keys] } }, { _id: { $in: [...keys] } }],
+        }).lean();
 
         if (docs.length === keys.length) {
             return keys.map(
@@ -31,7 +32,11 @@ export const UserLoader = new DataLoader<string, Profile>(
             const additionalDocs: Profile[] = [];
 
             for (const id of missingKeys) {
-                const fromAuth0 = await AuthProvider.getUser({ id });
+                const fromAuth0 = await AuthProvider.getUser({ id }).catch(
+                    (err) => {
+                        throw err;
+                    }
+                );
                 additionalDocs.push(
                     await (
                         await ProfileModel.create({

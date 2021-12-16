@@ -1,16 +1,15 @@
-import { ConfiguredInput } from './../Configured/ConfiguredInput';
 import { Context } from './../../auth/context';
 import { CompanyLoader } from './../Company/Company';
 import { loaderResult } from './../../utils/loaderResult';
 import { ItemContentInput } from './../Content/ContentInputs';
-import { ObjectId, UpdateQuery } from 'mongoose';
+import { ObjectId } from 'mongoose';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { Ctx, Field, InputType } from 'type-graphql';
 import { Order } from './Order';
 import { DocumentType } from '@typegoose/typegoose';
 
 @InputType()
-export class CreateOrderInput extends ConfiguredInput {
+export class CreateOrderInput {
     @Field(() => ObjectIdScalar, { nullable: true })
     customer?: ObjectId;
 
@@ -24,8 +23,7 @@ export class CreateOrderInput extends ConfiguredInput {
     due?: Date;
 
     async validateOrder(@Ctx() context: Context): Promise<Order> {
-        const configured = await this.validate(context);
-        const order: Order = { ...configured, contents: [] };
+        const order: Order = { ...context.base, contents: [] };
         if (this.customer) {
             const customer = loaderResult(
                 await CompanyLoader.load(this.customer.toString())
@@ -51,7 +49,7 @@ export class CreateOrderInput extends ConfiguredInput {
 }
 
 @InputType()
-export class UpdateOrderInput extends ConfiguredInput {
+export class UpdateOrderInput {
     @Field(() => ObjectIdScalar, { nullable: true })
     customer?: ObjectId;
 
@@ -71,11 +69,8 @@ export class UpdateOrderInput extends ConfiguredInput {
         @Ctx() context: Context,
         current: DocumentType<Order>
     ): Promise<Order> {
-        const configured = await this.validate(context);
-
-        current.modified_by = configured.modified_by;
-        current.date_modified = configured.date_modified;
-        current.field_values = configured.field_values;
+        current.modified_by = context.base.modified_by;
+        current.date_modified = context.base.date_modified;
 
         if (this.customer) {
             const customer = loaderResult(

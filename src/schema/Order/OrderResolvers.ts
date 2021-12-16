@@ -1,3 +1,4 @@
+import { createBaseResolver } from './../Base/BaseResolvers';
 import { Company, CompanyLoader } from './../Company/Company';
 import { loaderResult } from './../../utils/loaderResult';
 import { ObjectIdScalar } from './../ObjectIdScalar';
@@ -16,13 +17,12 @@ import {
     Resolver,
     Root,
 } from 'type-graphql';
-import { createConfiguredResolver } from '../Configured/ConfiguredResolver';
 import { ObjectId } from 'mongoose';
 
-const ConfiguredResolvers = createConfiguredResolver();
+const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Order)
-export class OrderResolvers extends ConfiguredResolvers {
+export class OrderResolvers extends BaseResolvers {
     @Query(() => OrderList)
     async orders(@Arg('filter') filter: OrderFilter): Promise<OrderList> {
         const query = filter.serializeOrderFilter();

@@ -1,45 +1,54 @@
-import { loaderResult } from './../../utils/loaderResult';
+import { Context } from './../../auth/context';
+import { createBaseResolver } from './../Base/BaseResolvers';
 import {
     Fulfillment,
-    FulfillmentLoader,
     FulfillmentModel,
     FulfillmentType,
 } from './../Fulfillment/Fulfillment';
 import { Itinerary, ItineraryModel } from './../Itinerary/Itinerary';
-import { UpdateBolInput } from './BolInput';
+import { UpdateBolInput, CreateBolInput } from './BolInput';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { ObjectId } from 'mongoose';
 import { LocationLoader } from './../Location/Location';
 import { CompanyLoader } from './../Company/Company';
 import { BolAppointmentType } from '@src/schema/Bol/BolInput';
-import { Arg, FieldResolver, Mutation, Resolver, Root } from 'type-graphql';
-import { createConfiguredResolver } from '../Configured/ConfiguredResolver';
+import {
+    Arg,
+    Ctx,
+    FieldResolver,
+    Mutation,
+    Resolver,
+    Root,
+} from 'type-graphql';
 import {
     Bol,
     BolAppointment,
     BolAppointment_Company,
     BolAppointment_Location,
+    BolModel,
 } from './Bol';
 
-const ConfiguredResolvers = createConfiguredResolver();
+const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Bol)
-export class BolResolvers extends ConfiguredResolvers {
+export class BolResolvers extends BaseResolvers {
+    @Mutation(() => Itinerary)
+    async createBol(
+        @Arg('data') data: CreateBolInput,
+        @Ctx() context: Context
+    ): Promise<Bol> {
+        return await BolModel.create(await data.validateBol(context));
+    }
+
     @Mutation(() => Itinerary)
     async updateBol(
         @Arg('id', () => ObjectIdScalar) id: ObjectId,
         @Arg('data') data: UpdateBolInput
-    ): Promise<Itinerary> {
-        const partialUpdate = await data.serializeBolUpdate();
-        const set = {};
-        for (const field in partialUpdate) {
-            if (partialUpdate[field] !== undefined)
-                set['bols.$.' + field] = partialUpdate[field];
-        }
-
-        return await ItineraryModel.findOneAndUpdate(
-            { ['bols._id']: id.toString() },
-            { $set: set }
+    ): Promise<Bol> {
+        return await BolModel.findByIdAndUpdate(
+            id,
+            await data.serializeBolUpdate(),
+            { new: true }
         );
     }
 

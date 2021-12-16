@@ -1,18 +1,8 @@
+import { Base } from './../Base/Base';
 import { getBaseLoader } from './../Loader';
-import { ItemClass } from './../ItemClass/ItemClass';
 import { Field, ObjectType } from 'type-graphql';
-import { Configured } from '../Configured/Configured';
 import { UnitClass } from '../Unit/Unit';
-import {
-    DocumentType,
-    getModelForClass,
-    modelOptions,
-    mongoose,
-    prop,
-    Ref,
-} from '@typegoose/typegoose';
-import DataLoader from 'dataloader';
-import { ObjectId } from 'mongoose';
+import { getModelForClass, prop, modelOptions } from '@typegoose/typegoose';
 
 @ObjectType()
 @modelOptions({
@@ -20,11 +10,7 @@ import { ObjectId } from 'mongoose';
         collection: 'items',
     },
 })
-export class Item extends Configured {
-    @Field(() => ItemClass)
-    @prop({ required: true, ref: () => ItemClass })
-    item_class!: Ref<ItemClass>;
-
+export class Item extends Base {
     @Field(() => UnitClass)
     @prop({ required: true, enum: UnitClass })
     unit_class!: UnitClass;

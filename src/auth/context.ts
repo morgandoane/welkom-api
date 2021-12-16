@@ -1,3 +1,7 @@
+import {
+    AppStorage,
+    AppStorageClass,
+} from './../services/CloudStorage/CloudStorage';
 import { Permission } from '@src/auth/permissions';
 import jwt from 'jsonwebtoken';
 import { mongoose } from '@typegoose/typegoose';
@@ -9,17 +13,20 @@ export class Context {
     authToken: string;
     roles: UserRole[];
     permissions: Permission[];
+    storage: AppStorageClass;
 
     constructor(
         jwt: jwt.JwtPayload | null,
         authToken: string,
         roles: UserRole[],
-        permissions: Permission[]
+        permissions: Permission[],
+        storage: AppStorageClass
     ) {
         this.jwt = jwt;
         this.authToken = authToken;
         this.roles = roles;
         this.permissions = permissions;
+        this.storage = storage;
     }
 
     public get base(): Base {

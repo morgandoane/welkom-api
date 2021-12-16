@@ -1,46 +1,33 @@
-import { loaderResult } from './../../utils/loaderResult';
-import { ItemClass, ItemClassLoader } from './../ItemClass/ItemClass';
+import { createBaseResolver } from './../Base/BaseResolvers';
+import { loaderResult } from '@src/utils/loaderResult';
+import { ObjectIdScalar } from '@src/schema/ObjectIdScalar';
 import { Context } from '@src/auth/context';
 import { Paginate } from './../Paginate';
 import { ItemFilter } from './ItemFilter';
 import { ItemList } from './ItemList';
-import { createConfiguredResolver } from './../Configured/ConfiguredResolver';
-import { Item, ItemModel } from './Item';
-import {
-    Arg,
-    Ctx,
-    FieldResolver,
-    Mutation,
-    Query,
-    Resolver,
-    Root,
-} from 'type-graphql';
-import { FilterQuery } from 'mongoose';
-import { DocumentType, mongoose } from '@typegoose/typegoose';
-import { CreateItemInput, UpdateItemInpiut } from './ItemInput';
+import { Item, ItemModel, ItemLoader } from './Item';
+import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
+import { CreateItemInput, UpdateItemInput } from './ItemInput';
+import { ObjectId } from 'mongoose';
 
-const ConfiguredResolver = createConfiguredResolver();
+const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Item)
-export class ItemResolvers extends ConfiguredResolver {
+export class ItemResolvers extends BaseResolvers {
+    @Query(() => Item)
+    async item(@Arg('id', () => ObjectIdScalar) id: ObjectId): Promise<Item> {
+        return loaderResult(await ItemLoader.load(id.toString()));
+    }
+
     @Query(() => ItemList)
-    async items(
-        @Arg('filter') { skip, take, name, class: item_class }: ItemFilter
-    ): Promise<ItemList> {
-        const query: FilterQuery<DocumentType<Item>> = {};
-
-        if (name !== undefined)
-            query.name = {
-                $regex: new RegExp(name, 'i'),
-            };
-
-        if (item_class !== undefined) query.item_class = item_class;
+    async items(@Arg('filter') filter: ItemFilter): Promise<ItemList> {
+        const query = filter.serializeItemFilter();
 
         return await Paginate.paginate({
             model: ItemModel,
             query,
-            skip,
-            take,
+            skip: filter.skip,
+            take: filter.take,
             sort: { english: 1 },
         });
     }
@@ -50,36 +37,19 @@ export class ItemResolvers extends ConfiguredResolver {
         @Arg('data') data: CreateItemInput,
         @Ctx() context: Context
     ): Promise<Item> {
-        const configured = await data.validate(context);
-        const doc: Item = {
-            ...configured,
-            english: data.english,
-            spanish: data.spanish,
-            item_class: new mongoose.Types.ObjectId(data.config.toString()),
-            unit_class: data.unit_class,
-        };
-        return await (await ItemModel.create(doc)).toJSON();
+        return await ItemModel.create({ ...context.base, ...data });
     }
 
     @Mutation(() => Item)
     async updateItem(
-        @Arg('id') id: string,
-        @Arg('data') data: UpdateItemInpiut,
+        @Arg('id', () => ObjectIdScalar) id: ObjectId,
+        @Arg('data') data: UpdateItemInput,
         @Ctx() context: Context
     ): Promise<Item> {
-        const configured = await data.validate(context);
-        const doc = await ItemModel.findById(id);
-        doc.field_values = configured.field_values;
-        doc.config = configured.config;
-        if (data.english !== undefined) doc.english = data.english;
-        if (data.spanish !== undefined) doc.spanish = data.spanish;
-        if (data.deleted !== undefined) doc.deleted = data.deleted;
-        await doc.save();
-        return doc.toJSON();
-    }
-
-    @FieldResolver(() => ItemClass)
-    async item_class(@Root() { item_class }: Item): Promise<ItemClass> {
-        return loaderResult(await ItemClassLoader.load(item_class.toString()));
+        return await ItemModel.findByIdAndUpdate(
+            id,
+            data.serializeItemUpdate(context),
+            { new: true }
+        );
     }
 }

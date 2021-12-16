@@ -1,4 +1,9 @@
-import { modelOptions, prop, Severity } from '@typegoose/typegoose';
+import {
+    modelOptions,
+    prop,
+    Severity,
+    getModelForClass,
+} from '@typegoose/typegoose';
 import { User } from 'auth0';
 import { Field, ObjectType } from 'type-graphql';
 
@@ -186,3 +191,5 @@ export class Profile implements User<AppMetaData, UserMetaData> {
     @prop({ required: false })
     family_name?: string | undefined;
 }
+
+export const ProfileModel = getModelForClass(Profile);

@@ -1,15 +1,13 @@
-import { ConfiguredInput } from './../Configured/ConfiguredInput';
 import { Field, InputType } from 'type-graphql';
-import { _FieldValueUnion } from '../Field/Field';
 
 @InputType()
-export class CreateCompanyInput extends ConfiguredInput {
+export class CreateCompanyInput {
     @Field()
     name: string;
 }
 
 @InputType()
-export class UpdateCompanyInput extends ConfiguredInput {
+export class UpdateCompanyInput {
     @Field({ nullable: true })
     name?: string;
 

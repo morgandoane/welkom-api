@@ -1,14 +1,14 @@
+import { BaseFilter } from './../Base/BaseFilter';
 import { DateRangeInput } from './../DateRange/DateRangeInput';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { Itinerary } from './Itinerary';
-import { ConfiguredFilter } from './../Configured/ConfiguredFilter';
 import { Field, InputType } from 'type-graphql';
 import { DocumentType } from '@typegoose/typegoose';
 import { FilterQuery, ObjectId } from 'mongoose';
 import { endOfDay, startOfDay } from 'date-fns';
 
 @InputType()
-export class ItineraryFilter extends ConfiguredFilter {
+export class ItineraryFilter extends BaseFilter {
     @Field(() => ObjectIdScalar, { nullable: true })
     item?: ObjectId;
 
@@ -19,7 +19,7 @@ export class ItineraryFilter extends ConfiguredFilter {
     stop_date?: DateRangeInput;
 
     public serializeItineraryFilter(): FilterQuery<DocumentType<Itinerary>> {
-        const query = this.serializeConfiguredFilter() as FilterQuery<
+        const query = this.serializeBaseFilter() as FilterQuery<
             DocumentType<Itinerary>
         >;
 

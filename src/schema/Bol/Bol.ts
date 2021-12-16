@@ -1,8 +1,15 @@
+import { getBaseLoader } from './../Loader';
+import { Base } from './../Base/Base';
 import { Fulfillment } from '../Fulfillment/Fulfillment';
 import { ItemContent } from '../Content/Content';
-import { prop, Ref } from '@typegoose/typegoose';
+import {
+    prop,
+    Ref,
+    getModelForClass,
+    modelOptions,
+    Severity,
+} from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
-import { Configured } from '../Configured/Configured';
 import { Location } from '../Location/Location';
 import { createUnionType, Field, ObjectType } from 'type-graphql';
 
@@ -46,8 +53,16 @@ export const BolAppointment = createUnionType({
     },
 });
 
+@modelOptions({
+    schemaOptions: {
+        collection: 'bols',
+    },
+    options: {
+        allowMixed: Severity.ALLOW,
+    },
+})
 @ObjectType()
-export class Bol extends Configured {
+export class Bol extends Base {
     @Field(() => BolAppointment, { nullable: true })
     @prop({ required: false })
     from?: BolAppointment_Company | BolAppointment_Location;
@@ -66,3 +81,6 @@ export class Bol extends Configured {
     @Field(() => [Fulfillment])
     receipts?: Fulfillment[];
 }
+
+export const BolModel = getModelForClass(Bol);
+export const BolLoader = getBaseLoader(BolModel);

@@ -1,11 +1,24 @@
+import { Paginate } from '@src/schema/Paginate';
+import { Pagination } from '@src/schema/Pagination/Pagination';
+import { ProfileFilter } from './ProfileFilter';
+import { ProfileList } from './ProfileList';
+import { UserInputError } from 'apollo-server-errors';
 import { loaderResult } from './../../utils/loaderResult';
 import { Context } from '@src/auth/context';
 import {
     AuthProvider,
     UserLoader,
 } from './../../services/AuthProvider/AuthProvider';
-import { Profile, AppMetaData, UserMetaData } from './Profile';
-import { Arg, Ctx, Mutation, Resolver } from 'type-graphql';
+import { Profile, AppMetaData, UserMetaData, ProfileModel } from './Profile';
+import {
+    Arg,
+    Ctx,
+    FieldResolver,
+    Mutation,
+    Query,
+    Resolver,
+    Root,
+} from 'type-graphql';
 import { ProfileInput, UpdateProfileInput } from './ProfileInput';
 import { CreateUserData, UserData } from 'auth0';
 import { getModelForClass, mongoose } from '@typegoose/typegoose';
@@ -49,13 +62,15 @@ export class ProfileResolvers {
             ...userData,
         };
 
-        await AuthProvider.createUser(createUserData, (err, doc) => {
-            if (err) throw err;
-        });
+        const auth0res = await AuthProvider.createUser(createUserData).catch(
+            (e) => {
+                throw new UserInputError(e);
+            }
+        );
 
         const res = await ProfileModel.create({
-            ...userData,
             _id: new mongoose.Types.ObjectId(),
+            ...auth0res,
         });
 
         return res.toJSON();
@@ -94,6 +109,21 @@ export class ProfileResolvers {
         return res.toJSON();
     }
 
+    @Query(() => ProfileList)
+    async profiles(@Arg('filter') filter: ProfileFilter): Promise<ProfileList> {
+        return Paginate.paginate({
+            model: ProfileModel,
+            query: filter.name
+                ? {
+                      name: { $regex: new RegExp(filter.name, 'i') },
+                  }
+                : {},
+            sort: { name: 1 },
+            skip: filter.skip,
+            take: filter.take,
+        });
+    }
+
     @Mutation(() => Profile)
     async blockProfile(@Arg('id') id: string): Promise<Profile> {
         const ProfileModel = getModelForClass(Profile);
@@ -105,5 +135,14 @@ export class ProfileResolvers {
             { new: true }
         );
         return res.toJSON();
+    }
+
+    @FieldResolver()
+    name(@Root() profile: Profile): string {
+        if (profile.name) return profile.name;
+        if (profile.given_name && profile.family_name)
+            return `${profile.given_name} ${profile.family_name}`;
+        if (profile.email) return profile.email;
+        return 'Anonymous user';
     }
 }

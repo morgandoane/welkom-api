@@ -1,4 +1,4 @@
-import { ObjectId } from 'mongoose';
+import { Base } from './../Base/Base';
 import { Bol } from './../Bol/Bol';
 import { loaderResult } from './../../utils/loaderResult';
 import { LotLoader } from './../Lot/Lot';
@@ -10,9 +10,9 @@ import {
     Ref,
     getModelForClass,
     pre,
+    DocumentType,
 } from '@typegoose/typegoose';
 import { Field, ObjectType } from 'type-graphql';
-import { Configured } from '../Configured/Configured';
 import { Location } from '../Location/Location';
 import { Lot } from '../Lot/Lot';
 import { Item } from '../Item/Item';
@@ -23,9 +23,9 @@ export enum FulfillmentType {
 }
 
 @pre<Fulfillment>('save', async function () {
-    const theseLots = await (
+    const theseLots = (await (
         await LotLoader.loadMany(this.lots.map((lot) => lot.toString()))
-    ).map((result) => loaderResult(result));
+    ).map((result) => loaderResult(result))) as DocumentType<Lot>[];
 
     const items = theseLots.map((lot) => lot.item);
 
@@ -37,8 +37,8 @@ export enum FulfillmentType {
     },
 })
 @ObjectType()
-export class Fulfillment extends Configured {
-    @prop({ required: true })
+export class Fulfillment extends Base {
+    @prop({ required: true, ref: () => Bol })
     bol!: Ref<Bol>;
 
     @Field(() => FulfillmentType)

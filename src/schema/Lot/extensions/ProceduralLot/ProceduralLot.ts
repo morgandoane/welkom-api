@@ -1,16 +1,12 @@
-import { ProcedureStep } from '../../../ProcedureStep/ProcedureStep';
+import { getBaseLoader } from './../../../Loader';
 import { LotModel } from '../../Lot';
-import { getDiscriminatorModelForClass, prop, Ref } from '@typegoose/typegoose';
+import { getDiscriminatorModelForClass, prop } from '@typegoose/typegoose';
 import { Lot } from '../../Lot';
 import { Field, ObjectType } from 'type-graphql';
 import { LotContent } from '@src/schema/Content/Content';
 
 @ObjectType()
-export class ProceduralLotContent extends LotContent {
-    @Field(() => ProcedureStep, { nullable: true })
-    @prop({ required: false, ref: () => ProcedureStep })
-    step?: Ref<ProcedureStep>;
-}
+export class ProceduralLotContent extends LotContent {}
 
 @ObjectType()
 export class ProceduralLot extends Lot {
@@ -19,7 +15,9 @@ export class ProceduralLot extends Lot {
     contents!: ProceduralLotContent[];
 }
 
-export const RecipeLotModel = getDiscriminatorModelForClass(
+export const ProceduralLotModel = getDiscriminatorModelForClass(
     LotModel,
     ProceduralLot
 );
+
+export const ProceduralLotLoader = getBaseLoader(ProceduralLotModel);

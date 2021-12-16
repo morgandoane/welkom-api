@@ -1,3 +1,4 @@
+import { Base } from './../Base/Base';
 import { getBaseLoader } from './../Loader';
 import { Field, ObjectType } from 'type-graphql';
 import { ItemContent } from '../Content/Content';
@@ -8,7 +9,6 @@ import {
     Ref,
 } from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
-import { Configured } from '../Configured/Configured';
 
 @ObjectType()
 @modelOptions({
@@ -16,7 +16,7 @@ import { Configured } from '../Configured/Configured';
         collection: 'orders',
     },
 })
-export class Order extends Configured {
+export class Order extends Base {
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
     customer?: Ref<Company>;
