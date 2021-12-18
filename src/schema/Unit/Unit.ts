@@ -31,6 +31,10 @@ export class Unit extends Base {
     @Field({ nullable: true })
     @prop({ required: false })
     spanish_plural?: string;
+
+    @Field()
+    @prop({ required: true })
+    base_per_unit!: number;
 }
 
 export const UnitModel = getModelForClass(Unit);

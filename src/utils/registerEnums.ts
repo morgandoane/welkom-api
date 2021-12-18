@@ -1,5 +1,3 @@
-import { SignedUrlCategory } from './../schema/SignedUrl/SignedUrl';
-import { SignedUrlType } from '../schema/SignedUrl/SignedUrl';
 import { Permission } from '@src/auth/permissions';
 import { UserRole } from '@src/auth/UserRole';
 import { BolAppointmentType } from '@src/schema/Bol/BolInput';
@@ -7,6 +5,14 @@ import { FulfillmentType } from '@src/schema/Fulfillment/Fulfillment';
 import { UnitClass } from '@src/schema/Unit/Unit';
 import { registerEnumType } from 'type-graphql';
 import { FolderClass } from '@src/schema/Folder/Folder';
+import { SignedUrlAction } from '@src/schema/SignedUrl/SignedUrlResolvers';
+
+export enum StorageBucketProxy {
+    ldbbakery_attachments = 'ldbbakery_attachments',
+    ldbbakery_documents = 'ldbbakery_documents',
+    ldbbakery_images = 'ldbbakery_images',
+    ldbbakery_profiles = 'ldbbakery_profiles',
+}
 
 export const registerEnums = (): void => {
     registerEnumType(Permission, { name: 'Permission' });
@@ -15,6 +21,6 @@ export const registerEnums = (): void => {
     registerEnumType(BolAppointmentType, { name: 'BolAppointmentType' });
     registerEnumType(FulfillmentType, { name: 'FulfillmentType' });
     registerEnumType(FolderClass, { name: 'FolderClass' });
-    registerEnumType(SignedUrlType, { name: 'SignedUrlType' });
-    registerEnumType(SignedUrlCategory, { name: 'SignedUrlCategory' });
+    registerEnumType(StorageBucketProxy, { name: 'StorageBucketProxy' });
+    registerEnumType(SignedUrlAction, { name: 'SignedUrlAction' });
 };

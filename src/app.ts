@@ -6,7 +6,6 @@ import express from 'express';
 // GraphQL
 import { buildSchema } from 'type-graphql';
 import { registerEnums } from './utils/registerEnums';
-import { GraphQLUpload, graphqlUploadExpress } from 'graphql-upload';
 
 // Resolvers
 import { AppFileResolvers } from './schema/AppFile/AppFileResolvers';
@@ -86,7 +85,6 @@ const httpsOptions = {
                 RecipeFolderResolvers,
                 SignedUrlResolvers,
                 UnitResolvers,
-                GraphQLUpload,
             ],
             validate: true,
         });
@@ -97,8 +95,6 @@ const httpsOptions = {
             schema,
             context: async ({ req }) => createContext(req, authToken),
         });
-
-        app.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }));
 
         const httpServer = https.createServer(httpsOptions, app);
 

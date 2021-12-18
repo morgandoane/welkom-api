@@ -9,6 +9,9 @@ export class CreateUnitInput {
     @Field()
     english!: string;
 
+    @Field()
+    base_per_unit!: number;
+
     @Field({ nullable: true })
     spanish?: string;
 
@@ -38,4 +41,7 @@ export class UpdateUnitInput {
 
     @Field({ nullable: true })
     deleted?: boolean;
+
+    @Field({ nullable: true })
+    base_per_unit?: number;
 }

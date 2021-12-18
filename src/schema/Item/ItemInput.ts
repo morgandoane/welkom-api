@@ -35,7 +35,6 @@ export class UpdateItemInput {
         if (this.english) item.english = this.english;
         if (this.spanish) item.spanish = this.spanish;
         if (this.deleted !== undefined) item.deleted = this.deleted;
-
         return item;
     }
 }

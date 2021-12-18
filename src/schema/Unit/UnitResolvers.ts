@@ -1,3 +1,4 @@
+import { UserInputError } from 'apollo-server-errors';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { ObjectId } from 'mongoose';
 import { loaderResult } from './../../utils/loaderResult';
@@ -14,6 +15,11 @@ const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Unit)
 export class UnitResolvers extends BaseResolvers {
+    @Query(() => Unit)
+    async unit(@Arg('id', () => ObjectIdScalar) id: ObjectId): Promise<Unit> {
+        return loaderResult(await UnitLoader.load(id.toString()));
+    }
+
     @Query(() => UnitList)
     async units(@Arg('filter') filter: UnitFilter): Promise<UnitList> {
         return await Paginate.paginate({
@@ -40,17 +46,20 @@ export class UnitResolvers extends BaseResolvers {
         @Arg('id', () => ObjectIdScalar) id: ObjectId,
         @Arg('data', () => UpdateUnitInput) data: UpdateUnitInput
     ): Promise<Unit> {
-        const doc = loaderResult(await UnitLoader.load(id.toString()));
+        const doc = await UnitModel.findById(id.toString());
+        if (!doc) throw new UserInputError('Could not find unit with id ' + id);
         if (data.class) doc.class = data.class;
         if (data.english) doc.english = data.english;
         if (data.english_plural) doc.english_plural = data.english_plural;
         if (data.spanish) doc.spanish = data.spanish;
         if (data.spanish_plural) doc.spanish_plural = data.spanish_plural;
+        if (data.base_per_unit) doc.base_per_unit = data.base_per_unit;
         if (data.deleted !== undefined && data.deleted !== null)
             doc.deleted = data.deleted;
         doc.date_modified = base.date_modified;
         doc.modified_by = base.modified_by;
+        UnitLoader.clear(doc._id.toString());
         await doc.save();
-        return doc;
+        return doc.toJSON();
     }
 }

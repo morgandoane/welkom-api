@@ -21,6 +21,7 @@ import { Paginate } from '../Paginate';
 import { FilterQuery, ObjectId } from 'mongoose';
 import { Location } from '../Location/Location';
 import { AppFile } from '../AppFile/AppFile';
+import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
 
 const BaseResolver = createBaseResolver();
 
@@ -57,7 +58,6 @@ export class CompanyResolvers extends BaseResolver {
     ): Promise<Company> {
         const doc: Company = { ...base, name: data.name, contacts: [] };
         const res = await CompanyModel.create(doc);
-        const bucket = await storage.createBucket(doc._id.toString());
         return res.toJSON();
     }
 
@@ -96,7 +96,11 @@ export class CompanyResolvers extends BaseResolver {
         @Ctx() { storage }: Context,
         @Root() { _id }: Company
     ): Promise<AppFile[]> {
-        const [files] = await storage.bucketContents(_id.toString());
-        return files.map((file) => AppFile.fromFile(file));
+        const files = await storage.files(
+            StorageBucket.Attachments,
+            _id.toString()
+        );
+
+        return files.map((file) => AppFile.fromFile(file, _id.toString()));
     }
 }
