@@ -7,6 +7,7 @@ import {
     modelOptions,
     prop,
     Ref,
+    Severity,
 } from '@typegoose/typegoose';
 import { Location } from '../Location/Location';
 import { Company } from '../Company/Company';
@@ -18,6 +19,9 @@ import { LotContent } from '../Content/Content';
 @modelOptions({
     schemaOptions: {
         collection: 'lots',
+    },
+    options: {
+        allowMixed: Severity.ALLOW,
     },
 })
 export class Lot extends Base {
@@ -38,7 +42,7 @@ export class Lot extends Base {
     company?: Ref<Company>;
 
     @Field(() => [LotContent])
-    @prop({ required: true, type: () => LotContent })
+    @prop({ required: true })
     contents!: LotContent[];
 }
 

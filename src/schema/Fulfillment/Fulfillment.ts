@@ -38,7 +38,7 @@ export enum FulfillmentType {
 })
 @ObjectType()
 export class Fulfillment extends Base {
-    @prop({ required: true, ref: () => Bol })
+    @prop({ required: true, ref: 'Bol' })
     bol!: Ref<Bol>;
 
     @Field(() => FulfillmentType)

@@ -1,7 +1,10 @@
 import { Context } from './../../auth/context';
 import { CompanyLoader } from './../Company/Company';
 import { loaderResult } from './../../utils/loaderResult';
-import { ItemContentInput } from './../Content/ContentInputs';
+import {
+    ItemContentInput,
+    OrderContentInput,
+} from './../Content/ContentInputs';
 import { ObjectId } from 'mongoose';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { Ctx, Field, InputType } from 'type-graphql';
@@ -10,20 +13,20 @@ import { DocumentType } from '@typegoose/typegoose';
 
 @InputType()
 export class CreateOrderInput {
+    @Field()
+    code: string;
+
     @Field(() => ObjectIdScalar, { nullable: true })
     customer?: ObjectId;
 
     @Field(() => ObjectIdScalar, { nullable: true })
     vendor?: ObjectId;
 
-    @Field(() => [ItemContentInput])
-    contents!: ItemContentInput[];
-
-    @Field({ nullable: true })
-    due?: Date;
+    @Field(() => [OrderContentInput])
+    contents!: OrderContentInput[];
 
     async validateOrder(@Ctx() context: Context): Promise<Order> {
-        const order: Order = { ...context.base, contents: [] };
+        const order: Order = { ...context.base, contents: [], code: this.code };
         if (this.customer) {
             const customer = loaderResult(
                 await CompanyLoader.load(this.customer.toString())
@@ -38,10 +41,8 @@ export class CreateOrderInput {
             order.vendor = vendor._id;
         }
 
-        if (this.due) order.due = this.due;
-
         for (const content of this.contents) {
-            order.contents.push(await content.validateItemContent());
+            order.contents.push(await content.validateOrderContent());
         }
 
         return order;
@@ -50,17 +51,17 @@ export class CreateOrderInput {
 
 @InputType()
 export class UpdateOrderInput {
+    @Field({ nullable: true })
+    code?: string;
+
     @Field(() => ObjectIdScalar, { nullable: true })
     customer?: ObjectId;
 
     @Field(() => ObjectIdScalar, { nullable: true })
     vendor?: ObjectId;
 
-    @Field(() => [ItemContentInput], { nullable: true })
-    contents?: ItemContentInput[];
-
-    @Field({ nullable: true })
-    due?: Date;
+    @Field(() => [OrderContentInput], { nullable: true })
+    contents?: OrderContentInput[];
 
     @Field({ nullable: true })
     deleted?: boolean;
@@ -86,12 +87,10 @@ export class UpdateOrderInput {
             current.vendor = vendor._id;
         }
 
-        if (this.due) current.due = this.due;
-
         if (this.contents) {
             current.contents = [];
             for (const content of this.contents) {
-                current.contents.push(await content.validateItemContent());
+                current.contents.push(await content.validateOrderContent());
             }
         }
 

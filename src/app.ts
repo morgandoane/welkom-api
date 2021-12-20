@@ -12,8 +12,10 @@ import { AppFileResolvers } from './schema/AppFile/AppFileResolvers';
 import { BaseUnionResolvers } from './schema/Fragments';
 import { BolResolvers } from './schema/Bol/BolResolvers';
 import { BucketLotResolvers } from './schema/Lot/extensions/BucketLot/BucketLotResolvers';
+import { CodeResolvers } from './schema/Code/CodeResolvers';
 import { CompanyResolvers } from './schema/Company/CompanyResolvers';
 import { ContactResolvers } from './schema/Contact/ContactResolvers';
+import { ConversionResolvers } from './schema/Conversion/ConversionResolvers';
 import { FulfillmentResolvers } from './schema/Fulfillment/FulfillmentResolvers';
 import { ItemResolvers } from './schema/Item/ItemResolvers';
 import { ItineraryResolvers } from './schema/Itinerary/ItineraryResolvers';
@@ -67,9 +69,11 @@ const httpsOptions = {
                 BaseUnionResolvers,
                 BolResolvers,
                 BucketLotResolvers,
+                CodeResolvers,
                 CompanyResolvers,
                 ContactResolvers,
                 ContentResolver,
+                ConversionResolvers,
                 FulfillmentResolvers,
                 ItemResolvers,
                 ItemContentResolver,

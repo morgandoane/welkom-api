@@ -1,3 +1,4 @@
+import { Conversion } from './Conversion/Conversion';
 import { Contact } from './Contact/Contact';
 import { Base } from '@src/schema/Base/Base';
 import { RecipeFolder } from './Folder/extensions/RecipeFolder/RecipeFolder';
@@ -24,6 +25,7 @@ export const BaseUnion = createUnionType({
             Bol,
             Company,
             Contact,
+            Conversion,
             Expense,
             Folder,
             RecipeFolder,

@@ -9,6 +9,7 @@ import { endOfDay, startOfDay } from 'date-fns';
 
 @InputType()
 export class OrderFilter extends BaseFilter {
+    @Field({ nullable: true }) code?: string;
     @Field(() => ObjectIdScalar, { nullable: true }) customer?: ObjectId;
     @Field(() => ObjectIdScalar, { nullable: true }) vendor?: ObjectId;
     @Field(() => ObjectIdScalar, { nullable: true }) item?: ObjectId;
@@ -17,6 +18,7 @@ export class OrderFilter extends BaseFilter {
     public serializeOrderFilter(): FilterQuery<DocumentType<Order>> {
         const base = this.serializeBaseFilter();
         const res = { ...base } as FilterQuery<DocumentType<Order>>;
+        if (this.code) res.code = { $regex: new RegExp(this.code, 'i') };
         if (this.customer) res.customer = this.customer.toString();
         if (this.vendor) res.vendor = this.vendor.toString();
         if (this.item) res['contents.item'] = this.item.toString();

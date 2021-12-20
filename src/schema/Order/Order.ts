@@ -1,7 +1,7 @@
+import { OrderContent } from './../Content/Content';
 import { Base } from './../Base/Base';
 import { getBaseLoader } from './../Loader';
 import { Field, ObjectType } from 'type-graphql';
-import { ItemContent } from '../Content/Content';
 import {
     getModelForClass,
     modelOptions,
@@ -17,6 +17,10 @@ import { Company } from '../Company/Company';
     },
 })
 export class Order extends Base {
+    @Field()
+    @prop({ required: true })
+    code!: string;
+
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
     customer?: Ref<Company>;
@@ -25,9 +29,9 @@ export class Order extends Base {
     @prop({ required: false, ref: () => Company })
     vendor?: Ref<Company>;
 
-    @Field(() => [ItemContent])
-    @prop({ required: true, type: () => ItemContent })
-    contents!: ItemContent[];
+    @Field(() => [OrderContent])
+    @prop({ required: true, type: () => OrderContent })
+    contents!: OrderContent[];
 
     @Field({ nullable: true })
     @prop({ required: false })

@@ -1,3 +1,4 @@
+import { Conversion } from './../Conversion/Conversion';
 import { Base } from './../Base/Base';
 import { getBaseLoader } from './../Loader';
 import { Field, ObjectType } from 'type-graphql';
@@ -22,6 +23,10 @@ export class Item extends Base {
     @Field()
     @prop({ required: true })
     spanish!: string;
+
+    @Field(() => [Conversion])
+    @prop({ required: true, type: () => Conversion })
+    conversions!: Conversion[];
 }
 
 export const ItemModel = getModelForClass(Item);

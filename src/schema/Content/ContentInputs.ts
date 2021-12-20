@@ -72,6 +72,9 @@ export class OrderContentInput extends ItemContentInput {
     @Field(() => ObjectIdScalar)
     location!: ObjectId;
 
+    @Field()
+    due!: Date;
+
     async validateOrderContent(): Promise<OrderContent> {
         const itemContent = await this.validateItemContent();
         const location = loaderResult(
@@ -80,6 +83,7 @@ export class OrderContentInput extends ItemContentInput {
         return {
             ...itemContent,
             location: location._id,
+            due: this.due,
         };
     }
 }

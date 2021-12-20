@@ -15,7 +15,7 @@ export class BucketLotContent extends LotContent {}
 @ObjectType()
 export class BucketLot extends Lot {
     @Field(() => BucketLotContent)
-    @prop({ required: true, type: () => BucketLotContent })
+    @prop({ required: true })
     contents!: BucketLotContent[];
 }
 

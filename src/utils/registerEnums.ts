@@ -1,3 +1,4 @@
+import { CodeType } from './../services/CodeGeneration/CodeGeneration';
 import { Permission } from '@src/auth/permissions';
 import { UserRole } from '@src/auth/UserRole';
 import { BolAppointmentType } from '@src/schema/Bol/BolInput';
@@ -23,4 +24,5 @@ export const registerEnums = (): void => {
     registerEnumType(FolderClass, { name: 'FolderClass' });
     registerEnumType(StorageBucketProxy, { name: 'StorageBucketProxy' });
     registerEnumType(SignedUrlAction, { name: 'SignedUrlAction' });
+    registerEnumType(CodeType, { name: 'CodeType' });
 };

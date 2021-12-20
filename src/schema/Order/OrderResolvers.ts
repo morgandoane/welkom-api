@@ -1,3 +1,6 @@
+import { UserInputError } from 'apollo-server-errors';
+import { CodeType } from '@src/services/CodeGeneration/CodeGeneration';
+import { CodeGenerator } from './../../services/CodeGeneration/CodeGeneration';
 import { createBaseResolver } from './../Base/BaseResolvers';
 import { Company, CompanyLoader } from './../Company/Company';
 import { loaderResult } from './../../utils/loaderResult';
@@ -42,6 +45,12 @@ export class OrderResolvers extends BaseResolvers {
         @Ctx() context: Context,
         @Arg('data') data: CreateOrderInput
     ): Promise<Order> {
+        const duplicate = await CodeGenerator.isDuplicate(
+            CodeType.PO,
+            data.code
+        );
+        if (duplicate)
+            throw new UserInputError(`PO code ${data.code} is already taken.`);
         return await (
             await OrderModel.create(await data.validateOrder(context))
         ).toJSON();
@@ -55,8 +64,13 @@ export class OrderResolvers extends BaseResolvers {
     ): Promise<Order> {
         const doc = loaderResult(await OrderLoader.load(id.toString()));
         const newDoc = await data.validateInput(context, doc);
-        await OrderModel.findOneAndUpdate({ _id: newDoc._id }, newDoc).lean();
-        return newDoc;
+        const res = await OrderModel.findOneAndUpdate(
+            { _id: newDoc._id },
+            newDoc,
+            { new: true }
+        );
+        OrderLoader.prime(res._id.toString(), res);
+        return res.toJSON();
     }
 
     @FieldResolver(() => Company)

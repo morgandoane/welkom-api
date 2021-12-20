@@ -47,9 +47,13 @@ export class ItemResolvers extends BaseResolvers {
         @Arg('data') data: CreateItemInput,
         @Ctx() context: Context
     ): Promise<Item> {
-        return await (
-            await ItemModel.create({ ...context.base, ...data })
-        ).toJSON();
+        const doc: Item = {
+            ...context.base,
+            ...data,
+            conversions: [],
+        };
+
+        return await (await ItemModel.create(doc)).toJSON();
     }
 
     @Mutation(() => Item)

@@ -35,6 +35,10 @@ export class OrderContent extends ItemContent {
     @Field(() => Location)
     @prop({ required: true, ref: () => Location })
     location!: Ref<Location>;
+
+    @Field(() => Date)
+    @prop({ required: true })
+    due!: Date;
 }
 
 @ObjectType()
