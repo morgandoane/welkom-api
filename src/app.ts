@@ -11,6 +11,7 @@ import { registerEnums } from './utils/registerEnums';
 import { AppFileResolvers } from './schema/AppFile/AppFileResolvers';
 import { BaseUnionResolvers } from './schema/Fragments';
 import { BolResolvers } from './schema/Bol/BolResolvers';
+import { BolAppointmentResolvers } from './schema/Bol/BolAppointmentResolvers';
 import { BucketLotResolvers } from './schema/Lot/extensions/BucketLot/BucketLotResolvers';
 import { CodeResolvers } from './schema/Code/CodeResolvers';
 import { CompanyResolvers } from './schema/Company/CompanyResolvers';
@@ -68,6 +69,7 @@ const httpsOptions = {
                 AppFileResolvers,
                 BaseUnionResolvers,
                 BolResolvers,
+                BolAppointmentResolvers,
                 BucketLotResolvers,
                 CodeResolvers,
                 CompanyResolvers,

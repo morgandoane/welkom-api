@@ -4,7 +4,7 @@ import { DateRangeInput } from './../DateRange/DateRangeInput';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { FilterQuery, ObjectId } from 'mongoose';
 import { Field, InputType } from 'type-graphql';
-import { DocumentType } from '@typegoose/typegoose';
+import { DocumentType, mongoose } from '@typegoose/typegoose';
 import { endOfDay, startOfDay } from 'date-fns';
 
 @InputType()
@@ -19,9 +19,16 @@ export class OrderFilter extends BaseFilter {
         const base = this.serializeBaseFilter();
         const res = { ...base } as FilterQuery<DocumentType<Order>>;
         if (this.code) res.code = { $regex: new RegExp(this.code, 'i') };
-        if (this.customer) res.customer = this.customer.toString();
-        if (this.vendor) res.vendor = this.vendor.toString();
-        if (this.item) res['contents.item'] = this.item.toString();
+        if (this.customer)
+            res.customer = new mongoose.Types.ObjectId(
+                this.customer.toString()
+            );
+        if (this.vendor)
+            res.vendor = new mongoose.Types.ObjectId(this.vendor.toString());
+        if (this.item)
+            res['contents.item'] = new mongoose.Types.ObjectId(
+                this.item.toString()
+            );
         if (this.due)
             res.due = {
                 $gte: startOfDay(this.due.start),

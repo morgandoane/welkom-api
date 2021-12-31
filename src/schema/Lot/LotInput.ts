@@ -39,6 +39,7 @@ export class LotInput {
                 ? new mongoose.Types.ObjectId(this.company.toString())
                 : undefined,
             contents: [],
+            start_quantity: 0,
         };
 
         for (const content of this.contents) {

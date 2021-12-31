@@ -1,3 +1,7 @@
+import { Order, OrderLoader } from './../Order/Order';
+import { Pagination } from './../Pagination/Pagination';
+import { BolFilter } from './BolFilter';
+import { BolList } from './BolList';
 import { Context } from './../../auth/context';
 import { createBaseResolver } from './../Base/BaseResolvers';
 import {
@@ -5,95 +9,72 @@ import {
     FulfillmentModel,
     FulfillmentType,
 } from './../Fulfillment/Fulfillment';
-import { Itinerary, ItineraryModel } from './../Itinerary/Itinerary';
+import {
+    Itinerary,
+    ItineraryLoader,
+    ItineraryModel,
+} from './../Itinerary/Itinerary';
 import { UpdateBolInput, CreateBolInput } from './BolInput';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { ObjectId } from 'mongoose';
 import { LocationLoader } from './../Location/Location';
 import { CompanyLoader } from './../Company/Company';
-import { BolAppointmentType } from '@src/schema/Bol/BolInput';
 import {
     Arg,
     Ctx,
     FieldResolver,
     Mutation,
+    Query,
     Resolver,
     Root,
 } from 'type-graphql';
-import {
-    Bol,
-    BolAppointment,
-    BolAppointment_Company,
-    BolAppointment_Location,
-    BolModel,
-} from './Bol';
+import { Bol, BolLoader, BolModel } from './Bol';
+import { Paginate } from '../Paginate';
+import { loaderResult } from '@src/utils/loaderResult';
 
 const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Bol)
 export class BolResolvers extends BaseResolvers {
-    @Mutation(() => Itinerary)
+    @Query(() => Bol)
+    async bol(@Arg('id', () => ObjectIdScalar) id: ObjectId): Promise<Bol> {
+        return loaderResult(await BolLoader.load(id.toString()));
+    }
+
+    @Query(() => BolList)
+    async bols(@Arg('filter') filter: BolFilter): Promise<BolList> {
+        return await Paginate.paginate({
+            model: BolModel,
+            query: await filter.serializeBolFilter(),
+            sort: { date_created: -1 },
+            skip: filter.skip,
+            take: filter.take,
+        });
+    }
+
+    @Mutation(() => Bol)
     async createBol(
         @Arg('data') data: CreateBolInput,
         @Ctx() context: Context
     ): Promise<Bol> {
-        return await BolModel.create(await data.validateBol(context));
+        const res = await BolModel.create(await data.validateBol(context));
+        return res.toJSON();
     }
 
-    @Mutation(() => Itinerary)
+    @Mutation(() => Bol)
     async updateBol(
         @Arg('id', () => ObjectIdScalar) id: ObjectId,
         @Arg('data') data: UpdateBolInput
     ): Promise<Bol> {
-        return await BolModel.findByIdAndUpdate(
+        const res = await BolModel.findByIdAndUpdate(
             id,
             await data.serializeBolUpdate(),
             { new: true }
         );
-    }
 
-    @FieldResolver(() => BolAppointment)
-    async from(@Root() { from }: Bol): Promise<typeof BolAppointment> {
-        if (!from) return null;
-        switch (from.type) {
-            case 'Company': {
-                const res: BolAppointment_Company = {
-                    type: BolAppointmentType.Company,
-                    company: await CompanyLoader.load(from.company.toString()),
-                };
-                return res;
-            }
-            case 'Location': {
-                const res: BolAppointment_Location = {
-                    type: BolAppointmentType.Location,
-                    location: await LocationLoader.load(
-                        from.location.toString()
-                    ),
-                };
-                return res;
-            }
-        }
-    }
+        BolLoader.clear(id.toString());
 
-    @FieldResolver(() => BolAppointment)
-    async to(@Root() { to }: Bol): Promise<typeof BolAppointment> {
-        if (!to) return null;
-        switch (to.type) {
-            case 'Company': {
-                const res: BolAppointment_Company = {
-                    type: BolAppointmentType.Company,
-                    company: await CompanyLoader.load(to.company.toString()),
-                };
-                return res;
-            }
-            case 'Location': {
-                const res: BolAppointment_Location = {
-                    type: BolAppointmentType.Location,
-                    location: await LocationLoader.load(to.location.toString()),
-                };
-                return res;
-            }
-        }
+        return res.toJSON();
     }
 
     @FieldResolver(() => [Fulfillment])
@@ -120,5 +101,15 @@ export class BolResolvers extends BaseResolvers {
             bol: bol._id,
             type: FulfillmentType.Receipt,
         });
+    }
+
+    @FieldResolver(() => Order)
+    async order(@Root() { order }: Bol): Promise<Order> {
+        return loaderResult(await OrderLoader.load(order.toString()));
+    }
+
+    @FieldResolver(() => Itinerary)
+    async itinerary(@Root() { itinerary }: Bol): Promise<Itinerary> {
+        return loaderResult(await ItineraryLoader.load(itinerary.toString()));
     }
 }

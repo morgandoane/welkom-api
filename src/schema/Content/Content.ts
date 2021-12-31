@@ -24,6 +24,14 @@ export class ItemContent extends Content {
 }
 
 @ObjectType()
+export class BolItemContent extends ItemContent {
+    // set upon save
+    @Field()
+    @prop({ required: true })
+    fulfillment_percentage: number;
+}
+
+@ObjectType()
 export class ItemPluralContent extends Content {
     @Field(() => Item)
     @prop({ required: true, ref: () => Item })

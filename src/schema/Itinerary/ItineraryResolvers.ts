@@ -1,5 +1,6 @@
+import { ObjectId } from 'mongoose';
 import { createBaseResolver } from './../Base/BaseResolvers';
-import { Bol, BolLoader } from './../Bol/Bol';
+import { Bol, BolLoader, BolModel } from './../Bol/Bol';
 import { Context } from './../../auth/context';
 import { CreateItineraryInput, UpdateItineraryInput } from './ItineraryInputs';
 import { loaderResult } from './../../utils/loaderResult';
@@ -17,11 +18,19 @@ import {
     Resolver,
     Root,
 } from 'type-graphql';
+import { ObjectIdScalar } from '../ObjectIdScalar';
 
 const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Itinerary)
 export class ItineraryResolvers extends BaseResolvers {
+    @Query(() => Itinerary)
+    async itinerary(
+        @Arg('id', () => ObjectIdScalar) id: ObjectId
+    ): Promise<Itinerary> {
+        return loaderResult(await ItineraryLoader.load(id.toString()));
+    }
+
     @Query(() => ItineraryList)
     async itineraries(
         @Arg('filter', () => ItineraryFilter) filter: ItineraryFilter
@@ -48,13 +57,13 @@ export class ItineraryResolvers extends BaseResolvers {
     @Mutation(() => Itinerary)
     async updateItinerary(
         @Ctx() context: Context,
-        @Arg('id') id: string,
+        @Arg('id', () => ObjectIdScalar) id: ObjectId,
         @Arg('data', () => UpdateItineraryInput) data: UpdateItineraryInput
     ): Promise<Itinerary> {
-        const doc = loaderResult(await ItineraryLoader.load(id));
+        const doc = await ItineraryModel.findById(id.toString());
         const newDoc = await data.validateUpdate(context, doc);
         await newDoc.save();
-        return newDoc;
+        return newDoc.toJSON();
     }
 
     @FieldResolver(() => Company)
@@ -65,20 +74,14 @@ export class ItineraryResolvers extends BaseResolvers {
 
     @FieldResolver(() => [Bol])
     async bols(
-        @Root() itinerary: Itinerary,
+        @Root() { _id }: Itinerary,
         @Arg('show_deleted', () => Boolean, { defaultValue: false })
         show_deleted: boolean
     ): Promise<Bol[]> {
-        const bols = await (
-            await loaderResult(
-                BolLoader.loadMany(itinerary.bols.map((b) => b.toString()))
-            )
-        ).map((result) => loaderResult(result));
-
-        if (show_deleted) {
-            return bols;
-        } else {
-            return bols.filter((bol) => bol.deleted !== true);
-        }
+        const bols = await BolModel.find({
+            itinerary: _id,
+            deleted: show_deleted ? undefined : false,
+        });
+        return bols.map((bol) => bol.toJSON());
     }
 }

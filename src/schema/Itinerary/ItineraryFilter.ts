@@ -3,7 +3,7 @@ import { DateRangeInput } from './../DateRange/DateRangeInput';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { Itinerary } from './Itinerary';
 import { Field, InputType } from 'type-graphql';
-import { DocumentType } from '@typegoose/typegoose';
+import { DocumentType, mongoose } from '@typegoose/typegoose';
 import { FilterQuery, ObjectId } from 'mongoose';
 import { endOfDay, startOfDay } from 'date-fns';
 
@@ -11,6 +11,9 @@ import { endOfDay, startOfDay } from 'date-fns';
 export class ItineraryFilter extends BaseFilter {
     @Field(() => ObjectIdScalar, { nullable: true })
     item?: ObjectId;
+
+    @Field(() => ObjectIdScalar, { nullable: true })
+    order?: ObjectId;
 
     @Field(() => ObjectIdScalar, { nullable: true })
     location?: ObjectId;
@@ -51,6 +54,10 @@ export class ItineraryFilter extends BaseFilter {
                     },
                 },
             ];
+        }
+
+        if (this.order) {
+            query.orders = new mongoose.Types.ObjectId(this.order.toString());
         }
 
         return query;

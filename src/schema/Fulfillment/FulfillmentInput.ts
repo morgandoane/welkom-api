@@ -87,6 +87,7 @@ export class FulfillmentLotFinder {
                 item: item._id,
                 company: company._id,
                 contents: [],
+                start_quantity: 0,
             };
 
             const res = await LotModel.create(newLot);

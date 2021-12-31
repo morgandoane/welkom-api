@@ -9,7 +9,13 @@ import {
     AuthProvider,
     UserLoader,
 } from './../../services/AuthProvider/AuthProvider';
-import { Profile, AppMetaData, UserMetaData, ProfileModel } from './Profile';
+import {
+    Profile,
+    AppMetaData,
+    UserMetaData,
+    ProfileModel,
+    UserMetaDataInput,
+} from './Profile';
 import {
     Arg,
     Ctx,
@@ -135,6 +141,17 @@ export class ProfileResolvers {
             { new: true }
         );
         return res.toJSON();
+    }
+
+    @Mutation(() => UserMetaData)
+    async updateUserPreferences(
+        @Ctx() { jwt }: Context,
+        @Arg('data') user_metadata: UserMetaDataInput
+    ): Promise<UserMetaData> {
+        const id = jwt.sub || '';
+        loaderResult(await UserLoader.load(id));
+        const res = await AuthProvider.updateUser({ id }, { user_metadata });
+        return user_metadata;
     }
 
     @FieldResolver()

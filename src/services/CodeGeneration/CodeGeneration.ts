@@ -5,6 +5,7 @@ import crypto from 'crypto';
 export enum CodeType {
     PO = 'PO',
     BOL = 'BOL',
+    ITIN = 'ITIN',
 }
 
 export class CodeGenerator {
@@ -30,6 +31,13 @@ export class CodeGenerator {
                 if (match) return await this.obtain(type);
                 else return codeAttempt;
             }
+            case CodeType.ITIN: {
+                const match = await ItineraryModel.findOne({
+                    code: codeAttempt,
+                });
+                if (match) return await this.obtain(type);
+                else return codeAttempt;
+            }
             case CodeType.PO: {
                 const match = await OrderModel.findOne({
                     code: codeAttempt,
@@ -48,6 +56,13 @@ export class CodeGenerator {
             case CodeType.BOL: {
                 const match = await ItineraryModel.findOne({
                     'bols.code': type + attempt,
+                });
+                if (match) return true;
+                else return false;
+            }
+            case CodeType.ITIN: {
+                const match = await ItineraryModel.findOne({
+                    code: type + attempt,
                 });
                 if (match) return true;
                 else return false;

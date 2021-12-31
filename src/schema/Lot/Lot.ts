@@ -29,6 +29,10 @@ export class Lot extends Base {
     @prop({ required: true })
     code!: string;
 
+    @Field()
+    @prop({ required: true })
+    start_quantity!: number;
+
     @Field(() => Item)
     @prop({ required: true, ref: () => Item })
     item!: Ref<Item>;

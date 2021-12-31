@@ -5,7 +5,18 @@ import {
     getModelForClass,
 } from '@typegoose/typegoose';
 import { User } from 'auth0';
-import { Field, ObjectType } from 'type-graphql';
+import { Field, ObjectType, InputType } from 'type-graphql';
+
+@InputType()
+export class UserMetaDataInput {
+    @Field({ nullable: true })
+    @prop({ required: false })
+    prefers_dark_mode?: boolean;
+
+    @Field({ nullable: true })
+    @prop({ required: false })
+    phone_number?: string;
+}
 
 @ObjectType()
 export class AppMetaData {
@@ -20,11 +31,11 @@ export class AppMetaData {
 
 @ObjectType()
 export class UserMetaData {
-    @Field()
+    @Field({ nullable: true })
     @prop({ required: false })
     prefers_dark_mode?: boolean;
 
-    @Field()
+    @Field({ nullable: true })
     @prop({ required: false })
     phone_number?: string;
 }

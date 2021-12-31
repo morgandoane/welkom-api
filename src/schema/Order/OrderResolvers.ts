@@ -1,3 +1,5 @@
+import { ItineraryModel } from '@src/schema/Itinerary/Itinerary';
+import { Itinerary } from './../Itinerary/Itinerary';
 import { UserInputError } from 'apollo-server-errors';
 import { CodeType } from '@src/services/CodeGeneration/CodeGeneration';
 import { CodeGenerator } from './../../services/CodeGeneration/CodeGeneration';
@@ -21,11 +23,18 @@ import {
     Root,
 } from 'type-graphql';
 import { ObjectId } from 'mongoose';
+import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
+import { AppFile } from '../AppFile/AppFile';
 
 const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Order)
 export class OrderResolvers extends BaseResolvers {
+    @Query(() => Order)
+    async order(@Arg('id', () => ObjectIdScalar) id: ObjectId): Promise<Order> {
+        return loaderResult(await OrderLoader.load(id.toString()));
+    }
+
     @Query(() => OrderList)
     async orders(@Arg('filter') filter: OrderFilter): Promise<OrderList> {
         const query = filter.serializeOrderFilter();
@@ -83,5 +92,28 @@ export class OrderResolvers extends BaseResolvers {
     async customer(@Root() { customer }: Order): Promise<Company> {
         if (!customer) return null;
         return loaderResult(await CompanyLoader.load(customer.toString()));
+    }
+
+    @FieldResolver(() => [Itinerary])
+    async itineraries(@Root() { _id }: Order): Promise<Itinerary[]> {
+        const res = await ItineraryModel.find({
+            orders: _id,
+            deleted: false,
+        });
+
+        return res.map((doc) => doc.toObject());
+    }
+
+    @FieldResolver(() => [AppFile])
+    async files(
+        @Ctx() { storage }: Context,
+        @Root() { _id }: Order
+    ): Promise<AppFile[]> {
+        const files = await storage.files(
+            StorageBucket.Documents,
+            _id.toString()
+        );
+
+        return files.map((file) => AppFile.fromFile(file, _id.toString()));
     }
 }

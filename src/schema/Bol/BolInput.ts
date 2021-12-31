@@ -1,79 +1,57 @@
+import { mongoose } from '@typegoose/typegoose';
 import { Context } from './../../auth/context';
 import { ItemContentInput } from './../Content/ContentInputs';
-import { LocationLoader } from './../Location/Location';
-import { CompanyLoader } from './../Company/Company';
-import { loaderResult } from './../../utils/loaderResult';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { Field, InputType } from 'type-graphql';
 import { ObjectId } from 'mongoose';
-import { Bol, BolAppointment_Company, BolAppointment_Location } from './Bol';
-
-export enum BolAppointmentType {
-    Company = 'Company',
-    Location = 'Location',
-}
-
-@InputType()
-export class BolAppointmentInput {
-    @Field(() => BolAppointmentType)
-    type!: BolAppointmentType;
-
-    @Field(() => ObjectIdScalar)
-    target!: ObjectId;
-
-    public async validate(): Promise<
-        BolAppointment_Company | BolAppointment_Location
-    > {
-        if (this.type == BolAppointmentType.Company) {
-            const company = loaderResult(
-                await CompanyLoader.load(this.target.toString())
-            );
-            return {
-                type: 'Company',
-                company: company._id,
-            };
-        } else {
-            const location = loaderResult(
-                await LocationLoader.load(this.target.toString())
-            );
-            return {
-                type: 'Location',
-                location: location._id,
-            };
-        }
-    }
-}
+import { Bol } from './Bol';
+import { BolAppointmentInput } from './BolAppointment';
+import { loaderResult } from '@src/utils/loaderResult';
+import { ItineraryLoader } from '../Itinerary/Itinerary';
 
 @InputType()
 export class CreateBolInput {
-    @Field(() => BolAppointmentInput, { nullable: true })
-    from?: BolAppointmentInput;
+    @Field()
+    itinerary!: string;
 
-    @Field(() => BolAppointmentInput, { nullable: true })
-    to?: BolAppointmentInput;
+    @Field()
+    code!: string;
 
-    @Field(() => [ItemContentInput], { nullable: true })
-    contents?: ItemContentInput[];
+    @Field(() => ObjectIdScalar)
+    order!: ObjectId;
 
-    public async validateBol(context: Context): Promise<Partial<Bol>> {
-        const bol: Partial<Bol> = {};
+    @Field(() => BolAppointmentInput)
+    from!: BolAppointmentInput;
 
-        if (this.from) {
-            bol.from = await this.from.validate();
+    @Field(() => BolAppointmentInput)
+    to!: BolAppointmentInput;
+
+    @Field(() => [ItemContentInput])
+    contents: ItemContentInput[];
+
+    public async validateBol(context: Context): Promise<Bol> {
+        const itinerary = loaderResult(
+            await ItineraryLoader.load(this.itinerary)
+        );
+
+        const bol: Bol = {
+            ...context.base,
+            code: this.code,
+            itinerary: itinerary._id,
+            contents: [],
+            order: new mongoose.Types.ObjectId(this.order.toString()),
+            from: await this.from.validateAppointment(),
+            to: await this.to.validateAppointment(),
+            receipts: [],
+            shipments: [],
+        };
+
+        for (const content of this.contents) {
+            bol.contents.push({
+                ...(await content.validateItemContent()),
+                fulfillment_percentage: 0,
+            });
         }
-
-        if (this.to) {
-            bol.to = await this.to.validate();
-        }
-
-        if (this.contents) {
-            for (const content of this.contents) {
-                bol.contents.push(await content.validateItemContent());
-            }
-        }
-
-        bol.modified_by = context.base.modified_by;
-        bol.date_modified = context.base.date_modified;
 
         return bol;
     }
@@ -81,6 +59,9 @@ export class CreateBolInput {
 
 @InputType()
 export class UpdateBolInput {
+    @Field({ nullable: false })
+    code?: string;
+
     @Field(() => BolAppointmentInput, { nullable: true })
     from?: BolAppointmentInput;
 
@@ -93,14 +74,19 @@ export class UpdateBolInput {
     public async serializeBolUpdate(): Promise<Partial<Bol>> {
         const bolUpdate: Partial<Bol> = {};
 
-        if (this.from) bolUpdate.from = await this.from.validate();
+        if (this.code) bolUpdate.code = this.code;
 
-        if (this.to) bolUpdate.to = await this.to.validate();
+        if (this.from) bolUpdate.from = await this.from.validateAppointment();
+
+        if (this.to) bolUpdate.to = await this.to.validateAppointment();
 
         if (this.contents) {
-            this.contents = [];
+            bolUpdate.contents = [];
             for (const content of this.contents) {
-                bolUpdate.contents.push(await content.validateItemContent());
+                bolUpdate.contents.push({
+                    ...(await content.validateItemContent()),
+                    fulfillment_percentage: 0,
+                });
             }
         }
 

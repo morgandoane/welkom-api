@@ -1,3 +1,4 @@
+import { Itinerary } from './../Itinerary/Itinerary';
 import { OrderContent } from './../Content/Content';
 import { Base } from './../Base/Base';
 import { getBaseLoader } from './../Loader';
@@ -32,6 +33,9 @@ export class Order extends Base {
     @Field(() => [OrderContent])
     @prop({ required: true, type: () => OrderContent })
     contents!: OrderContent[];
+
+    @Field(() => [Itinerary])
+    itineraries?: Itinerary[];
 
     @Field({ nullable: true })
     @prop({ required: false })

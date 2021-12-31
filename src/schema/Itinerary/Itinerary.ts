@@ -9,6 +9,7 @@ import {
     prop,
     Ref,
 } from '@typegoose/typegoose';
+import { Order } from '../Order/Order';
 
 @ObjectType()
 @modelOptions({
@@ -17,9 +18,16 @@ import {
     },
 })
 export class Itinerary extends Base {
+    @Field()
+    @prop({ required: true })
+    code!: string;
+
+    @Field(() => [Order])
+    @prop({ required: true, ref: 'Order' })
+    orders!: Ref<Order>[];
+
     @Field(() => [Bol])
-    @prop({ required: true, ref: () => Bol })
-    bols: Ref<Bol>[];
+    bols?: Bol[];
 
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
