@@ -23,10 +23,13 @@ import { ItineraryResolvers } from './schema/Itinerary/ItineraryResolvers';
 import { LocationResolvers } from './schema/Location/LocationResolvers';
 import { LotResolvers } from './schema/Lot/LotResolvers';
 import { OrderResolvers } from './schema/Order/OrderResolvers';
+import { OrderQueueResolvers } from './schema/OrderQueue/OrderQueueResolvers';
+import { OrderQueueContentResolvers } from './schema/OrderQueue/OrderQueueContentResolvers';
 import { ProceduralLotResolvers } from './schema/Lot/extensions/ProceduralLot/ProceduralLotResolvers';
 import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
 import { RecipeFolderResolvers } from './schema/Folder/extensions/RecipeFolder/RecipeFolderResolvers';
 import { SignedUrlResolvers } from './schema/SignedUrl/SignedUrlResolvers';
+import { TeamResolvers } from './schema/Team/TeamResolvers';
 import { UnitResolvers } from './schema/Unit/UnitResolvers';
 import {
     ContentResolver,
@@ -86,10 +89,13 @@ const httpsOptions = {
                 LotContentResolver,
                 OrderContentResolver,
                 OrderResolvers,
+                OrderQueueResolvers,
+                OrderQueueContentResolvers,
                 ProceduralLotResolvers,
                 ProfileResolvers,
                 RecipeFolderResolvers,
                 SignedUrlResolvers,
+                TeamResolvers,
                 UnitResolvers,
             ],
             validate: true,

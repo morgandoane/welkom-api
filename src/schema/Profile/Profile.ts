@@ -26,7 +26,11 @@ export class AppMetaData {
 
     @Field(() => Profile)
     @prop({ required: true })
-    require_password_rest!: boolean;
+    company!: string;
+
+    @Field(() => Profile)
+    @prop({ required: true })
+    require_password_reset!: boolean;
 }
 
 @ObjectType()

@@ -41,6 +41,7 @@ export class ProfileResolvers {
             email,
             phone_number,
             temporary_password: password,
+            company,
         }: ProfileInput
     ): Promise<Profile> {
         const ProfileModel = getModelForClass(Profile);
@@ -59,7 +60,8 @@ export class ProfileResolvers {
             },
             app_metadata: {
                 created_by: base.created_by,
-                require_password_rest: true,
+                require_password_reset: true,
+                company,
             },
         };
 

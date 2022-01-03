@@ -107,9 +107,6 @@ export class Bol extends Base {
     @prop({ required: true })
     code!: string;
 
-    @prop({ ref: 'Order' })
-    order!: Ref<Order>;
-
     // denormalized, set upon save
     @Field(() => BolStatus)
     @prop({ required: false, enum: BolStatus })

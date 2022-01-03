@@ -1,1 +1,3 @@
-export enum Permission {}
+export enum Permission {
+    CreateItem = 'CreateItem',
+}

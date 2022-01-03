@@ -103,11 +103,6 @@ export class BolResolvers extends BaseResolvers {
         });
     }
 
-    @FieldResolver(() => Order)
-    async order(@Root() { order }: Bol): Promise<Order> {
-        return loaderResult(await OrderLoader.load(order.toString()));
-    }
-
     @FieldResolver(() => Itinerary)
     async itinerary(@Root() { itinerary }: Bol): Promise<Itinerary> {
         return loaderResult(await ItineraryLoader.load(itinerary.toString()));

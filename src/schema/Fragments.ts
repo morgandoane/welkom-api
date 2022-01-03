@@ -1,3 +1,4 @@
+import { Team } from './Team/Team';
 import { Conversion } from './Conversion/Conversion';
 import { Contact } from './Contact/Contact';
 import { Base } from '@src/schema/Base/Base';
@@ -38,6 +39,7 @@ export const BaseUnion = createUnionType({
             ProceduralLot,
             Order,
             Recipe,
+            Team,
             Unit,
         ] as const,
 });

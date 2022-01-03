@@ -17,9 +17,6 @@ export class CreateBolInput {
     @Field()
     code!: string;
 
-    @Field(() => ObjectIdScalar)
-    order!: ObjectId;
-
     @Field(() => BolAppointmentInput)
     from!: BolAppointmentInput;
 
@@ -39,7 +36,6 @@ export class CreateBolInput {
             code: this.code,
             itinerary: itinerary._id,
             contents: [],
-            order: new mongoose.Types.ObjectId(this.order.toString()),
             from: await this.from.validateAppointment(),
             to: await this.to.validateAppointment(),
             receipts: [],

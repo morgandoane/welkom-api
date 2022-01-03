@@ -16,6 +16,9 @@ export class ProfileInput {
 
     @Field()
     temporary_password!: string;
+
+    @Field()
+    company!: string;
 }
 
 @InputType()
