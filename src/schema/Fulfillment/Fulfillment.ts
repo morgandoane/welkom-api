@@ -1,3 +1,4 @@
+import { Verified } from './../Verified/Verified';
 import { Base } from './../Base/Base';
 import { Bol } from './../Bol/Bol';
 import { loaderResult } from './../../utils/loaderResult';
@@ -16,6 +17,7 @@ import { Field, ObjectType } from 'type-graphql';
 import { Location } from '../Location/Location';
 import { Lot } from '../Lot/Lot';
 import { Item } from '../Item/Item';
+import { Verification } from '../Verification/Verification';
 
 export enum FulfillmentType {
     Shipment = 'Shipment',
@@ -37,7 +39,8 @@ export enum FulfillmentType {
     },
 })
 @ObjectType()
-export class Fulfillment extends Base {
+export class Fulfillment extends Verified {
+    @Field(() => Bol)
     @prop({ required: true, ref: 'Bol' })
     bol!: Ref<Bol>;
 

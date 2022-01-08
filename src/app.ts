@@ -27,10 +27,13 @@ import { OrderQueueResolvers } from './schema/OrderQueue/OrderQueueResolvers';
 import { OrderQueueContentResolvers } from './schema/OrderQueue/OrderQueueContentResolvers';
 import { ProceduralLotResolvers } from './schema/Lot/extensions/ProceduralLot/ProceduralLotResolvers';
 import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
+import { QualityCheckResponseResolvers } from './schema/QualityCheckResponse/QualityCheckResponseResoilvers';
+import { QualityCheckResolvers } from './schema/QualityCheck/QualityCheckResolvers';
 import { RecipeFolderResolvers } from './schema/Folder/extensions/RecipeFolder/RecipeFolderResolvers';
 import { SignedUrlResolvers } from './schema/SignedUrl/SignedUrlResolvers';
 import { TeamResolvers } from './schema/Team/TeamResolvers';
 import { UnitResolvers } from './schema/Unit/UnitResolvers';
+import { VerificationResolvers } from './schema/Verification/VerificationResolvers';
 import {
     ContentResolver,
     ItemContentResolver,
@@ -93,10 +96,13 @@ const httpsOptions = {
                 OrderQueueContentResolvers,
                 ProceduralLotResolvers,
                 ProfileResolvers,
+                QualityCheckResolvers,
+                QualityCheckResponseResolvers,
                 RecipeFolderResolvers,
                 SignedUrlResolvers,
                 TeamResolvers,
                 UnitResolvers,
+                VerificationResolvers,
             ],
             validate: true,
         });

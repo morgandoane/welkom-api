@@ -1,12 +1,15 @@
+import { ForbiddenError } from 'apollo-server-express';
+import { randomNumber } from './../../utils/randomNumber';
 import { Paginate } from '@src/schema/Paginate';
-import { Pagination } from '@src/schema/Pagination/Pagination';
 import { ProfileFilter } from './ProfileFilter';
 import { ProfileList } from './ProfileList';
 import { UserInputError } from 'apollo-server-errors';
 import { loaderResult } from './../../utils/loaderResult';
 import { Context } from '@src/auth/context';
 import {
+    assignUserRole,
     AuthProvider,
+    synchronizeProfiles,
     UserLoader,
 } from './../../services/AuthProvider/AuthProvider';
 import {
@@ -25,15 +28,17 @@ import {
     Resolver,
     Root,
 } from 'type-graphql';
-import { ProfileInput, UpdateProfileInput } from './ProfileInput';
-import { CreateUserData, UserData } from 'auth0';
+import { CreateProfileInput, UpdateProfileInput } from './ProfileInput';
+import { CreateUserData, Role, User, UserData } from 'auth0';
 import { getModelForClass, mongoose } from '@typegoose/typegoose';
+import { ObjectId, UpdateQuery } from 'mongoose';
+import { UserRole } from '@src/auth/UserRole';
 
 @Resolver(() => Profile)
 export class ProfileResolvers {
     @Mutation(() => Profile)
     async createProfile(
-        @Ctx() { base }: Context,
+        @Ctx() context: Context,
         @Arg('data')
         {
             given_name,
@@ -41,8 +46,8 @@ export class ProfileResolvers {
             email,
             phone_number,
             temporary_password: password,
-            company,
-        }: ProfileInput
+            role,
+        }: CreateProfileInput
     ): Promise<Profile> {
         const ProfileModel = getModelForClass(Profile);
 
@@ -59,9 +64,8 @@ export class ProfileResolvers {
                 phone_number,
             },
             app_metadata: {
-                created_by: base.created_by,
+                created_by: context.base.created_by,
                 require_password_reset: true,
-                company,
             },
         };
 
@@ -70,28 +74,47 @@ export class ProfileResolvers {
             ...userData,
         };
 
-        const auth0res = await AuthProvider.createUser(createUserData).catch(
+        const auth0res = (await AuthProvider.createUser(createUserData).catch(
             (e) => {
                 throw new UserInputError(e);
             }
-        );
+        )) as User<AppMetaData, UserMetaData>;
 
-        const res = await ProfileModel.create({
-            _id: new mongoose.Types.ObjectId(),
+        const profile: Profile = {
+            _id: new mongoose.Types.ObjectId().toString(),
             ...auth0res,
-        });
+            email: auth0res.email || '',
+            family_name: auth0res.family_name || '',
+            given_name: auth0res.given_name || '',
+            name: auth0res.name || '',
+            roles: [role],
+            app_metadata: auth0res.app_metadata as AppMetaData,
+        };
+
+        await assignUserRole(context, auth0res.user_id || '', role);
+
+        const res = await ProfileModel.create(profile);
 
         return res.toJSON();
     }
 
     @Mutation(() => Profile)
     async updateProfile(
+        @Ctx() context: Context,
         @Arg('id') id: string,
         @Arg('data')
-        { given_name, family_name, email, phone_number }: UpdateProfileInput
+        {
+            role,
+            given_name,
+            family_name,
+            email,
+            phone_number,
+        }: UpdateProfileInput
     ): Promise<Profile> {
         const ProfileModel = getModelForClass(Profile);
-        const current = loaderResult(await UserLoader.load(id));
+        const current = await ProfileModel.findOne({
+            $or: [{ _id: id }, { user_id: id }],
+        });
         const updateData: UserData<AppMetaData, UserMetaData> = {};
 
         if (given_name) updateData.given_name = given_name;
@@ -108,24 +131,42 @@ export class ProfileResolvers {
         }
 
         await AuthProvider.updateUser({ id }, updateData);
-        const res = await ProfileModel.findByIdAndUpdate(
-            id,
-            { ...updateData },
+
+        const profileUpdate: Partial<Profile> = { ...updateData };
+
+        if (role) {
+            await assignUserRole(context, id, role);
+            profileUpdate.roles = [role];
+        }
+
+        const res = await ProfileModel.findOneAndUpdate(
+            { $or: [{ _id: id }, { user_id: id }] },
+            { ...profileUpdate },
             { new: true }
         );
+
+        UserLoader.clear(id);
 
         return res.toJSON();
     }
 
+    @Query(() => Profile)
+    async profile(@Arg('id') id: string): Promise<Profile> {
+        return loaderResult(await UserLoader.load(id));
+    }
+
     @Query(() => ProfileList)
-    async profiles(@Arg('filter') filter: ProfileFilter): Promise<ProfileList> {
+    async profiles(
+        @Ctx() context: Context,
+        @Arg('filter') filter: ProfileFilter
+    ): Promise<ProfileList> {
+        if (randomNumber(10, 1) == 1) {
+            console.log('synchronizing profiles');
+            await synchronizeProfiles();
+        }
         return Paginate.paginate({
             model: ProfileModel,
-            query: filter.name
-                ? {
-                      name: { $regex: new RegExp(filter.name, 'i') },
-                  }
-                : {},
+            query: filter.serializeProfileFilter(context),
             sort: { name: 1 },
             skip: filter.skip,
             take: filter.take,

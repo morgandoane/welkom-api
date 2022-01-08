@@ -1,3 +1,5 @@
+import { Verification } from './Verification/Verification';
+import { QualityCheck } from './QualityCheck/QualityCheck';
 import { Team } from './Team/Team';
 import { Conversion } from './Conversion/Conversion';
 import { Contact } from './Contact/Contact';
@@ -41,6 +43,8 @@ export const BaseUnion = createUnionType({
             Recipe,
             Team,
             Unit,
+            Verification,
+            QualityCheck,
         ] as const,
 });
 

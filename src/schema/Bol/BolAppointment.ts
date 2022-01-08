@@ -1,12 +1,16 @@
 import { CompanyLoader } from './../Company/Company';
 import { Location, LocationLoader } from './../Location/Location';
 import { prop, Ref, mongoose } from '@typegoose/typegoose';
-import { Field, ObjectType, InputType } from 'type-graphql';
+import { Field, ObjectType, InputType, ID } from 'type-graphql';
 import { Company } from '../Company/Company';
 import { loaderResult } from '@src/utils/loaderResult';
 
 @ObjectType()
 export class BolAppointment {
+    @Field(() => ID)
+    @prop({ required: true })
+    _id!: mongoose.Types.ObjectId;
+
     @Field(() => Company)
     @prop({ required: true, ref: () => Company })
     company!: Ref<Company>;
@@ -40,6 +44,7 @@ export class BolAppointmentInput {
         }
 
         return {
+            _id: new mongoose.Types.ObjectId(),
             company: company._id,
             date: this.date,
             location: this.location

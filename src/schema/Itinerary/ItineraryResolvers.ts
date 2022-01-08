@@ -1,3 +1,4 @@
+import { Order, OrderLoader } from './../Order/Order';
 import { ObjectId } from 'mongoose';
 import { createBaseResolver } from './../Base/BaseResolvers';
 import { Bol, BolLoader, BolModel } from './../Bol/Bol';
@@ -83,5 +84,21 @@ export class ItineraryResolvers extends BaseResolvers {
             deleted: show_deleted ? undefined : false,
         });
         return bols.map((bol) => bol.toJSON());
+    }
+
+    @FieldResolver(() => [Order])
+    async orders(
+        @Root() { orders }: Itinerary,
+        @Arg('show_deleted', () => Boolean, { defaultValue: false })
+        show_deleted: boolean
+    ): Promise<Order[]> {
+        const orderRes = await OrderLoader.loadMany(
+            orders.map((o) => o.toString())
+        );
+        const res = orderRes.map((result) => loaderResult(result));
+        return res.filter((r) => {
+            if (show_deleted == true) return r;
+            else if (!r.deleted) return r;
+        });
     }
 }

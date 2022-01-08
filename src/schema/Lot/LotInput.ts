@@ -1,3 +1,4 @@
+import { QualityCheckResponseInput } from './../QualityCheckResponse/QualityCheckResponseInput';
 import { mongoose } from '@typegoose/typegoose';
 import { ItemLoader } from './../Item/Item';
 import { loaderResult } from './../../utils/loaderResult';
@@ -7,6 +8,7 @@ import { Field, InputType } from 'type-graphql';
 import { LotContentInput } from './../Content/ContentInputs';
 import { Lot } from './Lot';
 import { Context } from '@src/auth/context';
+import { QualityCheckResponse } from '../QualityCheckResponse/QualityCheckResponse';
 
 @InputType()
 export class LotInput {
@@ -15,6 +17,9 @@ export class LotInput {
 
     @Field(() => ObjectIdScalar)
     item!: ObjectId;
+
+    @Field(() => [QualityCheckResponseInput])
+    quality_check_responses!: QualityCheckResponseInput[];
 
     @Field(() => ObjectIdScalar, { nullable: true })
     location?: ObjectId;
@@ -28,10 +33,17 @@ export class LotInput {
     public async validateLot(context: Context): Promise<Lot> {
         const item = await loaderResult(ItemLoader.load(this.item.toString()));
 
+        const responses: QualityCheckResponse[] = [];
+
+        for (const response of this.quality_check_responses) {
+            responses.push(await response.validateResponse(context));
+        }
+
         const res: Lot = {
             ...context.base,
             code: this.code,
             item: item._id,
+            quality_check_responses: responses,
             location: this.location
                 ? new mongoose.Types.ObjectId(this.location.toString())
                 : undefined,

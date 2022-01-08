@@ -1,5 +1,7 @@
+import { TeamModel } from './../Team/Team';
+import { UserRole } from '@src/auth/UserRole';
 import { loaderResult } from '@src/utils/loaderResult';
-import { Contact, ContactModel, ContactLoader } from './../Contact/Contact';
+import { Contact, ContactLoader } from './../Contact/Contact';
 import { createBaseResolver } from './../Base/BaseResolvers';
 import { LocationModel } from './../Location/Location';
 import { ObjectIdScalar } from './../ObjectIdScalar';
@@ -7,7 +9,7 @@ import { CompanyFilter } from './CompanyFilter';
 import { CompanyList } from './CompanyList';
 import { Context } from '@src/auth/context';
 import { CreateCompanyInput, UpdateCompanyInput } from './CompanyInput';
-import { Company, CompanyModel } from './Company';
+import { Company, CompanyModel, CompanyLoader } from './Company';
 import {
     Arg,
     Mutation,
@@ -22,6 +24,7 @@ import { FilterQuery, ObjectId } from 'mongoose';
 import { Location } from '../Location/Location';
 import { AppFile } from '../AppFile/AppFile';
 import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
+import { Ref, mongoose } from '@typegoose/typegoose';
 
 const BaseResolver = createBaseResolver();
 
@@ -36,11 +39,32 @@ export class CompanyResolvers extends BaseResolver {
 
     @Query(() => CompanyList)
     async companies(
+        @Ctx() context: Context,
         @Arg('filter') filter: CompanyFilter
     ): Promise<CompanyList> {
-        const { skip, take, name } = filter;
+        const { skip, take, name, mine } = filter;
         const query: FilterQuery<Company> = { ...filter.serializeBaseFilter() };
         if (name !== undefined) query.name = { $regex: new RegExp(name, 'i') };
+
+        if (mine !== undefined) {
+            // determine companies based on assigned teams or on all teams in db
+            const teams = await TeamModel.find(
+                context.roles == [UserRole.User]
+                    ? {
+                          members: context.base.created_by,
+                          deleted: false,
+                      }
+                    : { deleted: false }
+            );
+
+            const companyIds = teams.map(
+                (t) => new mongoose.Types.ObjectId(t.company.toString())
+            );
+
+            if (mine == true)
+                query.$and = [...query.$and, { _id: { $in: companyIds } }];
+            else query.$and = [...query.$and, { _id: { $nin: companyIds } }];
+        }
 
         return await Paginate.paginate({
             model: CompanyModel,

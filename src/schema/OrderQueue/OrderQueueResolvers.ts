@@ -3,7 +3,7 @@ import { Context } from '@src/auth/context';
 import { OrderQueueContentInput } from './OrderQueueInput';
 import {
     OrderQueue,
-    OrderQueueModel,
+    PersonalOrderQueueModel,
     OrderQueueRecord,
     OrderQueueRecordModel,
     OrderQueueTemplate,
@@ -13,25 +13,14 @@ import { Arg, Mutation, Resolver, Ctx, Query } from 'type-graphql';
 
 @Resolver(() => OrderQueue)
 export class OrderQueueResolvers {
-    @Query(() => OrderQueue)
+    @Query(() => OrderQueue, { nullable: true })
     async orderQueue(@Ctx() { base }: Context): Promise<OrderQueue> {
-        const match = await OrderQueueModel.findOne({
+        const match = await PersonalOrderQueueModel.find({
             author: base.created_by,
-            date: { $exists: false },
-            title: { $exists: false },
         });
 
-        if (match) return match.toJSON();
-
-        const newQueue: OrderQueue = {
-            _id: new mongoose.Types.ObjectId(),
-            author: base.created_by,
-            contents: [],
-        };
-
-        const res = await OrderQueueModel.create(newQueue);
-
-        return res.toJSON();
+        if (match[0]) return match[0].toJSON();
+        else return null;
     }
 
     @Mutation(() => OrderQueue)
@@ -46,21 +35,28 @@ export class OrderQueueResolvers {
             newContents.push(await content.serialize());
         }
 
-        const newQueue: OrderQueue = {
-            _id: new mongoose.Types.ObjectId(),
+        const existingQueues = await PersonalOrderQueueModel.find({
             author: base.created_by,
-            contents: newContents,
-        };
-
-        await OrderQueueModel.deleteMany({
-            author: base.created_by,
-            title: null,
-            date: null,
         });
 
-        const doc = await OrderQueueModel.create(newQueue);
+        if (existingQueues[0]) {
+            const res = await PersonalOrderQueueModel.findByIdAndUpdate(
+                existingQueues[0]._id,
+                { contents: newContents },
+                { new: true }
+            );
 
-        return doc.toJSON();
+            return res.toJSON();
+        } else {
+            const newQueue: OrderQueue = {
+                _id: new mongoose.Types.ObjectId(),
+                author: base.created_by,
+                contents: newContents,
+            };
+
+            const doc = await PersonalOrderQueueModel.create(newQueue);
+            return doc.toJSON();
+        }
     }
 
     @Mutation(() => OrderQueue)
@@ -82,7 +78,7 @@ export class OrderQueueResolvers {
             date: new Date(),
         };
 
-        await OrderQueueModel.deleteMany({
+        await PersonalOrderQueueModel.deleteMany({
             author: base.created_by,
             title: null,
             date: null,

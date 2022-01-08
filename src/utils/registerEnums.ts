@@ -1,3 +1,4 @@
+import { VerificationStatus } from './../schema/Verification/Verification';
 import { CodeType } from './../services/CodeGeneration/CodeGeneration';
 import { Permission } from '@src/auth/permissions';
 import { UserRole } from '@src/auth/UserRole';
@@ -7,6 +8,7 @@ import { registerEnumType } from 'type-graphql';
 import { FolderClass } from '@src/schema/Folder/Folder';
 import { SignedUrlAction } from '@src/schema/SignedUrl/SignedUrlResolvers';
 import { BolStatus } from '@src/schema/Bol/Bol';
+import { PromptType } from '@src/schema/Prompt/Prompt';
 
 export enum StorageBucketProxy {
     ldbbakery_attachments = 'ldbbakery_attachments',
@@ -25,4 +27,6 @@ export const registerEnums = (): void => {
     registerEnumType(SignedUrlAction, { name: 'SignedUrlAction' });
     registerEnumType(CodeType, { name: 'CodeType' });
     registerEnumType(BolStatus, { name: 'BolStatus' });
+    registerEnumType(PromptType, { name: 'PromptType' });
+    registerEnumType(VerificationStatus, { name: 'VerificationStatus' });
 };

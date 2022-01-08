@@ -10,4 +10,7 @@ export class LocationFIlter extends PaginateArg {
 
     @Field({ nullable: true })
     label?: string;
+
+    @Field({ nullable: true })
+    mine?: boolean;
 }

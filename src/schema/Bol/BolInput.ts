@@ -4,7 +4,7 @@ import { ItemContentInput } from './../Content/ContentInputs';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { Field, InputType } from 'type-graphql';
 import { ObjectId } from 'mongoose';
-import { Bol } from './Bol';
+import { Bol, BolStatus } from './Bol';
 import { BolAppointmentInput } from './BolAppointment';
 import { loaderResult } from '@src/utils/loaderResult';
 import { ItineraryLoader } from '../Itinerary/Itinerary';
@@ -34,12 +34,11 @@ export class CreateBolInput {
         const bol: Bol = {
             ...context.base,
             code: this.code,
+            status: BolStatus.Pending,
             itinerary: itinerary._id,
             contents: [],
             from: await this.from.validateAppointment(),
             to: await this.to.validateAppointment(),
-            receipts: [],
-            shipments: [],
         };
 
         for (const content of this.contents) {

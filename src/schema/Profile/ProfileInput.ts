@@ -1,7 +1,11 @@
+import { UserRole } from './../../auth/UserRole';
 import { Field, InputType } from 'type-graphql';
 
 @InputType()
-export class ProfileInput {
+export class CreateProfileInput {
+    @Field(() => UserRole)
+    role!: UserRole;
+
     @Field()
     given_name!: string;
 
@@ -16,22 +20,22 @@ export class ProfileInput {
 
     @Field()
     temporary_password!: string;
-
-    @Field()
-    company!: string;
 }
 
 @InputType()
 export class UpdateProfileInput {
-    @Field()
+    @Field(() => UserRole, { nullable: true })
+    role?: UserRole;
+
+    @Field({ nullable: true })
     given_name?: string;
 
-    @Field()
+    @Field({ nullable: true })
     family_name?: string;
 
-    @Field()
+    @Field({ nullable: true })
     email?: string;
 
-    @Field()
+    @Field({ nullable: true })
     phone_number?: string;
 }

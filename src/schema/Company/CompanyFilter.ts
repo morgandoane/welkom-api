@@ -5,4 +5,7 @@ import { Field, InputType } from 'type-graphql';
 export class CompanyFilter extends BaseFilter {
     @Field({ nullable: true })
     name?: string;
+
+    @Field({ nullable: true })
+    mine?: boolean;
 }

@@ -1,3 +1,4 @@
+import { UserRole } from './../../auth/UserRole';
 import {
     modelOptions,
     prop,
@@ -23,10 +24,6 @@ export class AppMetaData {
     @Field(() => Profile)
     @prop({ required: true })
     created_by!: string;
-
-    @Field(() => Profile)
-    @prop({ required: true })
-    company!: string;
 
     @Field(() => Profile)
     @prop({ required: true })
@@ -118,6 +115,10 @@ export class Profile implements User<AppMetaData, UserMetaData> {
     @Field()
     @prop({ required: true })
     email!: string;
+
+    @Field(() => [UserRole])
+    @prop({ required: true })
+    roles!: UserRole[];
 
     @Field()
     @prop({ required: false })

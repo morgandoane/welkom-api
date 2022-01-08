@@ -4,6 +4,8 @@ import jwksClient from 'jwks-rsa';
 import jwt from 'jsonwebtoken';
 import { env } from '@src/config';
 import { Context } from '../context';
+import { UserRole } from '../UserRole';
+import { Permission } from '../permissions';
 
 const client = jwksClient({
     jwksUri: `https://${env.AUTH0_DOMAIN}/.well-known/jwks.json`,
@@ -58,15 +60,15 @@ const createContext = async (
 
         const decoded = await authResult;
 
-        // const roles = decoded[`${env.AUTH0_NAMEPSACE}/roles`];
+        const roles = decoded[`${env.AUTH0_NAMEPSACE}/roles`];
 
-        // const permissions = roles.includes(UserRole.Admin)
-        //     ? Object.values(Permission)
-        //     : decoded[`${env.AUTH0_NAMEPSACE}/permissions`];
+        const permissions = roles.includes(UserRole.Admin)
+            ? Object.values(Permission)
+            : decoded[`${env.AUTH0_NAMEPSACE}/permissions`];
 
         // permissions and roles come from Auth0 Actions
         // return new Context(decoded, authToken, roles, permissions);
-        return new Context(decoded, authToken, [], [], storage);
+        return new Context(decoded, authToken, roles, permissions, storage);
     } catch (err) {
         return new Context(null, authToken, [], [], null);
     }

@@ -1,12 +1,16 @@
 import { Itinerary } from './../Itinerary/Itinerary';
 import { BolItemContent } from './../Content/Content';
-import { LotLoader } from './../Lot/Lot';
+import { LotLoader, LotModel } from './../Lot/Lot';
 import { Item, ItemLoader } from './../Item/Item';
 import { UnitLoader } from './../Unit/Unit';
 import { LocationLoader } from './../Location/Location';
 import { getBaseLoader } from './../Loader';
 import { Base } from './../Base/Base';
-import { Fulfillment } from '../Fulfillment/Fulfillment';
+import {
+    Fulfillment,
+    FulfillmentModel,
+    FulfillmentType,
+} from '../Fulfillment/Fulfillment';
 import {
     prop,
     Ref,
@@ -36,13 +40,24 @@ export enum BolStatus {
         allowMixed: Severity.ALLOW,
     },
 })
-@pre<Bol>('save', async function () {
-    if (this.receipts.length == 0 && this.shipments.length == 0) {
-        this.status = BolStatus.Pending;
+@pre<Bol>(['findOneAndUpdate'], async function () {
+    const doc = await BolModel.findOne(this.getQuery());
+    const fulfillments = await FulfillmentModel.find({
+        bol: doc._id,
+        deleted: false,
+    });
+    const receipts = fulfillments.filter(
+        (f) => f.type === FulfillmentType.Receipt
+    );
+    const shipments = fulfillments.filter(
+        (f) => f.type === FulfillmentType.Shipment
+    );
+    if (receipts.length == 0 && shipments.length == 0) {
+        doc.status = BolStatus.Pending;
     } else {
-        this.status = BolStatus.Complete;
-        // if any contents are shy of requested, set status to pending
-        for (const content of this.contents) {
+        doc.status = BolStatus.Complete;
+        // if any contents are shy of requested, set status to partialws
+        for (const content of doc.contents) {
             let required = 0;
             const item = loaderResult(
                 await ItemLoader.load(content.item.toString())
@@ -71,20 +86,22 @@ export enum BolStatus {
                         unit.base_per_unit;
             }
             // per the required base qty of this item, check receipts for completion
-            const receiptLotIds = this.receipts
-                .filter((r) => r.items && r.items.includes(content.item))
-                .map((r) => r.lots);
 
-            const applicableLots = await (
-                await LotLoader.loadMany(
-                    receiptLotIds.map((id) => id.toString())
-                )
-            )
-                .map((result) => loaderResult(result))
-                .filter((lot) => lot.item == content.item);
+            const applicableLots = await LotModel.find({
+                deleted: false,
+                item: content.item,
+                _id: {
+                    $in: receipts
+                        .map((r) => r.lots)
+                        .flat()
+                        .map((id) => id.toString()),
+                },
+            });
 
-            const totalReceivedUnits = applicableLots.reduce((acc, item) => {
-                return (acc += item.start_quantity);
+            console.log(applicableLots);
+
+            const totalReceivedUnits = applicableLots.reduce((acc, l) => {
+                return (acc += l.start_quantity);
             }, 0);
 
             const fulfillment_percentage = Math.ceil(
@@ -93,7 +110,12 @@ export enum BolStatus {
 
             content.fulfillment_percentage = fulfillment_percentage;
 
-            if (totalReceivedUnits < required) this.status = BolStatus.Partial;
+            console.log(totalReceivedUnits);
+            console.log(required);
+
+            if (totalReceivedUnits < required) doc.status = BolStatus.Partial;
+
+            await doc.save();
         }
     }
 })
@@ -103,14 +125,13 @@ export class Bol extends Base {
     @prop({ required: true, ref: 'Itinerary' })
     itinerary!: Ref<Itinerary>;
 
-    @Field()
-    @prop({ required: true })
-    code!: string;
+    @Field({ nullable: true })
+    @prop({ required: false })
+    code?: string;
 
-    // denormalized, set upon save
     @Field(() => BolStatus)
     @prop({ required: false, enum: BolStatus })
-    status?: BolStatus;
+    status!: BolStatus;
 
     @Field(() => BolAppointment)
     @prop({ required: true })
@@ -123,14 +144,6 @@ export class Bol extends Base {
     @Field(() => [BolItemContent], { nullable: true })
     @prop({ required: true, type: () => BolItemContent })
     contents!: BolItemContent[];
-
-    @Field(() => [Fulfillment])
-    @prop({ required: true, type: () => Fulfillment })
-    shipments!: Fulfillment[];
-
-    @Field(() => [Fulfillment])
-    @prop({ required: true, type: () => Fulfillment })
-    receipts!: Fulfillment[];
 }
 
 export const BolModel = getModelForClass(Bol);

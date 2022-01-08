@@ -1,3 +1,4 @@
+import { UserInputError } from 'apollo-server-errors';
 import { CompanyLoader } from './../Company/Company';
 import { LocationLoader } from './../Location/Location';
 import { UnitLoader } from './../Unit/Unit';
@@ -15,7 +16,10 @@ export class OrderQueueContentInput {
     item?: string;
 
     @Field({ nullable: true })
-    company?: string;
+    vendor?: string;
+
+    @Field({ nullable: true })
+    vendor_location?: string;
 
     @Field({ nullable: true })
     unit?: string;
@@ -39,11 +43,21 @@ export class OrderQueueContentInput {
             content.item = item._id;
         }
 
-        if (this.company) {
-            const company = loaderResult(
-                await CompanyLoader.load(this.company)
+        if (this.vendor) {
+            const company = loaderResult(await CompanyLoader.load(this.vendor));
+            content.vendor = company._id;
+        }
+
+        if (this.vendor_location) {
+            const location = loaderResult(
+                await LocationLoader.load(this.vendor_location)
             );
-            content.company = company._id;
+            if (location.company.toString() !== this.vendor)
+                throw new UserInputError(
+                    'Vendor location does not match specified content vendor.'
+                );
+
+            content.vendor_location = location._id;
         }
 
         if (this.unit) {

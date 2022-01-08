@@ -1,4 +1,5 @@
-import { BolModel } from './../Bol/Bol';
+import { CompanyLoader } from './../Company/Company';
+import { BolModel, BolStatus } from './../Bol/Bol';
 import { ItineraryModel } from '@src/schema/Itinerary/Itinerary';
 import { Itinerary } from './../Itinerary/Itinerary';
 import {
@@ -24,6 +25,7 @@ import { Order, OrderModel } from '../Order/Order';
 import { Bol } from '../Bol/Bol';
 import { Company } from '../Company/Company';
 import { loaderResult } from '@src/utils/loaderResult';
+import { getCompaniesForProfile } from '@src/utils/getCompaniesForProfile';
 
 @ObjectType()
 export class OrderQueueContent {
@@ -33,7 +35,11 @@ export class OrderQueueContent {
 
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
-    company?: Ref<Company>;
+    vendor?: Ref<Company>;
+
+    @Field(() => Location, { nullable: true })
+    @prop({ required: false, ref: () => Location })
+    vendor_location?: Ref<Location>;
 
     @Field(() => Item, { nullable: true })
     @prop({ required: false, ref: () => Item })
@@ -79,6 +85,8 @@ export class OrderQueue {
     contents!: OrderQueueContent[];
 }
 
+export class PersonalOrderQueue extends OrderQueue {}
+
 @ObjectType()
 export class OrderQueueTemplate extends OrderQueue {
     @Field()
@@ -89,11 +97,18 @@ export class OrderQueueTemplate extends OrderQueue {
 @ObjectType()
 @pre<OrderQueueRecord>('save', async function () {
     for (const content of this.contents) {
+        const destination = loaderResult(
+            await LocationLoader.load(
+                content.location ? content.location.toString() : ''
+            )
+        );
         const order: Order = {
             _id: new mongoose.Types.ObjectId(),
             deleted: false,
             created_by: this.author,
             date_created: this.date,
+            vendor: content.vendor,
+            customer: destination.company,
             code:
                 content.order_code ||
                 (await CodeGenerator.generate(CodeType.PO)),
@@ -115,24 +130,44 @@ export class OrderQueueTemplate extends OrderQueue {
             date_created: this.date,
             code: await CodeGenerator.generate(CodeType.ITIN),
             orders: [order._id],
+            carrier: content.vendor,
         };
 
         const destinationLocation = loaderResult(
             await LocationLoader.load(content.location.toString())
         );
 
+        // BOL should only have a code if the *from* company (vendor) is "us"
+        const vendor = loaderResult(
+            await CompanyLoader.load(content.vendor.toString())
+        );
+
+        const profileCompanies = await (
+            await getCompaniesForProfile(this.author)
+        ).map((c) => c.toString());
+
+        let code: string | null = null;
+
+        if (profileCompanies.includes(vendor._id.toString())) {
+            code = await CodeGenerator.generate(CodeType.BOL);
+        }
+
         const bol: Bol = {
             _id: new mongoose.Types.ObjectId(),
+            status: BolStatus.Pending,
             deleted: false,
             created_by: this.author,
             date_created: this.date,
             itinerary: itinerary._id,
-            code: await CodeGenerator.generate(CodeType.BOL),
+            code,
             from: {
-                company: content.company,
+                _id: new mongoose.Types.ObjectId(),
+                company: content.vendor,
+                location: content.vendor_location,
                 date: content.date,
             },
             to: {
+                _id: new mongoose.Types.ObjectId(),
                 company: destinationLocation.company,
                 location: destinationLocation._id,
                 date: content.date,
@@ -145,20 +180,18 @@ export class OrderQueueTemplate extends OrderQueue {
                     fulfillment_percentage: 0,
                 },
             ],
-            shipments: [],
-            receipts: [],
         };
 
         await OrderModel.create(order).catch((e) => {
-            throw new console.error(e);
+            throw new Error(e);
         });
 
         await ItineraryModel.create(itinerary).catch((e) => {
-            throw new console.error(e);
+            throw new Error(e);
         });
 
         await BolModel.create(bol).catch((e) => {
-            throw new console.error(e);
+            throw new Error(e);
         });
     }
 })
@@ -168,7 +201,12 @@ export class OrderQueueRecord extends OrderQueue {
     date!: Date;
 }
 
-export const OrderQueueModel = getModelForClass(OrderQueue);
+const OrderQueueModel = getModelForClass(OrderQueue);
+
+export const PersonalOrderQueueModel = getDiscriminatorModelForClass(
+    OrderQueueModel,
+    PersonalOrderQueue
+);
 
 export const OrderQueueTemplateModel = getDiscriminatorModelForClass(
     OrderQueueModel,

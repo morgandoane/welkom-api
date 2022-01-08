@@ -12,10 +12,21 @@ import { OrderQueueContent } from './OrderQueue';
 @Resolver(() => OrderQueueContent)
 export class OrderQueueContentResolvers {
     @FieldResolver(() => Company)
-    async company(@Root() { company }: OrderQueueContent): Promise<Company> {
-        if (!company) return null;
+    async vendor(@Root() { vendor }: OrderQueueContent): Promise<Company> {
+        if (!vendor) return null;
 
-        return loaderResult(await CompanyLoader.load(company.toString()));
+        return loaderResult(await CompanyLoader.load(vendor.toString()));
+    }
+
+    @FieldResolver(() => Location)
+    async vendor_location(
+        @Root() { vendor_location }: OrderQueueContent
+    ): Promise<Location> {
+        if (!vendor_location) return null;
+
+        return loaderResult(
+            await LocationLoader.load(vendor_location.toString())
+        );
     }
 
     @FieldResolver(() => Item)

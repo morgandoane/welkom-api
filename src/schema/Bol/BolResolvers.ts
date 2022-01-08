@@ -1,4 +1,4 @@
-import { Order, OrderLoader } from './../Order/Order';
+import { Order, OrderLoader, OrderModel } from './../Order/Order';
 import { Pagination } from './../Pagination/Pagination';
 import { BolFilter } from './BolFilter';
 import { BolList } from './BolList';
@@ -43,9 +43,10 @@ export class BolResolvers extends BaseResolvers {
 
     @Query(() => BolList)
     async bols(@Arg('filter') filter: BolFilter): Promise<BolList> {
+        const query = await filter.serializeBolFilter();
         return await Paginate.paginate({
             model: BolModel,
-            query: await filter.serializeBolFilter(),
+            query,
             sort: { date_created: -1 },
             skip: filter.skip,
             take: filter.take,
@@ -83,11 +84,13 @@ export class BolResolvers extends BaseResolvers {
         @Arg('show_deleted', () => Boolean, { defaultValue: false })
         show_deleted: boolean
     ): Promise<Fulfillment[]> {
-        return await FulfillmentModel.find({
+        const docs = await FulfillmentModel.find({
             deleted: show_deleted ? undefined : false,
             bol: bol._id,
             type: FulfillmentType.Shipment,
         });
+
+        return docs.map((doc) => doc.toJSON());
     }
 
     @FieldResolver(() => [Fulfillment])
@@ -96,15 +99,30 @@ export class BolResolvers extends BaseResolvers {
         @Arg('show_deleted', () => Boolean, { defaultValue: false })
         show_deleted: boolean
     ): Promise<Fulfillment[]> {
-        return await FulfillmentModel.find({
+        const docs = await FulfillmentModel.find({
             deleted: show_deleted ? undefined : false,
             bol: bol._id,
             type: FulfillmentType.Receipt,
         });
+
+        return docs.map((doc) => doc.toJSON());
     }
 
     @FieldResolver(() => Itinerary)
     async itinerary(@Root() { itinerary }: Bol): Promise<Itinerary> {
         return loaderResult(await ItineraryLoader.load(itinerary.toString()));
+    }
+
+    @FieldResolver(() => [Order])
+    async orders(@Root() { itinerary }: Bol): Promise<Order[]> {
+        const itineraryDoc = loaderResult(
+            await ItineraryLoader.load(itinerary.toString())
+        );
+        const res = await OrderModel.find({
+            deleted: false,
+            _id: { $in: itineraryDoc.orders.map((o) => o.toString()) },
+        });
+
+        return res.map((doc) => doc.toJSON());
     }
 }
