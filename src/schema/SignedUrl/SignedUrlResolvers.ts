@@ -1,8 +1,9 @@
 import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
 import { SignedUrlConfig } from './SignedUrlConfig';
 import { Context } from '@src/auth/context';
-import { Arg, Ctx, Query, Resolver } from 'type-graphql';
+import { Arg, Ctx, Query, Resolver, UseMiddleware } from 'type-graphql';
 import { SignedUrl } from './SignedUrl';
+import { Permitted } from '@src/auth/middleware/Permitted';
 
 export enum SignedUrlAction {
     write = 'write',
@@ -13,6 +14,7 @@ export enum SignedUrlAction {
 
 @Resolver(() => SignedUrl)
 export class SignedUrlResolvers {
+    @UseMiddleware(Permitted())
     @Query(() => SignedUrl)
     async signedUrl(
         @Ctx() { storage, jwt }: Context,
@@ -35,6 +37,7 @@ export class SignedUrlResolvers {
         };
     }
 
+    @UseMiddleware(Permitted())
     @Query(() => [SignedUrl])
     async signedUrls(
         @Ctx() { storage, jwt }: Context,

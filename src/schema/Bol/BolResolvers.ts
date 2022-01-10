@@ -27,20 +27,29 @@ import {
     Query,
     Resolver,
     Root,
+    UseMiddleware,
 } from 'type-graphql';
 import { Bol, BolLoader, BolModel } from './Bol';
 import { Paginate } from '../Paginate';
 import { loaderResult } from '@src/utils/loaderResult';
+import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
 
 const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Bol)
 export class BolResolvers extends BaseResolvers {
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.GetBols })
+    )
     @Query(() => Bol)
     async bol(@Arg('id', () => ObjectIdScalar) id: ObjectId): Promise<Bol> {
         return loaderResult(await BolLoader.load(id.toString()));
     }
 
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.GetBols })
+    )
     @Query(() => BolList)
     async bols(@Arg('filter') filter: BolFilter): Promise<BolList> {
         const query = await filter.serializeBolFilter();
@@ -53,6 +62,9 @@ export class BolResolvers extends BaseResolvers {
         });
     }
 
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.CreateBol })
+    )
     @Mutation(() => Bol)
     async createBol(
         @Arg('data') data: CreateBolInput,
@@ -62,6 +74,9 @@ export class BolResolvers extends BaseResolvers {
         return res.toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.UpdateBol })
+    )
     @Mutation(() => Bol)
     async updateBol(
         @Arg('id', () => ObjectIdScalar) id: ObjectId,

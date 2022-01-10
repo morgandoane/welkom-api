@@ -1,3 +1,4 @@
+import { LegacyItemOrderModel } from './../../legacy/itemOrder';
 import { TeamModel } from './../Team/Team';
 import { UserRole } from '@src/auth/UserRole';
 import { loaderResult } from '@src/utils/loaderResult';
@@ -18,6 +19,7 @@ import {
     Query,
     FieldResolver,
     Root,
+    UseMiddleware,
 } from 'type-graphql';
 import { Paginate } from '../Paginate';
 import { FilterQuery, ObjectId } from 'mongoose';
@@ -25,11 +27,16 @@ import { Location } from '../Location/Location';
 import { AppFile } from '../AppFile/AppFile';
 import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
 import { Ref, mongoose } from '@typegoose/typegoose';
+import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
 
 const BaseResolver = createBaseResolver();
 
 @Resolver(() => Company)
 export class CompanyResolvers extends BaseResolver {
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.GetCompanies })
+    )
     @Query(() => Company)
     async company(
         @Arg('id', () => ObjectIdScalar) id: ObjectId
@@ -37,6 +44,9 @@ export class CompanyResolvers extends BaseResolver {
         return await CompanyModel.findById(id).lean();
     }
 
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.GetCompanies })
+    )
     @Query(() => CompanyList)
     async companies(
         @Ctx() context: Context,
@@ -75,6 +85,9 @@ export class CompanyResolvers extends BaseResolver {
         });
     }
 
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.CreateCompany })
+    )
     @Mutation(() => Company)
     async createCompany(
         @Arg('data') data: CreateCompanyInput,
@@ -85,6 +98,9 @@ export class CompanyResolvers extends BaseResolver {
         return res.toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.UpdateCompany })
+    )
     @Mutation(() => Company)
     async updateCompany(
         @Arg('id', () => ObjectIdScalar) id: ObjectId,

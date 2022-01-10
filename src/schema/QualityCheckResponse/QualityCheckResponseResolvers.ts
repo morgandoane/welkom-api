@@ -1,7 +1,4 @@
-import {
-    QualityCheck,
-    QualityCheckLoader,
-} from './../QualityCheck/QualityCheck';
+import { QualityCheck, QualityCheckLoader } from '../QualityCheck/QualityCheck';
 import { QualityCheckResponse } from './QualityCheckResponse';
 import { FieldResolver, Resolver, Root } from 'type-graphql';
 import { loaderResult } from '@src/utils/loaderResult';

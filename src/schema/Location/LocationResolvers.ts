@@ -15,11 +15,14 @@ import {
     Arg,
     Mutation,
     Ctx,
+    UseMiddleware,
 } from 'type-graphql';
 import { createBaseResolver } from '../Base/BaseResolvers';
 import { FilterQuery, ObjectId } from 'mongoose';
 import { UserRole } from '@src/auth/UserRole';
 import { TeamModel } from '../Team/Team';
+import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
 
 const BaseResolver = createBaseResolver();
 
@@ -30,6 +33,12 @@ export class LocationResolvers extends BaseResolver {
         return loaderResult(await CompanyLoader.load(company.toString()));
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetLocations,
+        })
+    )
     @Query(() => LocationList)
     async locations(
         @Ctx() context: Context,
@@ -90,6 +99,12 @@ export class LocationResolvers extends BaseResolver {
         });
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateLocation,
+        })
+    )
     @Mutation(() => Location)
     async createLocation(
         @Arg('data') data: CreateLocationInput,
@@ -100,6 +115,12 @@ export class LocationResolvers extends BaseResolver {
         ).toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.UpdateLocation,
+        })
+    )
     @Mutation(() => Location)
     async updateLocation(
         @Arg('id', () => ObjectIdScalar) _id: ObjectId,

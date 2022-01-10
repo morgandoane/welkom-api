@@ -4,14 +4,22 @@ import { Item, ItemLoader, ItemModel } from './../Item/Item';
 import { ConversionInput } from './ConversionInput';
 import { ObjectIdScalar } from '@src/schema/ObjectIdScalar';
 import { Conversion } from './Conversion';
-import { Arg, Ctx, Mutation, Resolver } from 'type-graphql';
+import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
 import { createBaseResolver } from './../Base/BaseResolvers';
 import { ObjectId } from 'mongoose';
+import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
 
 const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Conversion)
 export class ConversionResolvers extends BaseResolvers {
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateConversion,
+        })
+    )
     @Mutation(() => Conversion)
     async upsertConversion(
         @Ctx() { base }: Context,
@@ -57,6 +65,12 @@ export class ConversionResolvers extends BaseResolvers {
         }
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.UpdateConversion,
+        })
+    )
     @Mutation(() => Item)
     async deleteConversion(
         @Arg('id', () => ObjectIdScalar) id: ObjectId

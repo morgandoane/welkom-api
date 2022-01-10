@@ -1,6 +1,6 @@
 import { Verified } from './../Verified/Verified';
 import { Base } from './../Base/Base';
-import { Bol } from './../Bol/Bol';
+import { Bol, BolModel } from './../Bol/Bol';
 import { loaderResult } from './../../utils/loaderResult';
 import { LotLoader } from './../Lot/Lot';
 import { Company } from './../Company/Company';
@@ -28,6 +28,11 @@ export enum FulfillmentType {
     const theseLots = (await (
         await LotLoader.loadMany(this.lots.map((lot) => lot.toString()))
     ).map((result) => loaderResult(result))) as DocumentType<Lot>[];
+
+    await BolModel.findOneAndUpdate(
+        { _id: this.bol.toString() },
+        { date_modified: new Date() }
+    );
 
     const items = theseLots.map((lot) => lot.item);
 

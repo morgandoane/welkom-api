@@ -37,7 +37,10 @@ export class QualityCheckResponseInput {
     }
 }
 
-const validateResponse = (check: QualityCheck, response: string): boolean => {
+export const validateResponse = (
+    check: QualityCheck,
+    response: string
+): boolean => {
     switch (check.prompt.type) {
         case PromptType.Boolean: {
             if (!['true', 'false'].includes(response))

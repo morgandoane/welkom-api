@@ -31,14 +31,23 @@ import {
     Query,
     Resolver,
     Root,
+    UseMiddleware,
 } from 'type-graphql';
 import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
 import { AppFile } from '../AppFile/AppFile';
+import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
 
 const VerifiedResolvers = createVerifiedResolver();
 
 @Resolver(() => Fulfillment)
 export class FulfillmentResolvers extends VerifiedResolvers {
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetFulfillments,
+        })
+    )
     @Query(() => Fulfillment)
     async fulfillment(
         @Arg('id', () => ObjectIdScalar) id: ObjectId
@@ -46,6 +55,12 @@ export class FulfillmentResolvers extends VerifiedResolvers {
         return loaderResult(await FulfillmentLoader.load(id.toString()));
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetFulfillments,
+        })
+    )
     @Query(() => FulfillmentList)
     async fulfillments(
         @Arg('filter') filter: FulfillmentFilter
@@ -59,6 +74,12 @@ export class FulfillmentResolvers extends VerifiedResolvers {
         });
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateFulfillment,
+        })
+    )
     @Mutation(() => Fulfillment)
     async createFulfillment(
         @Ctx() context: Context,
@@ -81,6 +102,12 @@ export class FulfillmentResolvers extends VerifiedResolvers {
         return res.toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.UpdateFulfillment,
+        })
+    )
     @Mutation(() => Fulfillment)
     async updateFulfillment(
         @Ctx() context: Context,
@@ -112,6 +139,12 @@ export class FulfillmentResolvers extends VerifiedResolvers {
         return res.toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.VerifyFulfillment,
+        })
+    )
     @Mutation(() => Fulfillment)
     async verifyFulfillment(
         @Ctx() context: Context,

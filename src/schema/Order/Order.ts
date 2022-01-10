@@ -1,21 +1,47 @@
-import { Itinerary } from './../Itinerary/Itinerary';
+import { ItineraryModel } from '@src/schema/Itinerary/Itinerary';
+import { BolLoader, BolModel } from './../Bol/Bol';
+import { Itinerary, ItineraryLoader } from './../Itinerary/Itinerary';
 import { OrderContent } from './../Content/Content';
 import { Base } from './../Base/Base';
 import { getBaseLoader } from './../Loader';
 import { Field, ObjectType } from 'type-graphql';
 import {
+    DocumentType,
     getModelForClass,
     modelOptions,
+    pre,
     prop,
     Ref,
 } from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
+import { loaderResult } from '@src/utils/loaderResult';
+import { Lot } from '../Lot/Lot';
 
 @ObjectType()
 @modelOptions({
     schemaOptions: {
         collection: 'orders',
     },
+})
+@pre<Order>('save', async function () {
+    const theseItineraries = await ItineraryModel.find({
+        deleted: false,
+        orders: this._id,
+    });
+
+    for (const itin of theseItineraries) {
+        const theseBols = await BolModel.find({
+            deleted: false,
+            itinierary: itin._id,
+        });
+
+        for (const bol of theseBols) {
+            await BolModel.findOneAndUpdate(
+                { _id: bol._id },
+                { date_modified: new Date() }
+            );
+        }
+    }
 })
 export class Order extends Base {
     @Field()

@@ -27,7 +27,7 @@ import { OrderQueueResolvers } from './schema/OrderQueue/OrderQueueResolvers';
 import { OrderQueueContentResolvers } from './schema/OrderQueue/OrderQueueContentResolvers';
 import { ProceduralLotResolvers } from './schema/Lot/extensions/ProceduralLot/ProceduralLotResolvers';
 import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
-import { QualityCheckResponseResolvers } from './schema/QualityCheckResponse/QualityCheckResponseResoilvers';
+import { QualityCheckResponseResolvers } from './schema/QualityCheckResponse/QualityCheckResponseResolvers';
 import { QualityCheckResolvers } from './schema/QualityCheck/QualityCheckResolvers';
 import { RecipeFolderResolvers } from './schema/Folder/extensions/RecipeFolder/RecipeFolderResolvers';
 import { SignedUrlResolvers } from './schema/SignedUrl/SignedUrlResolvers';

@@ -18,13 +18,22 @@ import {
     Query,
     Resolver,
     Root,
+    UseMiddleware,
 } from 'type-graphql';
 import { ObjectIdScalar } from '../ObjectIdScalar';
+import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
 
 const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Itinerary)
 export class ItineraryResolvers extends BaseResolvers {
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetItineraries,
+        })
+    )
     @Query(() => Itinerary)
     async itinerary(
         @Arg('id', () => ObjectIdScalar) id: ObjectId
@@ -32,6 +41,12 @@ export class ItineraryResolvers extends BaseResolvers {
         return loaderResult(await ItineraryLoader.load(id.toString()));
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetItineraries,
+        })
+    )
     @Query(() => ItineraryList)
     async itineraries(
         @Arg('filter', () => ItineraryFilter) filter: ItineraryFilter
@@ -45,6 +60,12 @@ export class ItineraryResolvers extends BaseResolvers {
         });
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateItinerary,
+        })
+    )
     @Mutation(() => Itinerary)
     async createItinerary(
         @Ctx() context: Context,
@@ -55,6 +76,12 @@ export class ItineraryResolvers extends BaseResolvers {
         return res.toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.UpdateItinerary,
+        })
+    )
     @Mutation(() => Itinerary)
     async updateItinerary(
         @Ctx() context: Context,

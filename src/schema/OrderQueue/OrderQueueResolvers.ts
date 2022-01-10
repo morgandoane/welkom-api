@@ -9,10 +9,25 @@ import {
     OrderQueueTemplate,
     OrderQueueTemplateModel,
 } from './OrderQueue';
-import { Arg, Mutation, Resolver, Ctx, Query } from 'type-graphql';
+import {
+    Arg,
+    Mutation,
+    Resolver,
+    Ctx,
+    Query,
+    UseMiddleware,
+} from 'type-graphql';
+import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
 
 @Resolver(() => OrderQueue)
 export class OrderQueueResolvers {
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateOrderQueue,
+        })
+    )
     @Query(() => OrderQueue, { nullable: true })
     async orderQueue(@Ctx() { base }: Context): Promise<OrderQueue> {
         const match = await PersonalOrderQueueModel.find({
@@ -23,6 +38,12 @@ export class OrderQueueResolvers {
         else return null;
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.UpdateOrderQueue,
+        })
+    )
     @Mutation(() => OrderQueue)
     async updateOrderQueue(
         @Ctx() { base }: Context,
@@ -59,6 +80,12 @@ export class OrderQueueResolvers {
         }
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateOrderQueue,
+        })
+    )
     @Mutation(() => OrderQueue)
     async processOrderQueue(
         @Ctx() { base }: Context,
@@ -89,6 +116,12 @@ export class OrderQueueResolvers {
         return doc.toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateOrderQueue,
+        })
+    )
     @Query(() => [OrderQueueTemplate])
     async orderQueueTemplates(
         @Ctx() { base }: Context
@@ -100,6 +133,12 @@ export class OrderQueueResolvers {
             .toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateOrderQueue,
+        })
+    )
     @Query(() => [OrderQueueRecord])
     async orderQueueRecords(
         @Ctx() { base }: Context

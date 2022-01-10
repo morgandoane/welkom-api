@@ -6,6 +6,7 @@ dotenv.config();
 
 export const env = {
     ATLAS_URL: process.env.ATLAS_URL,
+    LEGACY_ATLAS_URL: process.env.LEGACY_ATLAS_URL,
     NODE_ENV: process.env.NODE_ENV,
     PORT: Number.parseInt(process.env.PORT || '8080'),
     CORS_WHITELIST: process.env.CORS_WHITELIST,

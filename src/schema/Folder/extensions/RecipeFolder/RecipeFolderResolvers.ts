@@ -18,6 +18,7 @@ import {
     ObjectType,
     Resolver,
     Root,
+    UseMiddleware,
 } from 'type-graphql';
 import { Context } from '@src/auth/context';
 import { mongoose } from '@typegoose/typegoose';
@@ -25,6 +26,8 @@ import { ObjectIdScalar } from '@src/schema/ObjectIdScalar';
 import { ObjectId } from 'mongoose';
 import { loaderResult } from '@src/utils/loaderResult';
 import { UserInputError } from 'apollo-server-errors';
+import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
 
 const BaseResolvers = createBaseResolver();
 
@@ -33,6 +36,12 @@ export class MoveRecipeFolderResult extends MoveFolderResult(RecipeFolder) {}
 
 @Resolver(() => RecipeFolder)
 export class RecipeFolderResolvers extends BaseResolvers {
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateRecipeFolder,
+        })
+    )
     @Mutation(() => RecipeFolder)
     async createRecipeFolder(
         @Ctx() { base }: Context,
@@ -51,6 +60,12 @@ export class RecipeFolderResolvers extends BaseResolvers {
         return res;
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateRecipeFolder,
+        })
+    )
     @Mutation(() => RecipeFolder)
     async updateFolder(
         @Ctx() { base }: Context,
@@ -70,6 +85,12 @@ export class RecipeFolderResolvers extends BaseResolvers {
         );
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateRecipeFolder,
+        })
+    )
     @Mutation(() => MoveRecipeFolderResult)
     async moveRecipeFolder(
         @Ctx() { base }: Context,

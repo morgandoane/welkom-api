@@ -1,3 +1,4 @@
+import { UserRole } from '@src/auth/UserRole';
 import { UserLoader } from '@src/services/AuthProvider/AuthProvider';
 import { Profile } from './../Profile/Profile';
 import { Location, LocationLoader } from './../Location/Location';
@@ -18,19 +19,33 @@ import {
     Query,
     Resolver,
     Root,
+    UseMiddleware,
 } from 'type-graphql';
 import { Team, TeamModel, TeamLoader } from './Team';
 import { loaderResult } from '@src/utils/loaderResult';
+import { Permitted } from '@src/auth/middleware/Permitted';
 
 const BaseResolver = createBaseResolver();
 
 @Resolver(() => Team)
 export class TeamResolvers extends BaseResolver {
+    @UseMiddleware(
+        Permitted({
+            type: 'role',
+            role: UserRole.Manager,
+        })
+    )
     @Query(() => Team)
     async team(@Arg('id', () => ObjectIdScalar) id: ObjectId): Promise<Team> {
         return loaderResult(await TeamLoader.load(id.toString()));
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'role',
+            role: UserRole.Manager,
+        })
+    )
     @Query(() => TeamList)
     async teams(@Arg('filter') filter: TeamFilter): Promise<TeamList> {
         return await Paginate.paginate({
@@ -42,6 +57,12 @@ export class TeamResolvers extends BaseResolver {
         });
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'role',
+            role: UserRole.Manager,
+        })
+    )
     @Mutation(() => Team)
     async createTeam(
         @Ctx() context: Context,
@@ -52,6 +73,12 @@ export class TeamResolvers extends BaseResolver {
         return doc.toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'role',
+            role: UserRole.Manager,
+        })
+    )
     @Mutation(() => Team)
     async updateTeam(
         @Ctx() context: Context,

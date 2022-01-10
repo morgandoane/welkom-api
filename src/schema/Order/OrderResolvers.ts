@@ -21,20 +21,35 @@ import {
     Query,
     Resolver,
     Root,
+    UseMiddleware,
 } from 'type-graphql';
 import { ObjectId } from 'mongoose';
 import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
 import { AppFile } from '../AppFile/AppFile';
+import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
 
 const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Order)
 export class OrderResolvers extends BaseResolvers {
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetOrders,
+        })
+    )
     @Query(() => Order)
     async order(@Arg('id', () => ObjectIdScalar) id: ObjectId): Promise<Order> {
         return loaderResult(await OrderLoader.load(id.toString()));
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetOrders,
+        })
+    )
     @Query(() => OrderList)
     async orders(@Arg('filter') filter: OrderFilter): Promise<OrderList> {
         const query = filter.serializeOrderFilter();
@@ -49,6 +64,12 @@ export class OrderResolvers extends BaseResolvers {
         return data;
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateOrder,
+        })
+    )
     @Mutation(() => Order)
     async createOrder(
         @Ctx() context: Context,
@@ -65,6 +86,12 @@ export class OrderResolvers extends BaseResolvers {
         ).toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.UpdateOrder,
+        })
+    )
     @Mutation(() => Order)
     async updateOrder(
         @Ctx() context: Context,

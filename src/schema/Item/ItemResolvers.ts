@@ -14,21 +14,36 @@ import {
     Query,
     Resolver,
     Root,
+    UseMiddleware,
 } from 'type-graphql';
 import { CreateItemInput, UpdateItemInput } from './ItemInput';
 import { ObjectId } from 'mongoose';
 import { AppFile } from '../AppFile/AppFile';
 import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
+import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
 
 const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Item)
 export class ItemResolvers extends BaseResolvers {
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetItems,
+        })
+    )
     @Query(() => Item)
     async item(@Arg('id', () => ObjectIdScalar) id: ObjectId): Promise<Item> {
         return loaderResult(await ItemLoader.load(id.toString()));
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetItems,
+        })
+    )
     @Query(() => ItemList)
     async items(@Arg('filter') filter: ItemFilter): Promise<ItemList> {
         const query = filter.serializeItemFilter();
@@ -42,6 +57,12 @@ export class ItemResolvers extends BaseResolvers {
         });
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateItem,
+        })
+    )
     @Mutation(() => Item)
     async createItem(
         @Arg('data') data: CreateItemInput,
@@ -56,6 +77,12 @@ export class ItemResolvers extends BaseResolvers {
         return await (await ItemModel.create(doc)).toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.UpdateItem,
+        })
+    )
     @Mutation(() => Item)
     async updateItem(
         @Arg('id', () => ObjectIdScalar) id: ObjectId,

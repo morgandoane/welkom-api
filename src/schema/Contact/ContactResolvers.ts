@@ -10,12 +10,24 @@ import { ObjectIdScalar } from './../ObjectIdScalar';
 import { loaderResult } from './../../utils/loaderResult';
 import { createBaseResolver } from './../Base/BaseResolvers';
 import { Contact, ContactLoader, ContactModel } from './Contact';
-import { Arg, Query, Resolver, Mutation, Ctx } from 'type-graphql';
+import {
+    Arg,
+    Query,
+    Resolver,
+    Mutation,
+    Ctx,
+    UseMiddleware,
+} from 'type-graphql';
+import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
 
 const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Contact)
 export class ContactResolvers extends BaseResolvers {
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.GetContacts })
+    )
     @Query(() => Contact)
     async contact(
         @Arg('id', () => ObjectIdScalar) id: ObjectId
@@ -25,6 +37,9 @@ export class ContactResolvers extends BaseResolvers {
         ).toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.GetContacts })
+    )
     @Query(() => ContactList)
     async contacts(
         @Arg('filter', () => ContactFilter) filter: ContactFilter
@@ -38,6 +53,9 @@ export class ContactResolvers extends BaseResolvers {
         });
     }
 
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.CreateContact })
+    )
     @Mutation(() => Contact)
     async createContact(
         @Ctx() context: Context,
@@ -61,6 +79,9 @@ export class ContactResolvers extends BaseResolvers {
         return res.toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.UpdateContact })
+    )
     @Mutation(() => Contact)
     async updateContact(
         @Ctx() context: Context,
@@ -91,6 +112,9 @@ export class ContactResolvers extends BaseResolvers {
         return doc.toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.UpdateContact })
+    )
     @Mutation(() => Contact)
     async deleteContact(
         @Ctx() { base }: Context,

@@ -8,18 +8,39 @@ import { Paginate } from './../Paginate';
 import { UnitFilter } from './UnitFilter';
 import { UnitList } from './UnitList';
 import { Unit, UnitModel, UnitLoader } from './Unit';
-import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql';
+import {
+    Arg,
+    Ctx,
+    Mutation,
+    Query,
+    Resolver,
+    UseMiddleware,
+} from 'type-graphql';
 import { createBaseResolver } from '../Base/BaseResolvers';
+import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
 
 const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Unit)
 export class UnitResolvers extends BaseResolvers {
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetUnits,
+        })
+    )
     @Query(() => Unit)
     async unit(@Arg('id', () => ObjectIdScalar) id: ObjectId): Promise<Unit> {
         return loaderResult(await UnitLoader.load(id.toString()));
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetUnits,
+        })
+    )
     @Query(() => UnitList)
     async units(@Arg('filter') filter: UnitFilter): Promise<UnitList> {
         return await Paginate.paginate({
@@ -31,6 +52,12 @@ export class UnitResolvers extends BaseResolvers {
         });
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateUnit,
+        })
+    )
     @Mutation(() => Unit)
     async createUnit(
         @Ctx() { base }: Context,
@@ -40,6 +67,12 @@ export class UnitResolvers extends BaseResolvers {
         return await (await UnitModel.create(doc)).toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.UpdateUnit,
+        })
+    )
     @Mutation(() => Unit)
     async updateUnit(
         @Ctx() { base }: Context,

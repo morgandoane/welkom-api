@@ -8,14 +8,15 @@ import {
     VerificationLoader,
     VerificationModel,
 } from './Verification';
-import { Arg, Ctx, Mutation, Resolver } from 'type-graphql';
+import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
 import { loaderResult } from '@src/utils/loaderResult';
-import { FulfillmentLoader } from '../Fulfillment/Fulfillment';
+import { Permitted } from '@src/auth/middleware/Permitted';
 
 const BaseResolver = createBaseResolver();
 
 @Resolver(() => Verification)
 export class VerificationResolvers extends BaseResolver {
+    @UseMiddleware(Permitted())
     @Mutation(() => Verification)
     async updateVerification(
         @Ctx() context: Context,

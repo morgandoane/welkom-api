@@ -1,3 +1,4 @@
+import { UserRole } from '@src/auth/UserRole';
 import { ForbiddenError } from 'apollo-server-express';
 import { randomNumber } from './../../utils/randomNumber';
 import { Paginate } from '@src/schema/Paginate';
@@ -27,15 +28,21 @@ import {
     Query,
     Resolver,
     Root,
+    UseMiddleware,
 } from 'type-graphql';
 import { CreateProfileInput, UpdateProfileInput } from './ProfileInput';
 import { CreateUserData, Role, User, UserData } from 'auth0';
 import { getModelForClass, mongoose } from '@typegoose/typegoose';
-import { ObjectId, UpdateQuery } from 'mongoose';
-import { UserRole } from '@src/auth/UserRole';
+import { Permitted } from '@src/auth/middleware/Permitted';
 
 @Resolver(() => Profile)
 export class ProfileResolvers {
+    @UseMiddleware(
+        Permitted({
+            type: 'role',
+            role: UserRole.Manager,
+        })
+    )
     @Mutation(() => Profile)
     async createProfile(
         @Ctx() context: Context,
@@ -98,6 +105,12 @@ export class ProfileResolvers {
         return res.toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'role',
+            role: UserRole.Manager,
+        })
+    )
     @Mutation(() => Profile)
     async updateProfile(
         @Ctx() context: Context,
@@ -150,11 +163,23 @@ export class ProfileResolvers {
         return res.toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'role',
+            role: UserRole.Manager,
+        })
+    )
     @Query(() => Profile)
     async profile(@Arg('id') id: string): Promise<Profile> {
         return loaderResult(await UserLoader.load(id));
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'role',
+            role: UserRole.Manager,
+        })
+    )
     @Query(() => ProfileList)
     async profiles(
         @Ctx() context: Context,
@@ -173,6 +198,12 @@ export class ProfileResolvers {
         });
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'role',
+            role: UserRole.Manager,
+        })
+    )
     @Mutation(() => Profile)
     async blockProfile(@Arg('id') id: string): Promise<Profile> {
         const ProfileModel = getModelForClass(Profile);
@@ -186,6 +217,7 @@ export class ProfileResolvers {
         return res.toJSON();
     }
 
+    @UseMiddleware(Permitted())
     @Mutation(() => UserMetaData)
     async updateUserPreferences(
         @Ctx() { jwt }: Context,
@@ -199,9 +231,9 @@ export class ProfileResolvers {
 
     @FieldResolver()
     name(@Root() profile: Profile): string {
-        if (profile.name) return profile.name;
         if (profile.given_name && profile.family_name)
             return `${profile.given_name} ${profile.family_name}`;
+        if (profile.name) return profile.name;
         if (profile.email) return profile.email;
         return 'Anonymous user';
     }

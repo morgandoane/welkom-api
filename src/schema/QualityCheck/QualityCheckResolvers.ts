@@ -22,14 +22,23 @@ import {
     Root,
     Mutation,
     Ctx,
+    UseMiddleware,
 } from 'type-graphql';
 import { createBaseResolver } from './../Base/BaseResolvers';
 import { loaderResult } from '@src/utils/loaderResult';
+import { Permission } from '@src/auth/permissions';
+import { Permitted } from '@src/auth/middleware/Permitted';
 
 const BaseResolver = createBaseResolver();
 
 @Resolver(() => QualityCheck)
 export class QualityCheckResolvers extends BaseResolver {
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetQualityChecks,
+        })
+    )
     @Query(() => QualityCheck)
     async qualityCheck(
         @Arg('id', () => ObjectIdScalar) id: ObjectId
@@ -37,6 +46,12 @@ export class QualityCheckResolvers extends BaseResolver {
         return loaderResult(await QualityCheckLoader.load(id.toString()));
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetQualityChecks,
+        })
+    )
     @Query(() => QualityCheckList)
     async qualityChecks(
         @Arg('filter', () => QualityCheckFilter) filter: QualityCheckFilter
@@ -50,6 +65,12 @@ export class QualityCheckResolvers extends BaseResolver {
         });
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateQualityCheck,
+        })
+    )
     @Mutation(() => QualityCheck)
     async createQualityCheck(
         @Ctx() context: Context,
@@ -63,6 +84,12 @@ export class QualityCheckResolvers extends BaseResolver {
         return doc.toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.UpdateQualityCheck,
+        })
+    )
     @Mutation(() => QualityCheck)
     async updateQualityCheck(
         @Ctx() context: Context,

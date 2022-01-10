@@ -1,6 +1,5 @@
 import { UserInputError } from 'apollo-server-errors';
 import { UnitLoader } from './../Unit/Unit';
-import { LotContent } from '@src/schema/Content/Content';
 import {
     CodeGenerator,
     CodeType,
