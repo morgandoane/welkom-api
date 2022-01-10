@@ -1,7 +1,8 @@
+import { LotModel } from './../Lot/Lot';
 import { TeamModel } from './../Team/Team';
 import { UserRole } from '@src/auth/UserRole';
 import { loaderResult } from '@src/utils/loaderResult';
-import { Contact, ContactLoader } from './../Contact/Contact';
+import { Contact, ContactLoader, ContactModel } from './../Contact/Contact';
 import { createBaseResolver } from './../Base/BaseResolvers';
 import { LocationModel } from './../Location/Location';
 import { ObjectIdScalar } from './../ObjectIdScalar';
@@ -125,9 +126,11 @@ export class CompanyResolvers extends BaseResolver {
 
     @FieldResolver(() => [Contact])
     async contacts(@Root() { contacts }: Company): Promise<Contact[]> {
-        return await (
-            await ContactLoader.loadMany(contacts.map((c) => c.toString()))
-        ).map((c) => loaderResult(c));
+        const res = await ContactModel.find({
+            deleted: false,
+            _id: { $in: (contacts ? contacts : []).map((c) => c.toString()) },
+        });
+        return res.map((doc) => doc.toJSON());
     }
 
     @FieldResolver(() => [AppFile])
