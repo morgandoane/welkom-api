@@ -7,9 +7,7 @@
   },
   "scripts": {
     "dev": "nodemon",
-    "start": "node dist/index.js",
-    "build": "tsc",
-    "postinstall": "npm run build"
+    "start": "ts-node src/app.ts"
   },
   "repository": {
     "type": "git",
