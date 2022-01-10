@@ -47,7 +47,10 @@ export class StorageClass {
             projectId: process.env.GOOGLE_STORAGE_PROJECT_ID,
             credentials: {
                 client_email: process.env.GOOGLE_STORAGE_EMAIL,
-                private_key: process.env.GOOGLE_STORAGE_PRIVATE_KEY,
+                private_key: process.env.GOOGLE_STORAGE_PRIVATE_KEY.replace(
+                    /\\n/gm,
+                    '\n'
+                ),
             },
         });
     }
