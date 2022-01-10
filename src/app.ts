@@ -1,6 +1,6 @@
 import { env } from './config';
 
-import { ApolloServer } from 'apollo-server';
+import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 
 // GraphQL
@@ -44,12 +44,12 @@ import {
 } from './schema/Content/ContentResolvers';
 
 // Serve locally over https
-// import https from 'https';
+import https from 'https';
 // import fs from 'fs';
 import { mongoose } from '@typegoose/typegoose';
 import { AuthProvider } from './services/AuthProvider/AuthProvider';
 import createContext from './auth/middleware/ContextMiddleware';
-import http from 'http';
+import { createServer } from 'http';
 
 // const httpsOptions = {
 //     key: fs.readFileSync('./cert/key.pem'),
@@ -58,6 +58,9 @@ import http from 'http';
 
 (async () => {
     try {
+        // Setup Express
+        const app = express();
+
         registerEnums();
 
         mongoose.Promise = global.Promise;
@@ -112,6 +115,11 @@ import http from 'http';
         const server = new ApolloServer({
             schema,
             context: async ({ req }) => createContext(req, authToken),
+        });
+
+        server.applyMiddleware({
+            app,
+            path: '/graphql',
             cors: {
                 origin: function (origin, callback) {
                     if (
@@ -127,13 +135,10 @@ import http from 'http';
             },
         });
 
-        // const httpServer = https.createServer(httpsOptions, app);
-
-        await server.start();
-
-        server.listen(process.env.PORT || 8080).then(({ url }) => {
-            console.log(`🚀  Server ready at ${url}`);
-        });
+        const httpServer = createServer(app);
+        httpServer.listen({ port: 3000 }, (): void =>
+            console.log(`🚀 Bangarang!`)
+        );
     } catch (error) {
         console.error(error);
     }
