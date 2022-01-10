@@ -136,7 +136,7 @@ import { createServer } from 'http';
         });
 
         const httpServer = createServer(app);
-        httpServer.listen({ port: 3000 }, (): void =>
+        httpServer.listen({ port: process.env.PORT || 8080 }, (): void =>
             console.log(`🚀 Bangarang!`)
         );
     } catch (error) {
