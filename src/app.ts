@@ -135,8 +135,7 @@ import { createServer } from 'http';
             },
         });
 
-        const httpServer = createServer(app);
-        httpServer.listen({ port: process.env.PORT || 8080 }, (): void =>
+        app.listen({ port: process.env.PORT || 8080 }, (): void =>
             console.log(`🚀 Bangarang!`)
         );
     } catch (error) {
