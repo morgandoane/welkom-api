@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "nodemon",
     "build-ts": "tsc",
-    "start": "npm run serve",
+    "build": "rimraf ./build && tsc",
+    "start": "npm run build && node build/index.js",
     "serve": "node dist/app.js"
   },
   "repository": {
@@ -67,6 +68,7 @@
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-prettier": "^3.1.4",
     "nodemon": "^2.0.4",
-    "prettier": "^2.1.2"
+    "prettier": "^2.1.2",
+    "rimraf": "^3.0.2"
   }
 }
