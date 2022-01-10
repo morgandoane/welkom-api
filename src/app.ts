@@ -1,6 +1,6 @@
 import { env } from './config';
 
-import { ApolloServer } from 'apollo-server-express';
+import { ApolloServer } from 'apollo-server';
 import express from 'express';
 
 // GraphQL
@@ -58,9 +58,6 @@ import http from 'http';
 
 (async () => {
     try {
-        // Setup Express
-        const app = express();
-
         registerEnums();
 
         mongoose.Promise = global.Promise;
@@ -115,14 +112,6 @@ import http from 'http';
         const server = new ApolloServer({
             schema,
             context: async ({ req }) => createContext(req, authToken),
-        });
-
-        // const httpServer = https.createServer(httpsOptions, app);
-
-        await server.start();
-
-        server.applyMiddleware({
-            app,
             cors: {
                 origin: function (origin, callback) {
                     if (
@@ -138,9 +127,12 @@ import http from 'http';
             },
         });
 
-        const httpServer = http.createServer(app);
-        httpServer.listen(process.env.PORT || 8080, () => {
-            console.log('Bangarang!');
+        // const httpServer = https.createServer(httpsOptions, app);
+
+        await server.start();
+
+        server.listen(process.env.PORT || 8080).then(({ url }) => {
+            console.log(`🚀  Server ready at ${url}`);
         });
     } catch (error) {
         console.error(error);
