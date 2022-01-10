@@ -108,6 +108,8 @@ import createContext from './auth/middleware/ContextMiddleware';
             context: async ({ req }) => createContext(req, authToken),
         });
 
+        await server.start();
+
         server.applyMiddleware({
             app,
             path: '/graphql',
