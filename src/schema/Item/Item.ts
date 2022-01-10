@@ -22,8 +22,8 @@ export class Item extends Base {
     @prop({ required: true, enum: UnitClass })
     unit_class!: UnitClass;
 
-    @prop({ required: false, type: () => [Number] })
-    order_queue_qtys?: [number, number];
+    @prop({ required: false, type: () => [[Number]] })
+    order_queue_qtys?: [number, number][];
 
     @Field(() => Number, { nullable: true })
     @prop({ required: false })

@@ -52,7 +52,7 @@ export class LocationResolvers extends BaseResolver {
         if (mine !== undefined) {
             // determine companies based on assigned teams or on all teams in db
             const teams = await TeamModel.find(
-                !context.roles.includes(UserRole.Admin) ||
+                !context.roles.includes(UserRole.Admin) &&
                     !context.roles.includes(UserRole.Manager)
                     ? {
                           members: context.base.created_by,

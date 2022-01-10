@@ -136,4 +136,21 @@ export class ItemResolvers extends BaseResolvers {
         else
             return loaderResult(await UnitLoader.load(default_unit.toString()));
     }
+
+    @FieldResolver(() => Number)
+    async order_queue_qty(@Root() { order_queue_qtys }: Item): Promise<number> {
+        if (!order_queue_qtys) return null;
+
+        let res = 0;
+        let count = 0;
+
+        for (const [qty, c] of order_queue_qtys) {
+            if (c > count) {
+                count = c;
+                res = qty;
+            }
+        }
+
+        return res;
+    }
 }

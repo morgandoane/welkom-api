@@ -1,3 +1,4 @@
+import { ItemModel } from './../Item/Item';
 import { mongoose } from '@typegoose/typegoose';
 import { Context } from '@src/auth/context';
 import { OrderQueueContentInput } from './OrderQueueInput';
@@ -96,6 +97,28 @@ export class OrderQueueResolvers {
 
         for (const content of contents) {
             newContents.push(await content.serialize());
+        }
+
+        for (const { item: item_id, quantity } of newContents) {
+            const item = await ItemModel.findById(item_id);
+            if (!item.order_queue_qtys) {
+                item.order_queue_qtys = [[quantity, 1]];
+                await item.save();
+            } else {
+                const index = item.order_queue_qtys
+                    .map(([qty, count]) => qty)
+                    .indexOf(quantity);
+
+                if (index == -1) {
+                    item.order_queue_qtys.push([quantity, 1]);
+                } else {
+                    item.order_queue_qtys[index] = [
+                        quantity,
+                        item.order_queue_qtys[index][1] + 1,
+                    ];
+                }
+                await item.save();
+            }
         }
 
         const newQueue: OrderQueueRecord = {
