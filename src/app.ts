@@ -49,6 +49,7 @@ import {
 import { mongoose } from '@typegoose/typegoose';
 import { AuthProvider } from './services/AuthProvider/AuthProvider';
 import createContext from './auth/middleware/ContextMiddleware';
+import http from 'http';
 
 // const httpsOptions = {
 //     key: fs.readFileSync('./cert/key.pem'),
@@ -111,16 +112,16 @@ import createContext from './auth/middleware/ContextMiddleware';
 
         const authToken = await AuthProvider.getAccessToken();
 
-        const apollo = new ApolloServer({
+        const server = new ApolloServer({
             schema,
             context: async ({ req }) => createContext(req, authToken),
         });
 
         // const httpServer = https.createServer(httpsOptions, app);
 
-        await apollo.start();
+        await server.start();
 
-        apollo.applyMiddleware({
+        server.applyMiddleware({
             app,
             cors: {
                 origin: function (origin, callback) {
@@ -137,11 +138,10 @@ import createContext from './auth/middleware/ContextMiddleware';
             },
         });
 
-        app.listen({ port: process.env.PORT }, () =>
-            console.log(
-                `Server ready and listening at port ${process.env.PORT}`
-            )
-        );
+        const httpServer = http.createServer(app);
+        httpServer.listen(process.env.PORT || 8080, () => {
+            console.log('Bangarang!');
+        });
     } catch (error) {
         console.error(error);
     }
