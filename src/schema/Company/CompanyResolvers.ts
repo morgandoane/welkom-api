@@ -1,4 +1,4 @@
-import { LegacyItemOrderModel } from './../../legacy/itemOrder';
+import { LegacyItemOrderModel } from '../../../legacy/itemOrder';
 import { TeamModel } from './../Team/Team';
 import { UserRole } from '@src/auth/UserRole';
 import { loaderResult } from '@src/utils/loaderResult';
