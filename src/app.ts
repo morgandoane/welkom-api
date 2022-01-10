@@ -137,8 +137,10 @@ const httpsOptions = {
             },
         });
 
-        httpServer.listen({ port: env.PORT }, () =>
-            console.log(`Server ready and listening at port ${env.PORT}`)
+        httpServer.listen({ port: process.env.PORT }, () =>
+            console.log(
+                `Server ready and listening at port ${process.env.PORT}`
+            )
         );
     } catch (error) {
         console.error(error);
