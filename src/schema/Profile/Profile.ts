@@ -22,12 +22,12 @@ export class UserMetaDataInput {
 @ObjectType()
 export class AppMetaData {
     @Field(() => Profile)
-    @prop({ required: true })
-    created_by!: string;
+    @prop({ required: false })
+    created_by?: string;
 
     @Field(() => Profile)
-    @prop({ required: true })
-    require_password_reset!: boolean;
+    @prop({ required: false })
+    require_password_reset?: boolean;
 }
 
 @ObjectType()
