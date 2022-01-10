@@ -47,6 +47,14 @@ import { mongoose } from '@typegoose/typegoose';
 import { AuthProvider } from './services/AuthProvider/AuthProvider';
 import createContext from './auth/middleware/ContextMiddleware';
 
+import fs from 'fs';
+import https from 'https';
+
+const httpsOptions = {
+    key: fs.readFileSync('./cert/key.pem'),
+    cert: fs.readFileSync('./cert/cert.pem'),
+};
+
 (async () => {
     try {
         // Setup Express
@@ -108,6 +116,8 @@ import createContext from './auth/middleware/ContextMiddleware';
             context: async ({ req }) => createContext(req, authToken),
         });
 
+        const httpServer = https.createServer(httpsOptions, app);
+
         await server.start();
 
         server.applyMiddleware({
@@ -128,9 +138,15 @@ import createContext from './auth/middleware/ContextMiddleware';
             },
         });
 
-        app.listen({ port: process.env.PORT || 8080 }, (): void =>
-            console.log(`🚀 Bangarang!`)
-        );
+        if (process.env.NODE_ENV == 'production') {
+            app.listen({ port: process.env.PORT || 8080 }, (): void =>
+                console.log(`🚀 Bangarang!`)
+            );
+        } else {
+            httpServer.listen({ port: env.PORT }, () =>
+                console.log(`Server ready and listening at port ${env.PORT}`)
+            );
+        }
     } catch (error) {
         console.error(error);
     }

@@ -1,5 +1,5 @@
-import { ItineraryModel } from '@src/schema/Itinerary/Itinerary';
-import { Itinerary } from './../Itinerary/Itinerary';
+import { BolModel } from './../Bol/Bol';
+import { Itinerary, ItineraryModel } from './../Itinerary/Itinerary';
 import { UserInputError } from 'apollo-server-errors';
 import { CodeType } from '@src/services/CodeGeneration/CodeGeneration';
 import { CodeGenerator } from './../../services/CodeGeneration/CodeGeneration';
@@ -28,11 +28,32 @@ import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
 import { AppFile } from '../AppFile/AppFile';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
+import { mongoose } from '@typegoose/typegoose';
+import { Bol, BolStatus } from '../Bol/Bol';
 
 const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Order)
 export class OrderResolvers extends BaseResolvers {
+    @Mutation(() => Boolean)
+    async convertThatDududuh(
+        @Arg('skip') skip: number,
+        @Arg('take') take: number
+    ): Promise<boolean> {
+        const bols = await BolModel.find({
+            $or: [{ code: { $exists: false } }, { code: null }],
+        });
+        for (const bol of bols) {
+            const itinerary = await ItineraryModel.findById(bol.itinerary);
+            const order = await OrderModel.findOne({
+                _id: { $in: itinerary.orders.map((o) => o.toString()) },
+            });
+            bol.code = order.code;
+            await bol.save();
+        }
+        return true;
+    }
+
     @UseMiddleware(
         Permitted({
             type: 'permission',

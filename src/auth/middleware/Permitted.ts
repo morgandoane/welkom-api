@@ -22,11 +22,12 @@ export function Permitted(arg?: RoleArg | PermissionArg): MiddlewareFn {
             throw new AuthenticationError("Yikes! You're not logged in.");
 
         if (arg && !context.roles.includes(UserRole.Admin)) {
-            if (
-                arg.type === 'permission' &&
-                !context.permissions.includes(arg.permission)
-            ) {
-                throw new ForbiddenError('Invalid permissions.');
+            if (arg.type === 'permission') {
+                if (
+                    !context.permissions.includes(arg.permission) &&
+                    !context.roles.includes(UserRole.Manager)
+                )
+                    throw new ForbiddenError('Invalid permissions.');
             } else if (arg.type === 'role') {
                 switch (arg.role) {
                     case UserRole.Admin: {
