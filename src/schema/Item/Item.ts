@@ -22,6 +22,13 @@ export class Item extends Base {
     @prop({ required: true, enum: UnitClass })
     unit_class!: UnitClass;
 
+    @prop({ required: false, type: () => [Number] })
+    order_queue_qtys?: [number, number];
+
+    @Field(() => Number, { nullable: true })
+    @prop({ required: false })
+    order_queue_qty?: number;
+
     @Field(() => Unit, { nullable: true })
     @prop({ required: false, ref: () => Unit })
     default_unit?: Ref<Unit>;

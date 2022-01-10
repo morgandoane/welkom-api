@@ -34,7 +34,6 @@ import { Paginate } from '../Paginate';
 import { loaderResult } from '@src/utils/loaderResult';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
-import { differenceInSeconds } from 'date-fns';
 
 const BaseResolvers = createBaseResolver();
 
@@ -54,7 +53,6 @@ export class BolResolvers extends BaseResolvers {
     @Query(() => BolList)
     async bols(@Arg('filter') filter: BolFilter): Promise<BolList> {
         const query = await filter.serializeBolFilter();
-        const start = new Date();
         const res = await Paginate.paginate({
             model: BolModel,
             query,
@@ -62,7 +60,6 @@ export class BolResolvers extends BaseResolvers {
             skip: filter.skip,
             take: filter.take,
         });
-        const end = new Date();
         return res;
     }
 
@@ -109,7 +106,7 @@ export class BolResolvers extends BaseResolvers {
             type: FulfillmentType.Shipment,
         });
 
-        return docs.map((doc) => doc.toJSON());
+        return docs;
     }
 
     @FieldResolver(() => [Fulfillment])
@@ -124,7 +121,7 @@ export class BolResolvers extends BaseResolvers {
             type: FulfillmentType.Receipt,
         });
 
-        return docs.map((doc) => doc.toJSON());
+        return docs;
     }
 
     @FieldResolver(() => Itinerary)

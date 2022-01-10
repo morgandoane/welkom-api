@@ -74,7 +74,7 @@ export class ItemResolvers extends BaseResolvers {
         const res = await ItemModel.create(
             await data.validateItemInput(context)
         );
-        return res.toJSON();
+        return res.toJSON() as unknown as Item;
     }
 
     @UseMiddleware(
@@ -105,7 +105,7 @@ export class ItemResolvers extends BaseResolvers {
 
         await item.save();
 
-        return item.toJSON();
+        return item.toJSON() as unknown as Item;
     }
 
     @FieldResolver(() => [AppFile])

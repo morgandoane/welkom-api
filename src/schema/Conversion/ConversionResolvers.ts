@@ -89,6 +89,6 @@ export class ConversionResolvers extends BaseResolvers {
 
         await item.save();
 
-        return item.toJSON();
+        return item.toJSON() as unknown as Item;
     }
 }

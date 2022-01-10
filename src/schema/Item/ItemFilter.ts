@@ -12,7 +12,7 @@ export class ItemFilter extends BaseFilter {
         const query: FilterQuery<Item> = this.serializeBaseFilter();
         if (this.name)
             query.$or = [
-                ...query.$or,
+                ...(query.$or ? query.$or : []),
                 { english: { $regex: new RegExp(this.name, 'i') } },
                 { spanish: { $regex: new RegExp(this.name, 'i') } },
             ];

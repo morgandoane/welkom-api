@@ -99,7 +99,7 @@ export class FulfillmentResolvers extends VerifiedResolvers {
         );
         BolLoader.clear(bol._id.toString());
 
-        return res.toJSON();
+        return res.toJSON() as Fulfillment;
     }
 
     @UseMiddleware(
@@ -136,7 +136,7 @@ export class FulfillmentResolvers extends VerifiedResolvers {
         );
         BolLoader.clear(bol._id.toString());
 
-        return res.toJSON();
+        return res.toJSON() as Fulfillment;
     }
 
     @UseMiddleware(
