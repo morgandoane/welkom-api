@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "nodemon",
-    "start": "node build/index.js",
+    "start": "node dist/index.js",
     "build": "tsc",
     "postinstall": "npm run build"
   },
