@@ -2,8 +2,14 @@ import { Conversion } from './../Conversion/Conversion';
 import { Base } from './../Base/Base';
 import { getBaseLoader } from './../Loader';
 import { Field, ObjectType } from 'type-graphql';
-import { UnitClass } from '../Unit/Unit';
-import { getModelForClass, prop, modelOptions } from '@typegoose/typegoose';
+import { Unit, UnitClass } from '../Unit/Unit';
+import {
+    getModelForClass,
+    prop,
+    modelOptions,
+    Ref,
+} from '@typegoose/typegoose';
+import { Company } from '../Company/Company';
 
 @ObjectType()
 @modelOptions({
@@ -15,6 +21,14 @@ export class Item extends Base {
     @Field(() => UnitClass)
     @prop({ required: true, enum: UnitClass })
     unit_class!: UnitClass;
+
+    @Field(() => Unit, { nullable: true })
+    @prop({ required: false, ref: () => Unit })
+    default_unit?: Ref<Unit>;
+
+    @Field(() => Company, { nullable: true })
+    @prop({ required: false, ref: () => Company })
+    default_vendor?: Ref<Company>;
 
     @Field()
     @prop({ required: true })
