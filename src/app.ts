@@ -50,11 +50,6 @@ import createContext from './auth/middleware/ContextMiddleware';
 import fs from 'fs';
 import https from 'https';
 
-const httpsOptions = {
-    key: fs.readFileSync('./cert/key.pem'),
-    cert: fs.readFileSync('./cert/cert.pem'),
-};
-
 (async () => {
     try {
         // Setup Express
@@ -116,7 +111,16 @@ const httpsOptions = {
             context: async ({ req }) => createContext(req, authToken),
         });
 
-        const httpServer = https.createServer(httpsOptions, app);
+        let httpServer;
+
+        if (process.env.NODE_ENV !== 'production') {
+            const httpsOptions = {
+                key: fs.readFileSync('./cert/key.pem'),
+                cert: fs.readFileSync('./cert/cert.pem'),
+            };
+
+            httpServer = https.createServer(httpsOptions, app);
+        }
 
         await server.start();
 
