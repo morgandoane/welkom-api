@@ -106,7 +106,7 @@ export class BolResolvers extends BaseResolvers {
             type: FulfillmentType.Shipment,
         });
 
-        return docs;
+        return docs.map((doc) => doc.toJSON()) as Fulfillment[];
     }
 
     @FieldResolver(() => [Fulfillment])
@@ -121,7 +121,7 @@ export class BolResolvers extends BaseResolvers {
             type: FulfillmentType.Receipt,
         });
 
-        return docs;
+        return docs.map((doc) => doc.toJSON()) as Fulfillment[];
     }
 
     @FieldResolver(() => Itinerary)
