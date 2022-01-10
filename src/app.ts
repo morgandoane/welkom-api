@@ -44,16 +44,16 @@ import {
 } from './schema/Content/ContentResolvers';
 
 // Serve locally over https
-import https from 'https';
-import fs from 'fs';
+// import https from 'https';
+// import fs from 'fs';
 import { mongoose } from '@typegoose/typegoose';
 import { AuthProvider } from './services/AuthProvider/AuthProvider';
 import createContext from './auth/middleware/ContextMiddleware';
 
-const httpsOptions = {
-    key: fs.readFileSync('./cert/key.pem'),
-    cert: fs.readFileSync('./cert/cert.pem'),
-};
+// const httpsOptions = {
+//     key: fs.readFileSync('./cert/key.pem'),
+//     cert: fs.readFileSync('./cert/cert.pem'),
+// };
 
 (async () => {
     try {
@@ -116,7 +116,7 @@ const httpsOptions = {
             context: async ({ req }) => createContext(req, authToken),
         });
 
-        const httpServer = https.createServer(httpsOptions, app);
+        // const httpServer = https.createServer(httpsOptions, app);
 
         await apollo.start();
 
@@ -137,7 +137,7 @@ const httpsOptions = {
             },
         });
 
-        httpServer.listen({ port: process.env.PORT }, () =>
+        app.listen({ port: process.env.PORT }, () =>
             console.log(
                 `Server ready and listening at port ${process.env.PORT}`
             )
