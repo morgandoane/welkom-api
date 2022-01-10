@@ -4,6 +4,7 @@ import { Item, ItemLoader } from './../Item/Item';
 import { loaderResult } from './../../utils/loaderResult';
 import { Unit, UnitLoader } from './../Unit/Unit';
 import {
+    BolItemContent,
     Content,
     ItemContent,
     ItemPluralContent,
@@ -11,7 +12,7 @@ import {
     OrderContent,
 } from './Content';
 
-import { FieldResolver, Resolver, Root } from 'type-graphql';
+import { FieldResolver, Resolver, Root, ResolverInterface } from 'type-graphql';
 import { Lot } from '../Lot/Lot';
 import { Location } from '../Location/Location';
 
@@ -33,6 +34,19 @@ export class ItemContentResolver {
     @FieldResolver(() => Item)
     async item(@Root() root: ItemContent): Promise<Item> {
         return loaderResult(await ItemLoader.load(root.item.toString()));
+    }
+}
+
+@Resolver(() => BolItemContent)
+export class BolItemContentResolver
+    implements ResolverInterface<BolItemContent>
+{
+    @FieldResolver(() => Number)
+    async fulfillment_percentage(
+        @Root() { fulfillment_percentage }: BolItemContent
+    ): Promise<number> {
+        if (isNaN(fulfillment_percentage)) return 0;
+        else return parseFloat(fulfillment_percentage + '');
     }
 }
 

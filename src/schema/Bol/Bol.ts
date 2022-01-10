@@ -104,14 +104,11 @@ export enum BolStatus {
                 return (acc += l.start_quantity);
             }, 0);
 
-            const fulfillment_percentage = Math.ceil(
-                totalReceivedUnits / required
-            );
+            const fulfillment_percentage = totalReceivedUnits / required;
 
-            content.fulfillment_percentage = fulfillment_percentage;
-
-            console.log(totalReceivedUnits);
-            console.log(required);
+            content.fulfillment_percentage = isNaN(fulfillment_percentage)
+                ? 0
+                : fulfillment_percentage;
 
             if (totalReceivedUnits < required) doc.status = BolStatus.Partial;
 

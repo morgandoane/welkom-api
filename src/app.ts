@@ -35,6 +35,7 @@ import { TeamResolvers } from './schema/Team/TeamResolvers';
 import { UnitResolvers } from './schema/Unit/UnitResolvers';
 import { VerificationResolvers } from './schema/Verification/VerificationResolvers';
 import {
+    BolItemContentResolver,
     ContentResolver,
     ItemContentResolver,
     ItemPluralContentResolver,
@@ -76,6 +77,7 @@ const httpsOptions = {
                 BaseUnionResolvers,
                 BolResolvers,
                 BolAppointmentResolvers,
+                BolItemContentResolver,
                 BucketLotResolvers,
                 CodeResolvers,
                 CompanyResolvers,
