@@ -2,16 +2,14 @@
   "name": "welkom-api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/app.ts",
   "_moduleAliases": {
     "@src": "src"
   },
   "scripts": {
     "dev": "nodemon",
-    "build-ts": "tsc",
-    "build": "rimraf ./build && tsc",
-    "serve": "node dist/app.js",
-    "start": "node ./src/index.js"
+    "start": "ts-node dist/app.js",
+    "build": "tsc -p ."
   },
   "repository": {
     "type": "git",

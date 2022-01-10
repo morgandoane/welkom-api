@@ -43,18 +43,9 @@ import {
     OrderContentResolver,
 } from './schema/Content/ContentResolvers';
 
-// Serve locally over https
-import https from 'https';
-// import fs from 'fs';
 import { mongoose } from '@typegoose/typegoose';
 import { AuthProvider } from './services/AuthProvider/AuthProvider';
 import createContext from './auth/middleware/ContextMiddleware';
-import { createServer } from 'http';
-
-// const httpsOptions = {
-//     key: fs.readFileSync('./cert/key.pem'),
-//     cert: fs.readFileSync('./cert/cert.pem'),
-// };
 
 (async () => {
     try {
