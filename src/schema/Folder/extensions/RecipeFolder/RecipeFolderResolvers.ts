@@ -16,6 +16,7 @@ import {
     FieldResolver,
     Mutation,
     ObjectType,
+    Query,
     Resolver,
     Root,
     UseMiddleware,
@@ -36,6 +37,22 @@ export class MoveRecipeFolderResult extends MoveFolderResult(RecipeFolder) {}
 
 @Resolver(() => RecipeFolder)
 export class RecipeFolderResolvers extends BaseResolvers {
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetRecipeFolders,
+        })
+    )
+    @Query(() => RecipeFolder)
+    async recipeFolder(
+        @Ctx() context: Context,
+        @Arg('id', () => ObjectIdScalar, { nullable: true })
+        id: ObjectId | null
+    ): Promise<RecipeFolder> {
+        if (!id) return RecipeFolder.fromNull(context);
+        else return loaderResult(await RecipeFolderLoader.load(id.toString()));
+    }
+
     @UseMiddleware(
         Permitted({
             type: 'permission',
@@ -147,7 +164,12 @@ export class RecipeFolderResolvers extends BaseResolvers {
     }
 
     @FieldResolver(() => [Recipe], { nullable: true })
-    async recipes(@Root() { _id: folder }: RecipeFolder): Promise<Recipe[]> {
-        return await RecipeModel.find({ deleted: false, folder });
+    async recipes(@Root() { _id, name }: RecipeFolder): Promise<Recipe[]> {
+        if (name == 'Home')
+            return await RecipeModel.find({
+                deleted: false,
+                $or: [{ folder: { $exists: false } }, { folder: null }],
+            });
+        else return await RecipeModel.find({ deleted: false, folder: _id });
     }
 }

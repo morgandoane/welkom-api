@@ -28,29 +28,43 @@ import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
 import { AppFile } from '../AppFile/AppFile';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
-import { mongoose } from '@typegoose/typegoose';
-import { Bol, BolStatus } from '../Bol/Bol';
 
 const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Order)
 export class OrderResolvers extends BaseResolvers {
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.UpdateOrder })
+    )
     @Mutation(() => Boolean)
-    async convertThatDududuh(
-        @Arg('skip') skip: number,
-        @Arg('take') take: number
+    async cancelOrders(
+        @Arg('ids', () => [ObjectIdScalar]) ids: ObjectId[]
     ): Promise<boolean> {
-        const bols = await BolModel.find({
-            $or: [{ code: { $exists: false } }, { code: null }],
+        const orders = await OrderModel.find({
+            _id: { $in: ids.map((id) => id.toString()) },
         });
-        for (const bol of bols) {
-            const itinerary = await ItineraryModel.findById(bol.itinerary);
-            const order = await OrderModel.findOne({
-                _id: { $in: itinerary.orders.map((o) => o.toString()) },
+
+        for (const order of orders) {
+            const itineraries = await ItineraryModel.find({
+                orders: order._id,
             });
-            bol.code = order.code;
-            await bol.save();
+
+            for (const itinerary of itineraries) {
+                const bols = await BolModel.find({ itinerary: itinerary._id });
+
+                for (const bol of bols) {
+                    bol.deleted = true;
+                    await bol.save();
+                }
+
+                itinerary.deleted = true;
+                await itinerary.save();
+            }
+
+            order.deleted = true;
+            await order.save();
         }
+
         return true;
     }
 
