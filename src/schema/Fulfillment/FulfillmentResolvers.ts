@@ -93,9 +93,13 @@ export class FulfillmentResolvers extends VerifiedResolvers {
             bol.code = data.bol_code_override;
         }
 
+        if (data.seal) {
+            bol.seal = data.seal;
+        }
+
         await BolModel.findOneAndUpdate(
             { _id: bol._id },
-            data.bol_code_override ? { code: data.bol_code_override } : {}
+            { code: bol.code, seal: bol.seal }
         );
         BolLoader.clear(bol._id.toString());
 
@@ -130,9 +134,13 @@ export class FulfillmentResolvers extends VerifiedResolvers {
             bol.code = data.bol_code_override;
         }
 
+        if (data.seal) {
+            bol.seal = data.seal;
+        }
+
         await BolModel.findOneAndUpdate(
             { _id: bol._id },
-            data.bol_code_override ? { code: data.bol_code_override } : {}
+            { code: bol.code, seal: bol.seal }
         );
         BolLoader.clear(bol._id.toString());
 

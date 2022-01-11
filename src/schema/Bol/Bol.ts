@@ -98,8 +98,6 @@ export enum BolStatus {
                 },
             });
 
-            console.log(applicableLots);
-
             const totalReceivedUnits = applicableLots.reduce((acc, l) => {
                 return (acc += l.start_quantity);
             }, 0);
@@ -125,6 +123,10 @@ export class Bol extends Base {
     @Field({ nullable: true })
     @prop({ required: false })
     code?: string;
+
+    @Field({ nullable: true })
+    @prop({ required: false })
+    seal?: string;
 
     @Field(() => BolStatus)
     @prop({ required: false, enum: BolStatus })

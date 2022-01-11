@@ -1,9 +1,6 @@
-import { mongoose } from '@typegoose/typegoose';
 import { Context } from './../../auth/context';
 import { ItemContentInput } from './../Content/ContentInputs';
-import { ObjectIdScalar } from './../ObjectIdScalar';
 import { Field, InputType } from 'type-graphql';
-import { ObjectId } from 'mongoose';
 import { Bol, BolStatus } from './Bol';
 import { BolAppointmentInput } from './BolAppointment';
 import { loaderResult } from '@src/utils/loaderResult';

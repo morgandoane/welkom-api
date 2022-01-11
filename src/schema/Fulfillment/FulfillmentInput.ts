@@ -38,6 +38,9 @@ export class FulfillmentInput {
     @Field(() => String, { nullable: true })
     bol_code_override?: string;
 
+    @Field(() => String, { nullable: true })
+    seal?: string;
+
     @Field(() => [FulfillmentItemInput])
     items!: FulfillmentItemInput[];
 
@@ -72,7 +75,6 @@ export class FulfillmentInput {
             let start_quantity = 0;
 
             const qtys = lots.map(({ quantity, unit }) => ({ quantity, unit }));
-            console.log(qtys);
 
             for (const { quantity, unit: unit_id } of qtys) {
                 // We need to understand this unit in the UnitClass of the lot's item
