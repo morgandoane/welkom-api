@@ -60,6 +60,10 @@ export class OrderQueueContent {
     @Field(() => Date, { nullable: true })
     @prop({ required: false })
     date?: Date;
+
+    @Field(() => Boolean, { nullable: true })
+    @prop({ required: false })
+    time_sensitive?: boolean;
 }
 
 @ObjectType()
@@ -165,12 +169,14 @@ export class OrderQueueTemplate extends OrderQueue {
                 company: content.vendor,
                 location: content.vendor_location,
                 date: content.date,
+                time_sensitive: content.time_sensitive || false,
             },
             to: {
                 _id: new mongoose.Types.ObjectId(),
                 company: destinationLocation.company,
                 location: destinationLocation._id,
                 date: content.date,
+                time_sensitive: content.time_sensitive || false,
             },
             contents: [
                 {

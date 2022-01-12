@@ -40,6 +40,10 @@ export enum Permission {
     CreateLot = 'CreateLot',
     UpdateLot = 'UpdateLot',
 
+    GetMachines = 'GetMachines',
+    CreateMachine = 'CreateMachine',
+    UpdateMachine = 'UpdateMachine',
+
     GetOrders = 'GetOrders',
     CreateOrder = 'CreateOrder',
     UpdateOrder = 'UpdateOrder',

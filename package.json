@@ -22,10 +22,14 @@
   "bugs": {
     "url": "https://github.com/morgandoane/welkom-api/issues"
   },
-  "engines": { "node": "16.13.1" },
+  "engines": {
+    "node": "16.13.1"
+  },
   "homepage": "https://github.com/morgandoane/welkom-api#readme",
   "dependencies": {
+    "@google-cloud/documentai": "^3.2.0",
     "@google-cloud/storage": "^5.16.0",
+    "@google-cloud/vision": "^2.4.2",
     "@typegoose/typegoose": "^8.1.1",
     "@types/auth0": "^2.34.7",
     "@types/axios": "^0.14.0",
@@ -52,6 +56,7 @@
     "mongoose": "^5.13.7",
     "neo4j-driver": "^4.3.4",
     "node-geocoder": "^3.27.0",
+    "pdf-image": "^2.0.0",
     "reflect-metadata": "^0.1.13",
     "ts-node": "^10.2.0",
     "tsconfig-paths": "^3.10.1",
@@ -64,6 +69,7 @@
     "@types/express-session": "^1.17.0",
     "@types/graphql": "^14.5.0",
     "@types/node": "^14.11.2",
+    "@types/pdf-image": "^2.0.1",
     "@typescript-eslint/eslint-plugin": "^4.29.2",
     "@typescript-eslint/parser": "^4.29.2",
     "eslint": "^7.32.0",

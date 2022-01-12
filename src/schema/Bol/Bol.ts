@@ -1,3 +1,4 @@
+import { Profile } from '@src/schema/Profile/Profile';
 import { Itinerary } from './../Itinerary/Itinerary';
 import { BolItemContent } from './../Content/Content';
 import { LotLoader, LotModel } from './../Lot/Lot';
@@ -6,11 +7,7 @@ import { UnitLoader } from './../Unit/Unit';
 import { LocationLoader } from './../Location/Location';
 import { getBaseLoader } from './../Loader';
 import { Base } from './../Base/Base';
-import {
-    Fulfillment,
-    FulfillmentModel,
-    FulfillmentType,
-} from '../Fulfillment/Fulfillment';
+import { FulfillmentModel, FulfillmentType } from '../Fulfillment/Fulfillment';
 import {
     prop,
     Ref,
@@ -19,8 +16,6 @@ import {
     Severity,
     pre,
 } from '@typegoose/typegoose';
-import { Company } from '../Company/Company';
-import { Location } from '../Location/Location';
 import { createUnionType, Field, ObjectType } from 'type-graphql';
 import { loaderResult } from '@src/utils/loaderResult';
 import { Order } from '../Order/Order';
@@ -30,6 +25,18 @@ export enum BolStatus {
     Pending = 'Pending',
     Complete = 'Complete',
     Partial = 'Partial',
+}
+
+@ObjectType()
+export class BolSignature {
+    @Field()
+    confidence: number;
+
+    @Field(() => Profile)
+    profile: Profile;
+
+    @Field(() => FulfillmentType)
+    fulfillment_type: FulfillmentType;
 }
 
 @modelOptions({
@@ -139,6 +146,9 @@ export class Bol extends Base {
     @Field(() => BolAppointment)
     @prop({ required: true })
     to!: BolAppointment;
+
+    @Field(() => [BolSignature])
+    signatures?: BolSignature[];
 
     @Field(() => [BolItemContent], { nullable: true })
     @prop({ required: true, type: () => BolItemContent })

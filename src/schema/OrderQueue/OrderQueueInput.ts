@@ -33,6 +33,9 @@ export class OrderQueueContentInput {
     @Field({ nullable: true })
     date?: Date;
 
+    @Field({ nullable: true })
+    time_sensitive?: boolean;
+
     public async serialize(): Promise<OrderQueueContent> {
         const content: OrderQueueContent = {};
 
@@ -67,6 +70,9 @@ export class OrderQueueContentInput {
 
         if (this.quantity !== null && this.quantity !== undefined)
             content.quantity = this.quantity;
+
+        if (this.time_sensitive !== null && this.time_sensitive !== undefined)
+            content.time_sensitive = this.time_sensitive;
 
         if (this.location) {
             const location = loaderResult(

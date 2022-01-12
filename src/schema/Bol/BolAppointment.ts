@@ -22,6 +22,10 @@ export class BolAppointment {
     @Field()
     @prop({ required: true })
     date!: Date;
+
+    @Field()
+    @prop({ required: true, default: false })
+    time_sensitive!: boolean;
 }
 
 @InputType()
@@ -34,6 +38,9 @@ export class BolAppointmentInput {
 
     @Field()
     date!: Date;
+
+    @Field({ nullable: true })
+    time_sensitive?: boolean;
 
     public async validateAppointment(): Promise<BolAppointment> {
         const company = loaderResult(await CompanyLoader.load(this.company));
@@ -50,6 +57,7 @@ export class BolAppointmentInput {
             location: this.location
                 ? new mongoose.Types.ObjectId(this.location)
                 : undefined,
+            time_sensitive: this.time_sensitive ? true : false,
         };
     }
 }

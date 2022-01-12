@@ -58,8 +58,6 @@ export class OrderStatisticFilter {
             query['contents.location'] = this.destination;
         }
 
-        console.log(query);
-
         return query;
     }
 }

@@ -67,6 +67,18 @@ export class StorageClass {
         return files;
     }
 
+    public async file(
+        bucket_name: StorageBucket,
+        prefix: string,
+        identifier: string
+    ): Promise<File | null> {
+        const bucket = await this.bucket(bucket_name);
+        const file = await bucket.file(this.filename(prefix, identifier));
+        const exists = await file.exists();
+        if (!exists) return null;
+        else return file;
+    }
+
     public async signedWriteUrl(
         bucket_name: StorageBucket,
         folder: string,
@@ -134,7 +146,7 @@ export class StorageClass {
         });
     }
 
-    private async bucket(bucket_name: StorageBucket): Promise<Bucket> {
+    public async bucket(bucket_name: StorageBucket): Promise<Bucket> {
         const bucket = this.storage.bucket(bucket_name);
         const [exists] = await bucket.exists();
         if (exists) return bucket;
@@ -150,7 +162,7 @@ export class StorageClass {
         }
     }
 
-    private filename(folder: string, filename: string) {
+    filename(folder: string, filename: string): string {
         return `${folder}/${filename}`;
     }
 }

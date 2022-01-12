@@ -1,3 +1,4 @@
+import { DocumentAi } from './../../services/CloudStorage/DocumentAi';
 import { DeleteFileArgs } from './DeleteFileArgs';
 import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
 import { Context } from '@src/auth/context';
@@ -62,7 +63,7 @@ export class AppFileResolvers implements ResolverInterface<AppFile> {
         @Root() { file, folder }: AppFile,
         @Ctx() { storage }: Context
     ): Promise<SignedUrl> {
-        const category = file.bucket.id;
+        const category = file.bucket.metadata.id;
         const url = await storage.signedReadUrl(
             category as StorageBucket,
             folder,
