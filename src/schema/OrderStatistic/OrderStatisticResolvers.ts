@@ -1,9 +1,7 @@
-import { CompanyLoader } from './../Company/Company';
-import { LocationModel } from './../Location/Location';
 import { loaderResult } from './../../utils/loaderResult';
-import { UnitClass, UnitLoader } from './../Unit/Unit';
+import { UnitLoader } from './../Unit/Unit';
 import { OrderModel } from './../Order/Order';
-import { Item, ItemModel, ItemLoader } from './../Item/Item';
+import { Item, ItemLoader } from './../Item/Item';
 import { OrderStatisticFilter } from './OrderStatisticsFilter';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import {
@@ -13,13 +11,6 @@ import {
 } from './OrderStatistic';
 import { Arg, Query, Resolver, UseMiddleware } from 'type-graphql';
 import { UserRole } from '@src/auth/UserRole';
-import {
-    addYears,
-    endOfDay,
-    endOfYear,
-    startOfDay,
-    startOfYear,
-} from 'date-fns';
 import { Ref } from '@typegoose/typegoose';
 import { Unit } from '../Unit/Unit';
 import { Company } from '../Company/Company';
