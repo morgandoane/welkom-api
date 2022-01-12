@@ -122,6 +122,7 @@ export class ProfileResolvers {
             family_name,
             email,
             phone_number,
+            password,
         }: UpdateProfileInput
     ): Promise<Profile> {
         const ProfileModel = getModelForClass(Profile);
@@ -131,10 +132,10 @@ export class ProfileResolvers {
         const updateData: UserData<AppMetaData, UserMetaData> = {};
 
         if (given_name) updateData.given_name = given_name;
+        if (password) updateData.password = password;
         if (family_name) updateData.family_name = family_name;
         if (email) {
             updateData.email = email;
-            updateData.email_verified = false;
         }
         if (phone_number) {
             updateData.user_metadata = {
@@ -185,7 +186,7 @@ export class ProfileResolvers {
         @Ctx() context: Context,
         @Arg('filter') filter: ProfileFilter
     ): Promise<ProfileList> {
-        if (randomNumber(10, 1) == 1) {
+        if (randomNumber(15, 1) == 1) {
             console.log('synchronizing profiles');
             await synchronizeProfiles();
         }

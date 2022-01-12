@@ -38,4 +38,7 @@ export class UpdateProfileInput {
 
     @Field({ nullable: true })
     phone_number?: string;
+
+    @Field({ nullable: true })
+    password?: string;
 }
