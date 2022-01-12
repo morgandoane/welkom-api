@@ -25,6 +25,7 @@ import { LotResolvers } from './schema/Lot/LotResolvers';
 import { OrderResolvers } from './schema/Order/OrderResolvers';
 import { OrderQueueResolvers } from './schema/OrderQueue/OrderQueueResolvers';
 import { OrderQueueContentResolvers } from './schema/OrderQueue/OrderQueueContentResolvers';
+import { OrderStatisticResolvers } from './schema/OrderStatistic/OrderStatisticResolvers';
 import { ProceduralLotResolvers } from './schema/Lot/extensions/ProceduralLot/ProceduralLotResolvers';
 import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
 import { QualityCheckResponseResolvers } from './schema/QualityCheckResponse/QualityCheckResponseResolvers';
@@ -91,6 +92,7 @@ import https from 'https';
                 OrderResolvers,
                 OrderQueueResolvers,
                 OrderQueueContentResolvers,
+                OrderStatisticResolvers,
                 ProceduralLotResolvers,
                 ProfileResolvers,
                 QualityCheckResolvers,

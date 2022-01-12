@@ -1,12 +1,11 @@
 import { ItineraryModel } from '@src/schema/Itinerary/Itinerary';
-import { BolLoader, BolModel } from './../Bol/Bol';
-import { Itinerary, ItineraryLoader } from './../Itinerary/Itinerary';
+import { BolModel } from './../Bol/Bol';
+import { Itinerary } from './../Itinerary/Itinerary';
 import { OrderContent } from './../Content/Content';
 import { Base } from './../Base/Base';
 import { getBaseLoader } from './../Loader';
 import { Field, ObjectType } from 'type-graphql';
 import {
-    DocumentType,
     getModelForClass,
     modelOptions,
     pre,
@@ -14,8 +13,6 @@ import {
     Ref,
 } from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
-import { loaderResult } from '@src/utils/loaderResult';
-import { Lot } from '../Lot/Lot';
 
 @ObjectType()
 @modelOptions({
