@@ -14,15 +14,18 @@ import { UserRole } from '@src/auth/UserRole';
 import { Ref } from '@typegoose/typegoose';
 import { Unit } from '../Unit/Unit';
 import { Company } from '../Company/Company';
+import { getMonth } from 'date-fns';
+import { KeyObject } from 'crypto';
 
 export interface OrderStatisticResult {
-    month: number;
-    contents: {
+    _id: string;
+    orders: {
         vendor: Ref<Company>;
+        customer: Ref<Company>;
         unit: Ref<Unit>;
         quantity: number;
         destination: Ref<Location>;
-        item: Ref<Item>;
+        date: Date;
     }[];
 }
 
@@ -34,8 +37,10 @@ export class OrderStatisticResolvers {
         @Arg('filter', () => OrderStatisticFilter)
         filter: OrderStatisticFilter
     ): Promise<OrderStatistic[]> {
-        const results: OrderStatisticResult[] = await OrderModel.aggregate([
-            [
+        const stats: OrderStatistic[] = [];
+
+        const groupedByItem: OrderStatisticResult[] =
+            await OrderModel.aggregate([
                 {
                     $match: await filter.serializeFilter(),
                 },
@@ -47,125 +52,89 @@ export class OrderStatisticResolvers {
                 },
                 {
                     $project: {
-                        date: '$contents.due',
                         unit: '$contents.unit',
                         quantity: '$contents.quantity',
-                        location: '$contents.location',
                         item: '$contents.item',
+                        date: '$contents.due',
                         vendor: '$vendor',
+                        customer: '$customer',
+                        destination: '$contents.destination',
                     },
                 },
                 {
                     $group: {
-                        _id: {
-                            $month: '$date',
-                        },
-                        month_contents: {
+                        _id: '$item',
+                        orders: {
                             $addToSet: {
-                                quantity: '$quantity',
-                                destination: '$location',
-                                item: '$item',
-                                vendor: '$vendor',
                                 unit: '$unit',
+                                quantity: '$quantity',
+                                date: '$date',
+                                vendor: '$vendor',
+                                customer: '$customer',
+                                destination: '$location',
                             },
                         },
                     },
                 },
-                {
-                    $project: {
-                        month: '$_id',
-                        contents: '$month_contents',
-                        _id: 0,
-                    },
-                },
-            ],
-        ]);
+            ]);
 
-        const groupedByItem: Record<
-            string,
-            {
-                month: number;
-                vendor: Ref<Company>;
-                unit: Ref<Unit>;
-                quantity: number;
-                destination: Ref<Location>;
-            }[]
-        > = {};
+        for (const { _id: item_id, orders } of groupedByItem) {
+            const item = loaderResult(
+                await ItemLoader.load(item_id.toString())
+            );
 
-        for (const { month, contents } of results) {
-            for (const {
-                vendor,
-                unit,
-                quantity,
-                destination,
-                item,
-            } of contents) {
-                const record: typeof groupedByItem[string][number] = {
-                    month,
-                    vendor,
-                    unit,
-                    quantity,
-                    destination,
-                };
+            const stat: OrderStatistic = { item, ranges: [] };
 
-                if (groupedByItem[item.toString()]) {
-                    groupedByItem[item.toString()].push(record);
-                } else {
-                    groupedByItem[item.toString()] = [record];
-                }
-            }
-        }
-
-        const stats: OrderStatistic[] = [];
-
-        for (const itemId of Object.keys(groupedByItem)) {
-            const item = loaderResult(await ItemLoader.load(itemId));
-            const ranges: OrderStatisticRange[] = [];
+            const groups: Record<string, OrderStatisticRange> = {};
 
             for (const {
-                month,
                 vendor,
-                unit,
+                customer,
+                unit: unit_id,
                 quantity,
                 destination,
-            } of groupedByItem[itemId]) {
-                const qtys: OrderStatisticRangeQuantity[] = [];
+                date,
+            } of orders) {
+                const month = getMonth(date);
 
-                const unitDoc = loaderResult(
-                    await UnitLoader.load(unit.toString())
+                const { class: unit_class, base_per_unit } = loaderResult(
+                    await UnitLoader.load(unit_id.toString())
                 );
 
-                const qty = unitDoc.base_per_unit * quantity;
-                const unit_class = unitDoc.class;
+                if (groups[month] !== undefined) {
+                    const index = groups[month].quantitys
+                        .map((q) => q.unit_class)
+                        .indexOf(unit_class);
 
-                const qtyIndex = qtys
-                    .map((q) => q.unit_class)
-                    .indexOf(unit_class);
-
-                if (qtyIndex == -1) {
-                    qtys.push({ quantity: qty, unit_class });
+                    if (index == -1) {
+                        groups[month].quantitys.push({
+                            quantity: base_per_unit * quantity,
+                            unit_class,
+                        });
+                    } else {
+                        groups[month].quantitys[index] = {
+                            ...groups[month].quantitys[index],
+                            quantity:
+                                groups[month].quantitys[index].quantity +
+                                quantity * base_per_unit,
+                        };
+                    }
                 } else {
-                    qtys[qtyIndex].quantity = qtys[qtyIndex].quantity + qty;
-                }
-
-                const rangeIndex = ranges.map((r) => r.month).indexOf(month);
-
-                if (rangeIndex == -1) {
-                    ranges.push({
+                    groups[month] = {
                         month,
-                        quantitys: [...qtys],
-                    });
-                } else {
-                    ranges[rangeIndex].quantitys = [
-                        ...ranges[rangeIndex].quantitys,
-                        ...qtys,
-                    ];
+                        quantitys: [
+                            { unit_class, quantity: base_per_unit * quantity },
+                        ],
+                    };
                 }
             }
 
-            stats.push({ item, ranges });
-        }
+            for (const val of Object.values(groups)) {
+                stat.ranges.push(val);
+            }
 
+            stats.push(stat);
+        }
         return stats;
     }
 }

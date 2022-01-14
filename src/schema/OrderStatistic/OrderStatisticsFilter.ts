@@ -24,7 +24,7 @@ export class OrderStatisticFilter {
     destination?: ObjectId;
 
     public async serializeFilter(): Promise<FilterQuery<Order>> {
-        const query: FilterQuery<Order> = {};
+        const query: FilterQuery<Order> = { deleted: false };
 
         if (this.item_name) {
             const items = await ItemModel.find(

@@ -116,6 +116,7 @@ export class FulfillmentInput {
                 contents: [],
                 start_quantity,
                 item: item._id,
+                fulfillment_type: this.type,
             };
 
             for (const lotfinder of lots) {

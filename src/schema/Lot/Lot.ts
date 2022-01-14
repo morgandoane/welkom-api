@@ -1,3 +1,4 @@
+import { FulfillmentType } from './../Fulfillment/Fulfillment';
 import { Base } from './../Base/Base';
 import { getBaseLoader } from './../Loader';
 import { Item } from '../Item/Item';
@@ -33,6 +34,14 @@ export class Lot extends Base {
     @Field()
     @prop({ required: true })
     start_quantity!: number;
+
+    @Field({ nullable: true })
+    @prop({ required: false, default: false })
+    expensed?: boolean;
+
+    @Field(() => FulfillmentType, { nullable: true })
+    @prop({ required: false, enum: FulfillmentType })
+    fulfillment_type?: FulfillmentType;
 
     @Field(() => Item)
     @prop({ required: true, ref: () => Item })

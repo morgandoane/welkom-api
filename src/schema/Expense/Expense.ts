@@ -1,15 +1,27 @@
 import { getBaseLoader } from './../Loader';
 import { Base } from './../Base/Base';
 import { Field, ObjectType } from 'type-graphql';
-import { getModelForClass, prop, Ref, mongoose } from '@typegoose/typegoose';
+import {
+    getModelForClass,
+    prop,
+    Ref,
+    mongoose,
+    modelOptions,
+} from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
 
 export enum ExpenseKey {
     Bol = 'Bol',
-    Order = 'Order',
     Itinerary = 'Itinerary',
+    Lot = 'Lot',
+    Order = 'Order',
 }
 
+@modelOptions({
+    schemaOptions: {
+        collection: 'expenses',
+    },
+})
 @ObjectType()
 export class Expense extends Base {
     @Field()
@@ -21,6 +33,7 @@ export class Expense extends Base {
     key!: ExpenseKey;
 
     @prop({ required: true })
+    @Field(() => String)
     against!: mongoose.Types.ObjectId;
 
     @Field(() => Company)

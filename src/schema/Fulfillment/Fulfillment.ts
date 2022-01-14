@@ -54,7 +54,7 @@ export class Fulfillment extends Verified {
     type!: FulfillmentType;
 
     @Field(() => [Lot])
-    @prop({ required: true, ref: () => Lot })
+    @prop({ required: true, ref: 'Lot' })
     lots!: Ref<Lot>[];
 
     // denormalized

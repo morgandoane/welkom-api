@@ -1,3 +1,4 @@
+import { LotModel } from './../Lot/Lot';
 import { Company, CompanyLoader } from './../Company/Company';
 import { Context } from './../../auth/context';
 import { CreateExpenseInput, UpdateExpenseInput } from './ExpenseInput';
@@ -19,7 +20,7 @@ import {
     FieldResolver,
     Root,
 } from 'type-graphql';
-import { Expense, ExpenseLoader, ExpenseModel } from './Expense';
+import { Expense, ExpenseKey, ExpenseLoader, ExpenseModel } from './Expense';
 import { Permission } from '@src/auth/permissions';
 
 const BaseResolvers = createBaseResolver();
@@ -61,6 +62,16 @@ export class ExpenseResolvers extends BaseResolvers {
         @Arg('data', () => CreateExpenseInput) data: CreateExpenseInput
     ): Promise<Expense> {
         const res = await ExpenseModel.create(await data.validate(context));
+
+        switch (data.key) {
+            case ExpenseKey.Lot: {
+                await LotModel.findOneAndUpdate(
+                    { _id: data.against.toString() },
+                    { expensed: true }
+                );
+                break;
+            }
+        }
         return res.toJSON();
     }
 
@@ -77,6 +88,23 @@ export class ExpenseResolvers extends BaseResolvers {
             { _id: id.toString() },
             await data.serializeExpenseUpdate(context)
         );
+
+        if (data.deleted) {
+            switch (res.key) {
+                case ExpenseKey.Lot: {
+                    const otherExpenses = await ExpenseModel.find({
+                        against: res.against,
+                        deleted: false,
+                    });
+                    if (otherExpenses.length == 0)
+                        await LotModel.findOneAndUpdate(
+                            { _id: res.against.toString() },
+                            { expensed: false }
+                        );
+                    break;
+                }
+            }
+        }
 
         ExpenseLoader.clear(id.toString());
 

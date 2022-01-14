@@ -5,6 +5,7 @@ import { Item, ItemLoader } from './../Item/Item';
 import { Company, CompanyLoader } from './../Company/Company';
 import { Lot } from './Lot';
 import { FieldResolver, Resolver, Root } from 'type-graphql';
+import { Expense, ExpenseModel } from '../Expense/Expense';
 
 const BaseResolvers = createBaseResolver();
 
@@ -25,5 +26,14 @@ export class LotResolvers extends BaseResolvers {
     async location(@Root() { location }: Lot): Promise<Location> {
         if (!location) return null;
         return loaderResult(await LocationLoader.load(location.toString()));
+    }
+
+    @FieldResolver(() => [Expense])
+    async expenses(@Root() { _id }: Lot): Promise<Expense[]> {
+        const res = await ExpenseModel.find({
+            against: _id.toString(),
+            deleted: false,
+        });
+        return res.map((doc) => doc.toJSON());
     }
 }
