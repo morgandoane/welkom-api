@@ -1,3 +1,4 @@
+import { Expense } from './../Expense/Expense';
 import { Profile } from '@src/schema/Profile/Profile';
 import { Itinerary } from './../Itinerary/Itinerary';
 import { BolItemContent } from './../Content/Content';
@@ -149,6 +150,9 @@ export class Bol extends Base {
 
     @Field(() => [BolSignature])
     signatures?: BolSignature[];
+
+    @Field(() => [Expense])
+    expenses?: Expense[];
 
     @Field(() => [BolItemContent], { nullable: true })
     @prop({ required: true, type: () => BolItemContent })

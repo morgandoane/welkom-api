@@ -13,6 +13,7 @@ import {
     Ref,
 } from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
+import { Expense } from '../Expense/Expense';
 
 @ObjectType()
 @modelOptions({
@@ -59,6 +60,9 @@ export class Order extends Base {
 
     @Field(() => [Itinerary])
     itineraries?: Itinerary[];
+
+    @Field(() => [Expense])
+    expenses?: Expense[];
 
     @Field({ nullable: true })
     @prop({ required: false })

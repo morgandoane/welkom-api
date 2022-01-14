@@ -15,6 +15,10 @@ export enum Permission {
     CreateConversion = 'CreateConversion',
     UpdateConversion = 'UpdateConversion',
 
+    GetExpenses = 'GetExpenses',
+    CreateExpenses = 'CreateExpenses',
+    UpdateExpenses = 'UpdateExpenses',
+
     GetRecipeFolders = 'GetRecipeFolders',
     CreateRecipeFolder = 'CreateRecipeFolder',
     UpdateRecipeFolder = 'UpdateRecipeFolder',

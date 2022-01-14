@@ -41,6 +41,7 @@ import { Permission } from '@src/auth/permissions';
 import { AppFile } from '../AppFile/AppFile';
 import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
 import { DocumentReader } from '@src/services/CloudStorage/DocumentAi';
+import { Expense, ExpenseModel } from '../Expense/Expense';
 
 const BaseResolvers = createBaseResolver();
 
@@ -256,5 +257,14 @@ export class BolResolvers extends BaseResolvers {
         }
 
         return signatures;
+    }
+
+    @FieldResolver(() => [Expense])
+    async expenses(@Root() { _id }: Bol): Promise<Expense[]> {
+        const res = await ExpenseModel.find({
+            against: _id.toString(),
+            deleted: false,
+        });
+        return res.map((doc) => doc.toJSON());
     }
 }

@@ -163,6 +163,29 @@ export class RecipeFolderResolvers extends BaseResolvers {
         return await RecipeFolderModel.find({ deleted: false, parent });
     }
 
+    @FieldResolver(() => [RecipeFolder], { nullable: true })
+    async ancestry(
+        @Ctx() context: Context,
+        @Root() root: RecipeFolder
+    ): Promise<RecipeFolder[]> {
+        const loop = async (
+            folder: RecipeFolder,
+            stack: RecipeFolder[]
+        ): Promise<RecipeFolder[]> => {
+            if (!folder.parent)
+                return [...stack, RecipeFolder.fromNull(context)];
+            else {
+                const parent = loaderResult(
+                    await RecipeFolderLoader.load(folder.parent.toString())
+                );
+
+                return await loop(parent, [...stack, parent]);
+            }
+        };
+
+        return await loop(root, []);
+    }
+
     @FieldResolver(() => [Recipe], { nullable: true })
     async recipes(@Root() { _id, name }: RecipeFolder): Promise<Recipe[]> {
         if (name == 'Home')

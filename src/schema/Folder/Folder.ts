@@ -35,6 +35,9 @@ export class Folder extends Base {
 
     @Field(() => [Folder])
     folders?: Folder[];
+
+    @Field(() => [Folder])
+    ancestry?: Folder[];
 }
 
 export const FolderModel = getModelForClass(Folder);

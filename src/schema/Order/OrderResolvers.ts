@@ -1,3 +1,4 @@
+import { ExpenseModel } from './../Expense/Expense';
 import { BolModel } from './../Bol/Bol';
 import { Itinerary, ItineraryModel } from './../Itinerary/Itinerary';
 import { UserInputError } from 'apollo-server-errors';
@@ -28,6 +29,7 @@ import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
 import { AppFile } from '../AppFile/AppFile';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
+import { Expense } from '../Expense/Expense';
 
 const BaseResolvers = createBaseResolver();
 
@@ -177,5 +179,14 @@ export class OrderResolvers extends BaseResolvers {
         );
 
         return files.map((file) => AppFile.fromFile(file, _id.toString()));
+    }
+
+    @FieldResolver(() => [Expense])
+    async expenses(@Root() { _id }: Order): Promise<Expense[]> {
+        const res = await ExpenseModel.find({
+            against: _id.toString(),
+            deleted: false,
+        });
+        return res.map((doc) => doc.toJSON());
     }
 }

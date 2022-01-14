@@ -1,14 +1,6 @@
 import { Field, InputType } from 'type-graphql';
+import { RangeInput } from '../Range/RangeInput';
 import { Prompt, PromptType } from './Prompt';
-
-@InputType()
-export class RangeInput {
-    @Field()
-    min!: number;
-
-    @Field()
-    max!: number;
-}
 
 @InputType()
 export class PromptInput {

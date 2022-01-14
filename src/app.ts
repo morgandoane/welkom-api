@@ -18,6 +18,7 @@ import { CodeResolvers } from './schema/Code/CodeResolvers';
 import { CompanyResolvers } from './schema/Company/CompanyResolvers';
 import { ContactResolvers } from './schema/Contact/ContactResolvers';
 import { ConversionResolvers } from './schema/Conversion/ConversionResolvers';
+import { ExpenseResolvers } from './schema/Expense/ExpenseResolvers';
 import { FulfillmentResolvers } from './schema/Fulfillment/FulfillmentResolvers';
 import { ItemResolvers } from './schema/Item/ItemResolvers';
 import { ItineraryResolvers } from './schema/Itinerary/ItineraryResolvers';
@@ -82,6 +83,7 @@ import https from 'https';
                 ContactResolvers,
                 ContentResolver,
                 ConversionResolvers,
+                ExpenseResolvers,
                 FulfillmentResolvers,
                 ItemResolvers,
                 ItemContentResolver,
