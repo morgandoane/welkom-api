@@ -2,9 +2,9 @@
   "name": "welkom-api",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/app.js",
+  "main": "index.js",
   "_moduleAliases": {
-    "@src": "dist"
+    "@src": "src"
   },
   "scripts": {
     "dev": "nodemon",

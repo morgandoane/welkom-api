@@ -35,7 +35,8 @@ export class FolderResolvers extends BaseResolvers {
         @Arg('id', () => ObjectIdScalar, { nullable: true }) id: ObjectId | null
     ): Promise<Folder> {
         if (!id) return Folder.fromNull(context);
-        else return loaderResult(await FolderLoader.load(id.toString()));
+        const doc = await FolderModel.findById(id.toString());
+        return doc.toJSON();
     }
 
     @UseMiddleware(
@@ -71,6 +72,8 @@ export class FolderResolvers extends BaseResolvers {
             new: true,
         });
 
+        FolderLoader.clearAll();
+
         return res.toJSON();
     }
 
@@ -81,10 +84,10 @@ export class FolderResolvers extends BaseResolvers {
     }
 
     @FieldResolver(() => [Recipe])
-    async recipes(@Root() { _id }: Folder): Promise<Recipe[]> {
+    async recipes(@Root() { _id, name }: Folder): Promise<Recipe[]> {
         const res = await RecipeModel.find({
             deleted: false,
-            folder: _id,
+            folder: name == 'Home' ? null : _id,
         }).sort({ name: 1 });
 
         return res.map((r) => r.toJSON());
@@ -114,10 +117,10 @@ export class FolderResolvers extends BaseResolvers {
             stack: Folder[]
         ): Promise<Folder[]> => {
             const { parent } = folder;
-            if (!parent) return [Folder.fromNull(context), ...stack];
+            if (!parent) return [Folder.fromNull(context)];
             else {
                 const parentDoc = await FolderModel.findById(parent.toString());
-                return [...(await loop(parentDoc, stack)), ...stack];
+                return [...(await loop(parentDoc, stack)), parentDoc, ...stack];
             }
         };
 

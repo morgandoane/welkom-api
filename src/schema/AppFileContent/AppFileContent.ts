@@ -1,20 +1,19 @@
 import {
     modelOptions,
-    mongoose,
     prop,
     getModelForClass,
+    Severity,
 } from '@typegoose/typegoose';
 import { Field, ID } from 'type-graphql';
 import { protos } from '@google-cloud/documentai';
 import { File } from '@google-cloud/storage';
-import {
-    ImageAnnotatorClient,
-    protos as vision_protos,
-} from '@google-cloud/vision';
 
 @modelOptions({
     schemaOptions: {
         collection: 'appfilecontents',
+    },
+    options: {
+        allowMixed: Severity.ALLOW,
     },
 })
 export class AppFileContents {

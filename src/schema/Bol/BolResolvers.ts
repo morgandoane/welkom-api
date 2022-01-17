@@ -162,8 +162,6 @@ export class BolResolvers extends BaseResolvers {
             bol._id.toString()
         );
 
-        console.log(files);
-
         if (!files[0]) return null;
         else return AppFile.fromFile(files[0], bol._id.toString());
     }

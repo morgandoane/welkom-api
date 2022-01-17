@@ -37,7 +37,7 @@ export class CreateItemInput {
             conversions: [],
         };
 
-        if (this.unit_class !== UnitClass.Weight && this.to_base_unit !== 1) {
+        if (this.unit_class !== UnitClass.Volume && this.to_base_unit !== 1) {
             throw new UserInputError('Invalid to_base_unit');
         }
 
@@ -97,7 +97,7 @@ export class UpdateItemInput {
 
         if (this.to_base_unit) {
             if (
-                this.unit_class !== UnitClass.Weight &&
+                this.unit_class !== UnitClass.Volume &&
                 this.to_base_unit !== 1
             ) {
                 throw new UserInputError('Invalid to_base_unit');
