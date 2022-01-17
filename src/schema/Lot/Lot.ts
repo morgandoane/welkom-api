@@ -35,10 +35,6 @@ export class Lot extends Base {
     @prop({ required: true })
     start_quantity!: number;
 
-    @Field({ nullable: true })
-    @prop({ required: false, default: false })
-    expensed?: boolean;
-
     @Field(() => FulfillmentType, { nullable: true })
     @prop({ required: false, enum: FulfillmentType })
     fulfillment_type?: FulfillmentType;

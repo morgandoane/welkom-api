@@ -1,5 +1,4 @@
-import { MoveFolderResult } from './MoveFolderResult';
-import { RecipeFolder } from './extensions/RecipeFolder/RecipeFolder';
+import { Context } from './../../auth/context';
 import { getBaseLoader } from './../Loader';
 import {
     prop,
@@ -33,11 +32,13 @@ export class Folder extends Base {
     @prop({ required: false, ref: () => Folder })
     parent?: Ref<Folder>;
 
-    @Field(() => [Folder])
-    folders?: Folder[];
-
-    @Field(() => [Folder])
-    ancestry?: Folder[];
+    public static fromNull(context: Context): Folder {
+        return {
+            ...context.base,
+            name: 'Home',
+            class: FolderClass.Recipe,
+        };
+    }
 }
 
 export const FolderModel = getModelForClass(Folder);

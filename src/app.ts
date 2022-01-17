@@ -19,6 +19,7 @@ import { CompanyResolvers } from './schema/Company/CompanyResolvers';
 import { ContactResolvers } from './schema/Contact/ContactResolvers';
 import { ConversionResolvers } from './schema/Conversion/ConversionResolvers';
 import { ExpenseResolvers } from './schema/Expense/ExpenseResolvers';
+import { FolderResolvers } from './schema/Folder/FolderResolvers';
 import { FulfillmentResolvers } from './schema/Fulfillment/FulfillmentResolvers';
 import { ItemResolvers } from './schema/Item/ItemResolvers';
 import { ItineraryResolvers } from './schema/Itinerary/ItineraryResolvers';
@@ -32,7 +33,6 @@ import { ProceduralLotResolvers } from './schema/Lot/extensions/ProceduralLot/Pr
 import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
 import { QualityCheckResponseResolvers } from './schema/QualityCheckResponse/QualityCheckResponseResolvers';
 import { QualityCheckResolvers } from './schema/QualityCheck/QualityCheckResolvers';
-import { RecipeFolderResolvers } from './schema/Folder/extensions/RecipeFolder/RecipeFolderResolvers';
 import { SignedUrlResolvers } from './schema/SignedUrl/SignedUrlResolvers';
 import { TeamResolvers } from './schema/Team/TeamResolvers';
 import { UnitResolvers } from './schema/Unit/UnitResolvers';
@@ -84,6 +84,7 @@ import https from 'https';
                 ContentResolver,
                 ConversionResolvers,
                 ExpenseResolvers,
+                FolderResolvers,
                 FulfillmentResolvers,
                 ItemResolvers,
                 ItemContentResolver,
@@ -101,7 +102,6 @@ import https from 'https';
                 ProfileResolvers,
                 QualityCheckResolvers,
                 QualityCheckResponseResolvers,
-                RecipeFolderResolvers,
                 SignedUrlResolvers,
                 TeamResolvers,
                 UnitResolvers,

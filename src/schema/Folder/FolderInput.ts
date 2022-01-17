@@ -1,13 +1,13 @@
 import { UserInputError } from 'apollo-server-errors';
 import { Context } from './../../auth/context';
 import { loaderResult } from './../../utils/loaderResult';
-import { ObjectId } from 'mongoose';
+import { ObjectId, UpdateQuery } from 'mongoose';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { Field, InputType } from 'type-graphql';
-import { Folder, FolderClass, FolderLoader } from './Folder';
+import { Folder, FolderClass, FolderLoader, FolderModel } from './Folder';
 
 @InputType()
-export class FolderInput {
+export class CreateFolderInput {
     @Field(() => FolderClass)
     class!: FolderClass;
 
@@ -45,4 +45,33 @@ export class UpdateFolderInput {
 
     @Field({ nullable: true })
     name?: string;
+
+    @Field(() => ObjectIdScalar, { nullable: true })
+    parent?: ObjectId;
+
+    public async serializeFolderUpdate(
+        context: Context
+    ): Promise<Partial<Folder>> {
+        const res: Partial<Folder> = {
+            date_modified: new Date(),
+            modified_by: context.base.modified_by,
+        };
+
+        if (this.name) res.name = this.name;
+        if (this.deleted !== undefined && this.deleted !== null)
+            res.deleted = this.deleted;
+
+        if (this.parent !== undefined) {
+            if (this.parent == null) res.parent = null;
+            else {
+                const parent = await FolderModel.findById(
+                    this.parent.toString()
+                );
+
+                res.parent = parent._id;
+            }
+        }
+
+        return res;
+    }
 }

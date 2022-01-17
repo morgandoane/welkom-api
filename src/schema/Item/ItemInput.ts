@@ -1,3 +1,4 @@
+import { UserInputError } from 'apollo-server-errors';
 import { CompanyLoader } from './../Company/Company';
 import { UnitLoader } from './../Unit/Unit';
 import { loaderResult } from './../../utils/loaderResult';
@@ -15,6 +16,9 @@ export class CreateItemInput {
     english!: string;
 
     @Field()
+    to_base_unit!: number;
+
+    @Field()
     spanish!: string;
 
     @Field({ nullable: true })
@@ -29,8 +33,13 @@ export class CreateItemInput {
             english: this.english,
             spanish: this.spanish,
             unit_class: this.unit_class,
+            to_base_unit: this.to_base_unit,
             conversions: [],
         };
+
+        if (this.unit_class !== UnitClass.Weight && this.to_base_unit !== 1) {
+            throw new UserInputError('Invalid to_base_unit');
+        }
 
         if (this.default_unit) {
             const unit = loaderResult(await UnitLoader.load(this.default_unit));
@@ -55,6 +64,9 @@ export class UpdateItemInput {
     @Field({ nullable: true })
     spanish?: string;
 
+    @Field()
+    to_base_unit?: number;
+
     @Field({ nullable: true })
     deleted?: boolean;
 
@@ -74,6 +86,24 @@ export class UpdateItemInput {
             date_modified: base.date_modified,
             modified_by: base.modified_by,
         };
+
+        if (this.unit_class || this.to_base_unit) {
+            if (!this.unit_class || !this.to_base_unit) {
+                throw new UserInputError(
+                    'Plase update unit_class & to_base_unit at the same time.'
+                );
+            }
+        }
+
+        if (this.to_base_unit) {
+            if (
+                this.unit_class !== UnitClass.Weight &&
+                this.to_base_unit !== 1
+            ) {
+                throw new UserInputError('Invalid to_base_unit');
+            }
+            item.to_base_unit = this.to_base_unit;
+        }
 
         if (this.english) item.english = this.english;
         if (this.spanish) item.spanish = this.spanish;

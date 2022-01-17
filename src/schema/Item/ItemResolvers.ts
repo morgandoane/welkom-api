@@ -1,4 +1,4 @@
-import { UnitLoader, Unit } from './../Unit/Unit';
+import { UnitLoader, Unit, UnitClass } from './../Unit/Unit';
 import { CompanyLoader } from './../Company/Company';
 import { createBaseResolver } from './../Base/BaseResolvers';
 import { loaderResult } from '@src/utils/loaderResult';

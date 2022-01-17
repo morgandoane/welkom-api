@@ -121,7 +121,7 @@ export class Profile implements User<AppMetaData, UserMetaData> {
     roles!: UserRole[];
 
     @Field()
-    @prop({ required: false })
+    @prop({ required: true })
     name!: string;
 
     @Field({ nullable: true })

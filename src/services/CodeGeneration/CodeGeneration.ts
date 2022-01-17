@@ -4,10 +4,10 @@ import { ItineraryModel } from '@src/schema/Itinerary/Itinerary';
 import crypto from 'crypto';
 
 export enum CodeType {
-    PO = 'PO',
-    BOL = 'BOL',
-    ITIN = 'ITIN',
-    LOT = 'LOT',
+    PO = 'P',
+    BOL = 'B',
+    ITIN = 'I',
+    LOT = 'L',
 }
 
 export class CodeGenerator {
@@ -24,7 +24,7 @@ export class CodeGenerator {
 
     private static async obtain(type: CodeType): Promise<string> {
         const attempt = crypto.randomBytes(3).toString('hex').toUpperCase();
-        const codeAttempt = `${type}-${attempt}`;
+        const codeAttempt = `${attempt}${type}`;
         switch (type) {
             case CodeType.BOL: {
                 const match = await ItineraryModel.findOne({

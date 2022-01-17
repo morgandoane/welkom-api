@@ -22,6 +22,11 @@ export class Item extends Base {
     @prop({ required: true, enum: UnitClass })
     unit_class!: UnitClass;
 
+    // if unit class is weight, count, or time, this is 1. If it is volume, it is a multiplier to get to weight.
+    @Field()
+    @prop({ required: true, default: 1 })
+    to_base_unit!: number;
+
     @prop({ required: false, type: () => [[Number]] })
     order_queue_qtys?: [number, number][];
 

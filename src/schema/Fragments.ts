@@ -4,7 +4,6 @@ import { Team } from './Team/Team';
 import { Conversion } from './Conversion/Conversion';
 import { Contact } from './Contact/Contact';
 import { Base } from '@src/schema/Base/Base';
-import { RecipeFolder } from './Folder/extensions/RecipeFolder/RecipeFolder';
 import { ProceduralLot } from './Lot/extensions/ProceduralLot/ProceduralLot';
 import { BucketLot } from './Lot/extensions/BucketLot/BucketLot';
 import { Unit } from './Unit/Unit';
@@ -31,7 +30,6 @@ export const BaseUnion = createUnionType({
             Conversion,
             Expense,
             Folder,
-            RecipeFolder,
             Fulfillment,
             Item,
             Itinerary,

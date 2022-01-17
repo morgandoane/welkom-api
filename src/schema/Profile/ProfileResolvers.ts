@@ -51,6 +51,7 @@ export class ProfileResolvers {
             given_name,
             family_name,
             email,
+            username,
             phone_number,
             temporary_password: password,
             role,
@@ -58,10 +59,12 @@ export class ProfileResolvers {
     ): Promise<Profile> {
         const ProfileModel = getModelForClass(Profile);
 
+        if (!username && !email)
+            throw new UserInputError('Please provide a username or email.');
+
         const userData: UserData<AppMetaData, UserMetaData> = {
-            email,
-            email_verified: false,
-            verify_email: true,
+            username,
+            email: email || `${username}@littledutchboy.com`,
             blocked: false,
             password,
             given_name,
@@ -121,6 +124,7 @@ export class ProfileResolvers {
             given_name,
             family_name,
             email,
+            username,
             phone_number,
             password,
         }: UpdateProfileInput
@@ -132,6 +136,7 @@ export class ProfileResolvers {
         const updateData: UserData<AppMetaData, UserMetaData> = {};
 
         if (given_name) updateData.given_name = given_name;
+        if (username) updateData.username = username;
         if (password) updateData.password = password;
         if (family_name) updateData.family_name = family_name;
         if (email) {

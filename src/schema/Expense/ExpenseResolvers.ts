@@ -63,15 +63,6 @@ export class ExpenseResolvers extends BaseResolvers {
     ): Promise<Expense> {
         const res = await ExpenseModel.create(await data.validate(context));
 
-        switch (data.key) {
-            case ExpenseKey.Lot: {
-                await LotModel.findOneAndUpdate(
-                    { _id: data.against.toString() },
-                    { expensed: true }
-                );
-                break;
-            }
-        }
         return res.toJSON();
     }
 

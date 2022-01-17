@@ -12,8 +12,11 @@ export class CreateProfileInput {
     @Field()
     family_name!: string;
 
-    @Field()
-    email!: string;
+    @Field({ nullable: true })
+    email?: string;
+
+    @Field({ nullable: true })
+    username?: string;
 
     @Field()
     phone_number!: string;
@@ -35,6 +38,9 @@ export class UpdateProfileInput {
 
     @Field({ nullable: true })
     email?: string;
+
+    @Field({ nullable: true })
+    username?: string;
 
     @Field({ nullable: true })
     phone_number?: string;
