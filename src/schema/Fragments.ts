@@ -1,3 +1,4 @@
+import { RecipeVersion } from './RecipeVersion/RecipeVersion';
 import { Verification } from './Verification/Verification';
 import { QualityCheck } from './QualityCheck/QualityCheck';
 import { Team } from './Team/Team';
@@ -39,6 +40,7 @@ export const BaseUnion = createUnionType({
             ProceduralLot,
             Order,
             Recipe,
+            RecipeVersion,
             Team,
             Unit,
             Verification,

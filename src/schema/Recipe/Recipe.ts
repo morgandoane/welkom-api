@@ -1,3 +1,5 @@
+import { RecipeVersion } from './../RecipeVersion/RecipeVersion';
+import { DateGroup } from './../DateGroup/DateGroup';
 import { getBaseLoader } from './../Loader';
 import {
     prop,
@@ -28,6 +30,12 @@ export class Recipe extends Base {
     @Field(() => Folder, { nullable: true })
     @prop({ required: false, ref: () => Folder })
     folder?: Ref<Folder>;
+
+    @Field(() => [DateGroup])
+    version_date_groups?: DateGroup[];
+
+    @Field(() => RecipeVersion, { nullable: true })
+    active?: RecipeVersion;
 }
 
 export const RecipeModel = getModelForClass(Recipe);

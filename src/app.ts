@@ -34,6 +34,7 @@ import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
 import { QualityCheckResponseResolvers } from './schema/QualityCheckResponse/QualityCheckResponseResolvers';
 import { QualityCheckResolvers } from './schema/QualityCheck/QualityCheckResolvers';
 import { RecipeResolvers } from './schema/Recipe/RecipeResolvers';
+import { RecipeVersionResolvers } from './schema/RecipeVersion/RecipeVersionResolvers';
 import { SignedUrlResolvers } from './schema/SignedUrl/SignedUrlResolvers';
 import { TeamResolvers } from './schema/Team/TeamResolvers';
 import { UnitResolvers } from './schema/Unit/UnitResolvers';
@@ -104,6 +105,7 @@ import https from 'https';
                 QualityCheckResolvers,
                 QualityCheckResponseResolvers,
                 RecipeResolvers,
+                RecipeVersionResolvers,
                 SignedUrlResolvers,
                 TeamResolvers,
                 UnitResolvers,

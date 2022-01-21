@@ -1,3 +1,8 @@
+import {
+    RecipeVersion,
+    RecipeVersionModel,
+} from './../RecipeVersion/RecipeVersion';
+import { DateGroup } from './../DateGroup/DateGroup';
 import { Folder, FolderLoader } from './../Folder/Folder';
 import { ItemLoader } from './../Item/Item';
 import { Item } from '@src/schema/Item/Item';
@@ -89,6 +94,19 @@ export class RecipeResolvers extends BaseResolver {
         return loaderResult(await ItemLoader.load(item.toString()));
     }
 
+    @FieldResolver(() => RecipeVersion)
+    async active(@Root() { _id: recipe }: Recipe): Promise<RecipeVersion> {
+        const latest = await RecipeVersionModel.find({
+            deleted: false,
+            recipe,
+        })
+            .sort({ date_created: -1 })
+            .limit(1);
+
+        if (latest[0]) return latest[0].toJSON();
+        else return null;
+    }
+
     @FieldResolver(() => Folder)
     async folder(
         @Ctx() context: Context,
@@ -96,5 +114,14 @@ export class RecipeResolvers extends BaseResolver {
     ): Promise<Folder> {
         if (!folder) return Folder.fromNull(context);
         return loaderResult(await FolderLoader.load(folder.toString()));
+    }
+
+    @FieldResolver(() => [DateGroup])
+    async version_date_groups(@Root() { _id }: Recipe): Promise<DateGroup[]> {
+        return await DateGroup.execute({
+            model: RecipeVersionModel,
+            query: { recipe: _id, deleted: false },
+            date_path: 'date_created',
+        });
     }
 }

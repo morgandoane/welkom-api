@@ -8,6 +8,9 @@ export class ItemFilter extends BaseFilter {
     @Field({ nullable: true })
     name?: string;
 
+    @Field({ nullable: true, defaultValue: false })
+    primitive?: boolean;
+
     serializeItemFilter(): FilterQuery<Item> {
         const query: FilterQuery<Item> = this.serializeBaseFilter();
         if (this.name)
@@ -16,6 +19,17 @@ export class ItemFilter extends BaseFilter {
                 { english: { $regex: new RegExp(this.name, 'i') } },
                 { spanish: { $regex: new RegExp(this.name, 'i') } },
             ];
+
+        if (this.primitive !== undefined && this.primitive !== null) {
+            query.$and = [
+                {
+                    $or: [
+                        { primitive: false },
+                        { primitive: { $exists: false } },
+                    ],
+                },
+            ];
+        }
 
         return query;
     }

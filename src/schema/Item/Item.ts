@@ -53,6 +53,10 @@ export class Item extends Base {
     @Field(() => [Conversion])
     @prop({ required: true, type: () => Conversion })
     conversions!: Conversion[];
+
+    @Field({ nullable: true })
+    @prop({ required: false, default: false })
+    primitive?: boolean;
 }
 
 export const ItemModel = getModelForClass(Item);

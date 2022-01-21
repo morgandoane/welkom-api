@@ -11,7 +11,7 @@ import {
     LotContent,
     OrderContent,
 } from './Content';
-
+import { DocumentType } from '@typegoose/typegoose';
 import { FieldResolver, Resolver, Root, ResolverInterface } from 'type-graphql';
 import { Lot } from '../Lot/Lot';
 import { Location } from '../Location/Location';
@@ -67,7 +67,7 @@ export class ItemPluralContentResolver {
             if (doc instanceof Error) throw doc;
         }
 
-        return docs as Item[];
+        return docs.map((d) => loaderResult(d));
     }
 }
 

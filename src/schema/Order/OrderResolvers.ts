@@ -1,3 +1,4 @@
+import { DateGroup } from './../DateGroup/DateGroup';
 import { ExpenseModel } from './../Expense/Expense';
 import { BolModel } from './../Bol/Bol';
 import { Itinerary, ItineraryModel } from './../Itinerary/Itinerary';
@@ -79,6 +80,21 @@ export class OrderResolvers extends BaseResolvers {
     @Query(() => Order)
     async order(@Arg('id', () => ObjectIdScalar) id: ObjectId): Promise<Order> {
         return loaderResult(await OrderLoader.load(id.toString()));
+    }
+
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetOrders,
+        })
+    )
+    @Query(() => [DateGroup])
+    async orderDateGroups(): Promise<DateGroup[]> {
+        return await DateGroup.execute({
+            model: OrderModel,
+            query: { deleted: false },
+            date_path: 'date_created',
+        });
     }
 
     @UseMiddleware(

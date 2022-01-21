@@ -33,7 +33,7 @@ export class BolItemContent extends ItemContent {
 
 @ObjectType()
 export class ItemPluralContent extends Content {
-    @Field(() => Item)
+    @Field(() => [Item])
     @prop({ required: true, ref: () => Item })
     items!: Ref<Item>[];
 }
