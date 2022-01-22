@@ -66,4 +66,8 @@ export enum Permission {
     GetUnits = 'GetUnits',
     CreateUnit = 'CreateUnit',
     UpdateUnit = 'UpdateUnit',
+
+    GetMixingCards = 'GetMixingCards',
+    CreateMixingCard = 'CreateMixingCard',
+    UpdateMixingCard = 'UpdateMixingCard',
 }

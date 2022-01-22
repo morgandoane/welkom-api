@@ -1,3 +1,4 @@
+import { ProfileIdentifierModel } from './../../schema/ProfileIdentifier/ProfileIdentifier';
 import { LotModel } from './../../schema/Lot/Lot';
 import { OrderModel } from './../../schema/Order/Order';
 import { ItineraryModel } from '@src/schema/Itinerary/Itinerary';
@@ -8,6 +9,7 @@ export enum CodeType {
     BOL = 'B',
     ITIN = 'I',
     LOT = 'L',
+    ID = 'ID',
 }
 
 export class CodeGenerator {
@@ -23,7 +25,10 @@ export class CodeGenerator {
     }
 
     private static async obtain(type: CodeType): Promise<string> {
-        const attempt = crypto.randomBytes(3).toString('hex').toUpperCase();
+        const attempt = crypto
+            .randomBytes(type == CodeType.ID ? 8 : 3)
+            .toString('hex')
+            .toUpperCase();
         const codeAttempt = `${attempt}${type}`;
         switch (type) {
             case CodeType.BOL: {
@@ -49,6 +54,13 @@ export class CodeGenerator {
             }
             case CodeType.PO: {
                 const match = await OrderModel.findOne({
+                    code: codeAttempt,
+                });
+                if (match) return await this.obtain(type);
+                else return codeAttempt;
+            }
+            case CodeType.ID: {
+                const match = await ProfileIdentifierModel.findOne({
                     code: codeAttempt,
                 });
                 if (match) return await this.obtain(type);
@@ -85,6 +97,13 @@ export class CodeGenerator {
             }
             case CodeType.PO: {
                 const match = await OrderModel.findOne({
+                    code: type + attempt,
+                });
+                if (match) return true;
+                else return false;
+            }
+            case CodeType.ID: {
+                const match = await ProfileIdentifierModel.findOne({
                     code: type + attempt,
                 });
                 if (match) return true;

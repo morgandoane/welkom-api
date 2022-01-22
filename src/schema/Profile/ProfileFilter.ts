@@ -1,3 +1,5 @@
+import { TeamModel } from './../Team/Team';
+import { Permission } from '@src/auth/permissions';
 import { Context } from './../../auth/context';
 import { PaginateArg } from './../Pagination/Pagination';
 import { Field, InputType } from 'type-graphql';
@@ -11,7 +13,15 @@ export class ProfileFilter extends PaginateArg {
     @Field({ nullable: true })
     name?: string;
 
-    public serializeProfileFilter({ roles }: Context): FilterQuery<Profile> {
+    @Field({ nullable: true, defaultValue: true })
+    skip_sync?: boolean;
+
+    @Field(() => [Permission], { nullable: true })
+    has_permissions?: Permission[];
+
+    public async serializeProfileFilter({
+        roles,
+    }: Context): Promise<FilterQuery<Profile>> {
         const filter: FilterQuery<Profile> = {};
         if (this.name) {
             filter.$or = [
@@ -36,6 +46,17 @@ export class ProfileFilter extends PaginateArg {
 
         if (!roles.includes(UserRole.Admin)) {
             filter.roles = UserRole.User;
+        }
+
+        if (this.has_permissions) {
+            const teams = await TeamModel.find({
+                permissions: { $all: this.has_permissions },
+                deleted: false,
+            });
+
+            const members = teams.map((team) => team.members).flat();
+
+            filter.user_id = { $in: members };
         }
 
         return filter;

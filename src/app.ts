@@ -25,12 +25,15 @@ import { ItemResolvers } from './schema/Item/ItemResolvers';
 import { ItineraryResolvers } from './schema/Itinerary/ItineraryResolvers';
 import { LocationResolvers } from './schema/Location/LocationResolvers';
 import { LotResolvers } from './schema/Lot/LotResolvers';
+import { MixingCardResolvers } from './schema/MixingCard/MixingCardResolvers';
+import { MixingCardLineResolvers } from './schema/MixingCardLine/MixingLineResolvers';
 import { OrderResolvers } from './schema/Order/OrderResolvers';
 import { OrderQueueResolvers } from './schema/OrderQueue/OrderQueueResolvers';
 import { OrderQueueContentResolvers } from './schema/OrderQueue/OrderQueueContentResolvers';
 import { OrderStatisticResolvers } from './schema/OrderStatistic/OrderStatisticResolvers';
 import { ProceduralLotResolvers } from './schema/Lot/extensions/ProceduralLot/ProceduralLotResolvers';
 import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
+import { ProfileIdentifierResolvers } from './schema/ProfileIdentifier/ProfileIdentifierResolvers';
 import { QualityCheckResponseResolvers } from './schema/QualityCheckResponse/QualityCheckResponseResolvers';
 import { QualityCheckResolvers } from './schema/QualityCheck/QualityCheckResolvers';
 import { RecipeResolvers } from './schema/Recipe/RecipeResolvers';
@@ -95,6 +98,8 @@ import https from 'https';
                 LocationResolvers,
                 LotResolvers,
                 LotContentResolver,
+                MixingCardResolvers,
+                MixingCardLineResolvers,
                 OrderContentResolver,
                 OrderResolvers,
                 OrderQueueResolvers,
@@ -102,6 +107,7 @@ import https from 'https';
                 OrderStatisticResolvers,
                 ProceduralLotResolvers,
                 ProfileResolvers,
+                ProfileIdentifierResolvers,
                 QualityCheckResolvers,
                 QualityCheckResponseResolvers,
                 RecipeResolvers,

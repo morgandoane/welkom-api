@@ -1,3 +1,7 @@
+import {
+    ProfileIdentifier,
+    ProfileIdentifierModel,
+} from './../ProfileIdentifier/ProfileIdentifier';
 import { UserRole } from '@src/auth/UserRole';
 import { ForbiddenError } from 'apollo-server-express';
 import { randomNumber } from './../../utils/randomNumber';
@@ -31,7 +35,7 @@ import {
     UseMiddleware,
 } from 'type-graphql';
 import { CreateProfileInput, UpdateProfileInput } from './ProfileInput';
-import { CreateUserData, Role, User, UserData } from 'auth0';
+import { CreateUserData, User, UserData } from 'auth0';
 import { getModelForClass, mongoose } from '@typegoose/typegoose';
 import { Permitted } from '@src/auth/middleware/Permitted';
 
@@ -191,13 +195,13 @@ export class ProfileResolvers {
         @Ctx() context: Context,
         @Arg('filter') filter: ProfileFilter
     ): Promise<ProfileList> {
-        if (randomNumber(15, 1) == 1) {
+        if (randomNumber(15, 1) == 1 && !filter.skip_sync) {
             console.log('synchronizing profiles');
             await synchronizeProfiles();
         }
-        return Paginate.paginate({
+        return await Paginate.paginate({
             model: ProfileModel,
-            query: filter.serializeProfileFilter(context),
+            query: await filter.serializeProfileFilter(context),
             sort: { name: 1 },
             skip: filter.skip,
             take: filter.take,
@@ -242,5 +246,18 @@ export class ProfileResolvers {
         if (profile.name) return profile.name;
         if (profile.email) return profile.email;
         return 'Anonymous user';
+    }
+
+    @UseMiddleware(Permitted({ type: 'role', role: UserRole.Admin }))
+    @FieldResolver(() => ProfileIdentifier, { nullable: true })
+    async identifier(@Root() { user_id }: Profile): Promise<ProfileIdentifier> {
+        const identifier = await ProfileIdentifierModel.findOne({
+            profile: user_id,
+            deleted: false,
+        });
+
+        if (!identifier) return null;
+
+        return identifier.toJSON();
     }
 }

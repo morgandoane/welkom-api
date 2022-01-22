@@ -1,3 +1,6 @@
+import { MixingCard } from './MixingCard/MixingCard';
+import { Batch } from './Batch/Batch';
+import { ProfileIdentifier } from './ProfileIdentifier/ProfileIdentifier';
 import { RecipeVersion } from './RecipeVersion/RecipeVersion';
 import { Verification } from './Verification/Verification';
 import { QualityCheck } from './QualityCheck/QualityCheck';
@@ -25,7 +28,9 @@ export const BaseUnion = createUnionType({
     name: 'BaseUnion',
     types: () =>
         [
+            Batch,
             Bol,
+            BucketLot,
             Company,
             Contact,
             Conversion,
@@ -36,8 +41,9 @@ export const BaseUnion = createUnionType({
             Itinerary,
             Location,
             Lot,
-            BucketLot,
+            MixingCard,
             ProceduralLot,
+            ProfileIdentifier,
             Order,
             Recipe,
             RecipeVersion,

@@ -52,36 +52,12 @@ export class CompanyResolvers extends BaseResolver {
         @Ctx() context: Context,
         @Arg('filter') filter: CompanyFilter
     ): Promise<CompanyList> {
-        const { skip, take, name, mine } = filter;
-        const query: FilterQuery<Company> = { ...filter.serializeBaseFilter() };
-        if (name !== undefined) query.name = { $regex: new RegExp(name, 'i') };
-
-        if (mine !== undefined) {
-            // determine companies based on assigned teams or on all teams in db
-            const teams = await TeamModel.find(
-                context.roles == [UserRole.User]
-                    ? {
-                          members: context.base.created_by,
-                          deleted: false,
-                      }
-                    : { deleted: false }
-            );
-
-            const companyIds = teams.map(
-                (t) => new mongoose.Types.ObjectId(t.company.toString())
-            );
-
-            if (mine == true)
-                query.$and = [...query.$and, { _id: { $in: companyIds } }];
-            else query.$and = [...query.$and, { _id: { $nin: companyIds } }];
-        }
-
         return await Paginate.paginate({
             model: CompanyModel,
-            query,
+            query: await filter.serializeCompanyFilter(context),
             sort: { name: 1 },
-            skip,
-            take,
+            skip: filter.skip,
+            take: filter.take,
         });
     }
 
