@@ -1,3 +1,4 @@
+import { Permitted } from '@src/auth/middleware/Permitted';
 import { createBaseResolver } from './../../../Base/BaseResolvers';
 import {
     ProceduralLotInput,
@@ -10,12 +11,21 @@ import {
     ProceduralLotLoader,
     ProceduralLotModel,
 } from './ProceduralLot';
-import { Arg, Query, Resolver, ObjectType, Mutation, Ctx } from 'type-graphql';
+import {
+    Arg,
+    Query,
+    Resolver,
+    ObjectType,
+    Mutation,
+    Ctx,
+    UseMiddleware,
+} from 'type-graphql';
 import { ObjectIdScalar } from '@src/schema/ObjectIdScalar';
 import { ObjectId } from 'mongoose';
 import { loaderResult } from '@src/utils/loaderResult';
 import { Paginate } from '@src/schema/Paginate';
 import { Context } from '@src/auth/context';
+import { Permission } from '@src/auth/permissions';
 
 const BaseResolvers = createBaseResolver();
 
@@ -24,6 +34,9 @@ export class ProceduralLotList extends Pagination(ProceduralLot) {}
 
 @Resolver(() => ProceduralLot)
 export class ProceduralLotResolvers extends BaseResolvers {
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.GetLots })
+    )
     @Query(() => ProceduralLot)
     async proceduralLot(
         @Arg('id', () => ObjectIdScalar) id: ObjectId
@@ -31,6 +44,9 @@ export class ProceduralLotResolvers extends BaseResolvers {
         return loaderResult(await ProceduralLotLoader.load(id.toString()));
     }
 
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.GetLots })
+    )
     @Query(() => ProceduralLotList)
     async proceduralLots(
         @Arg('filter') filter: ProceduralLotFilter
@@ -46,6 +62,9 @@ export class ProceduralLotResolvers extends BaseResolvers {
         });
     }
 
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.CreateLot })
+    )
     @Mutation(() => ProceduralLot)
     async createProceduralLot(
         @Arg('data') data: ProceduralLotInput,
@@ -56,6 +75,9 @@ export class ProceduralLotResolvers extends BaseResolvers {
         return res.toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.UpdateLot })
+    )
     @Mutation(() => ProceduralLot)
     async updateProceduralLot(
         @Arg('id', () => ObjectIdScalar) id: ObjectId,

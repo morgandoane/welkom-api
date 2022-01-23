@@ -51,7 +51,7 @@ export class MixingCardResolvers extends BaseResolver {
     @UseMiddleware(
         Permitted({ type: 'permission', permission: Permission.GetMixingCards })
     )
-    @Query(() => MixingCard)
+    @Query(() => MixingCard, { nullable: true })
     async myMixingCard(@Ctx() context: Context): Promise<MixingCard> {
         const res = await MixingCardModel.findOne({
             deleted: false,

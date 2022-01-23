@@ -1,3 +1,6 @@
+import { UserInputError } from 'apollo-server-errors';
+import { RecipeVersionModel } from './../RecipeVersion/RecipeVersion';
+import { RecipeModel } from './../Recipe/Recipe';
 import { mongoose } from '@typegoose/typegoose';
 import { ProceduralLotContent } from './../Lot/extensions/ProceduralLot/ProceduralLot';
 import { LocationLoader } from './../Location/Location';
@@ -105,11 +108,30 @@ export class LotContentInput extends ContentInput {
 
 @InputType()
 export class ProceduralLotContentInput extends LotContentInput {
+    @Field({ nullable: true })
+    recipe_step?: string;
+
     async validateProceduralLotContent(): Promise<ProceduralLotContent> {
-        const content = await this.validateLotContent();
-        return {
-            ...content,
-        };
+        if (this.recipe_step) {
+            const recipe = await RecipeVersionModel.findOne({
+                'sections.steps._id': this.recipe_step,
+            });
+
+            if (!recipe)
+                throw new UserInputError(
+                    'Failed to find recipe version containing step with id ' +
+                        this.recipe_step
+                );
+
+            return {
+                ...(await this.validateLotContent()),
+                recipe_step: new mongoose.Types.ObjectId(this.recipe_step),
+            };
+        } else {
+            return {
+                ...(await this.validateLotContent()),
+            };
+        }
     }
 }
 

@@ -52,9 +52,10 @@ export class CompanyResolvers extends BaseResolver {
         @Ctx() context: Context,
         @Arg('filter') filter: CompanyFilter
     ): Promise<CompanyList> {
+        const query = await filter.serializeCompanyFilter(context);
         return await Paginate.paginate({
             model: CompanyModel,
-            query: await filter.serializeCompanyFilter(context),
+            query,
             sort: { name: 1 },
             skip: filter.skip,
             take: filter.take,

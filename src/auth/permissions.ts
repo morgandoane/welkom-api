@@ -1,4 +1,8 @@
 export enum Permission {
+    GetBatches = 'GetBatches',
+    CreateBatch = 'CreateBatch',
+    UpdateBatch = 'UpdateBatch',
+
     GetBols = 'GetBols',
     CreateBol = 'CreateBol',
     UpdateBol = 'UpdateBol',

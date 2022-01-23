@@ -9,6 +9,7 @@ import { registerEnums } from './utils/registerEnums';
 
 // Resolvers
 import { AppFileResolvers } from './schema/AppFile/AppFileResolvers';
+import { BatchResolvers } from './schema/Batch/BatchResolvers';
 import { BolFileResolvers } from './schema/AppFile/extensons/BolFile/BolFile';
 import { BaseUnionResolvers } from './schema/Fragments';
 import { BolResolvers } from './schema/Bol/BolResolvers';
@@ -77,6 +78,7 @@ import https from 'https';
         const schema = await buildSchema({
             resolvers: [
                 AppFileResolvers,
+                BatchResolvers,
                 BolFileResolvers,
                 BaseUnionResolvers,
                 BolResolvers,

@@ -46,8 +46,7 @@ export class CompanyFilter extends BaseFilter {
                     ...(res.$and ? res.$and : []),
                     { _id: { $nin: companyIds } },
                 ];
-
-            return res;
         }
+        return res;
     }
 }
