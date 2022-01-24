@@ -5,7 +5,7 @@
   "main": "dist/app.js",
   "_moduleAliases": {
     "@src": "dist"
-  },
+  }, 
   "scripts": {
     "dev": "nodemon",
     "build-ts": "tsc",
