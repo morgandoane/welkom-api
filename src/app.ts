@@ -10,6 +10,7 @@ import { registerEnums } from './utils/registerEnums';
 // Resolvers
 import { AppFileResolvers } from './schema/AppFile/AppFileResolvers';
 import { BatchResolvers } from './schema/Batch/BatchResolvers';
+import { BatchLineResolvers } from './schema/BatchLine/BatchLineResolvers';
 import { BolFileResolvers } from './schema/AppFile/extensons/BolFile/BolFile';
 import { BaseUnionResolvers } from './schema/Fragments';
 import { BolResolvers } from './schema/Bol/BolResolvers';
@@ -50,6 +51,7 @@ import {
     ItemPluralContentResolver,
     LotContentResolver,
     OrderContentResolver,
+    ProceduralLotContentResolver,
 } from './schema/Content/ContentResolvers';
 
 import { mongoose } from '@typegoose/typegoose';
@@ -79,6 +81,7 @@ import https from 'https';
             resolvers: [
                 AppFileResolvers,
                 BatchResolvers,
+                BatchLineResolvers,
                 BolFileResolvers,
                 BaseUnionResolvers,
                 BolResolvers,
@@ -110,6 +113,7 @@ import https from 'https';
                 ProceduralLotResolvers,
                 ProfileResolvers,
                 ProfileIdentifierResolvers,
+                ProceduralLotContentResolver,
                 QualityCheckResolvers,
                 QualityCheckResponseResolvers,
                 RecipeResolvers,

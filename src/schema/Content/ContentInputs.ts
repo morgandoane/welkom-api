@@ -113,16 +113,6 @@ export class ProceduralLotContentInput extends LotContentInput {
 
     async validateProceduralLotContent(): Promise<ProceduralLotContent> {
         if (this.recipe_step) {
-            const recipe = await RecipeVersionModel.findOne({
-                'sections.steps._id': this.recipe_step,
-            });
-
-            if (!recipe)
-                throw new UserInputError(
-                    'Failed to find recipe version containing step with id ' +
-                        this.recipe_step
-                );
-
             return {
                 ...(await this.validateLotContent()),
                 recipe_step: new mongoose.Types.ObjectId(this.recipe_step),

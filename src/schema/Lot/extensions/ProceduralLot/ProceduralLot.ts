@@ -15,8 +15,8 @@ export class ProceduralLotContent extends LotContent {
 
 @ObjectType()
 export class ProceduralLot extends Lot {
-    @Field(() => ProceduralLotContent)
-    @prop({ required: true })
+    @Field(() => [ProceduralLotContent])
+    @prop({ required: true, type: () => ProceduralLotContent })
     contents!: ProceduralLotContent[];
 }
 

@@ -78,7 +78,8 @@ export class CreateBatchInput {
         );
 
         const bestMatch = matches.find((line) => {
-            line.recipe_version.toString() === recipeVersion._id.toString();
+            (line.recipe_version || '').toString() ===
+                recipeVersion._id.toString();
         });
 
         const lineIndex = card.lines

@@ -22,9 +22,6 @@ import { QualityCheckResponse } from '../QualityCheckResponse/QualityCheckRespon
     schemaOptions: {
         collection: 'lots',
     },
-    options: {
-        allowMixed: Severity.ALLOW,
-    },
 })
 export class Lot extends Base {
     @Field()
@@ -56,7 +53,7 @@ export class Lot extends Base {
     company?: Ref<Company>;
 
     @Field(() => [LotContent])
-    @prop({ required: true })
+    @prop({ required: true, type: () => LotContent })
     contents!: LotContent[];
 }
 

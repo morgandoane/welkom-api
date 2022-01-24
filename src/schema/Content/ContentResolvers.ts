@@ -1,3 +1,7 @@
+import { RecipeVersionModel } from './../RecipeVersion/RecipeVersion';
+import { RecipeModel } from './../Recipe/Recipe';
+import { RecipeStep } from './../RecipeStep/RecipeStep';
+import { ProceduralLotContent } from './../Lot/extensions/ProceduralLot/ProceduralLot';
 import { LocationLoader } from './../Location/Location';
 import { LotLoader } from './../Lot/Lot';
 import { Item, ItemLoader } from './../Item/Item';
@@ -81,6 +85,35 @@ export class LotContentResolver {
     @FieldResolver(() => Lot)
     async lot(@Root() root: LotContent): Promise<Lot> {
         return loaderResult(await LotLoader.load(root.lot.toString()));
+    }
+}
+
+@Resolver(() => ProceduralLotContent)
+export class ProceduralLotContentResolver {
+    @FieldResolver(() => Unit)
+    async unit(@Root() root: ProceduralLotContent): Promise<Unit> {
+        return loaderResult(await UnitLoader.load(root.unit.toString()));
+    }
+
+    @FieldResolver(() => Lot)
+    async lot(@Root() root: ProceduralLotContent): Promise<Lot> {
+        return loaderResult(await LotLoader.load(root.lot.toString()));
+    }
+
+    @FieldResolver(() => RecipeStep, { nullable: true })
+    async recipe_step(
+        @Root() { recipe_step }: ProceduralLotContent
+    ): Promise<RecipeStep> {
+        if (!recipe_step) return null;
+        const version = await RecipeVersionModel.findOne({
+            'sections.steps._id': recipe_step.toString(),
+        });
+        return (
+            version.sections
+                .map((s) => s.steps)
+                .flat()
+                .find((l) => l._id.toString() == recipe_step.toString()) || null
+        );
     }
 }
 
