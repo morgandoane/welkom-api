@@ -10,10 +10,4 @@ export class BatchLotInput {
 
     @Field({ nullable: true })
     lot?: string;
-
-    @Field({ nullable: true })
-    recipe_step?: string;
-
-    @Field({ nullable: true })
-    recipe_step?: string;
 }
