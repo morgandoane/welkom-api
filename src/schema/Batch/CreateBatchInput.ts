@@ -1,3 +1,4 @@
+import { ProductionLineLoader } from './../ProductionLine/ProductionLine';
 import { UserInputError } from 'apollo-server-errors';
 import {
     CodeGenerator,
@@ -25,6 +26,9 @@ export class CreateBatchInput {
     @Field()
     location!: string;
 
+    @Field({ nullable: true })
+    production_line?: string;
+
     public async validateBatchCreation({ base }: Context): Promise<{
         batch: Batch;
         lot: ProceduralLot;
@@ -39,6 +43,11 @@ export class CreateBatchInput {
         );
 
         const location = loaderResult(await LocationLoader.load(this.location));
+        const production_line = !this.production_line
+            ? null
+            : loaderResult(
+                  await ProductionLineLoader.load(this.production_line)
+              );
 
         const lot: ProceduralLot = {
             ...base,
@@ -55,6 +64,9 @@ export class CreateBatchInput {
             ...base,
             recipe_version: recipeVersion._id,
             lot: lot._id,
+            item: recipe.item,
+            location: location._id,
+            production_line: production_line?._id || null,
         };
 
         if (!this.mixing_card_line) {

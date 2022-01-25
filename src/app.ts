@@ -33,7 +33,9 @@ import { OrderResolvers } from './schema/Order/OrderResolvers';
 import { OrderQueueResolvers } from './schema/OrderQueue/OrderQueueResolvers';
 import { OrderQueueContentResolvers } from './schema/OrderQueue/OrderQueueContentResolvers';
 import { OrderStatisticResolvers } from './schema/OrderStatistic/OrderStatisticResolvers';
+import { PalletResolvers } from './schema/Pallet/PalletResolvers';
 import { ProceduralLotResolvers } from './schema/Lot/extensions/ProceduralLot/ProceduralLotResolvers';
+import { ProductionLineResolvers } from './schema/ProductionLine/ProductionLineResolvers';
 import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
 import { ProfileIdentifierResolvers } from './schema/ProfileIdentifier/ProfileIdentifierResolvers';
 import { QualityCheckResponseResolvers } from './schema/QualityCheckResponse/QualityCheckResponseResolvers';
@@ -42,8 +44,10 @@ import { RecipeResolvers } from './schema/Recipe/RecipeResolvers';
 import { RecipeVersionResolvers } from './schema/RecipeVersion/RecipeVersionResolvers';
 import { SignedUrlResolvers } from './schema/SignedUrl/SignedUrlResolvers';
 import { TeamResolvers } from './schema/Team/TeamResolvers';
+import { TrayResolvers } from './schema/Tray/TrayResolvers';
 import { UnitResolvers } from './schema/Unit/UnitResolvers';
 import { VerificationResolvers } from './schema/Verification/VerificationResolvers';
+import { WorkbookResolvers } from './schema/Workbook/WorkbookResolvers';
 import {
     BolItemContentResolver,
     ContentResolver,
@@ -110,18 +114,22 @@ import https from 'https';
                 OrderQueueResolvers,
                 OrderQueueContentResolvers,
                 OrderStatisticResolvers,
+                PalletResolvers,
                 ProceduralLotResolvers,
                 ProfileResolvers,
                 ProfileIdentifierResolvers,
                 ProceduralLotContentResolver,
+                ProductionLineResolvers,
                 QualityCheckResolvers,
                 QualityCheckResponseResolvers,
                 RecipeResolvers,
                 RecipeVersionResolvers,
                 SignedUrlResolvers,
                 TeamResolvers,
+                TrayResolvers,
                 UnitResolvers,
                 VerificationResolvers,
+                WorkbookResolvers,
             ],
             validate: true,
         });

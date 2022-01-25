@@ -13,6 +13,7 @@ export enum StorageBucket {
     Documents = 'ldbbakery_documents',
     Images = 'ldbbakery_images',
     Profiles = 'ldbbakery_profiles',
+    Workbooks = 'ldbbakery_workbooks',
 }
 
 export type StorageRecord = Record<StorageBucket, CreateBucketRequest>;
@@ -37,6 +38,7 @@ const StorageSchema: StorageRecord = {
     [StorageBucket.Documents]: { ...defaultConfig },
     [StorageBucket.Images]: { ...defaultConfig },
     [StorageBucket.Profiles]: { ...defaultConfig },
+    [StorageBucket.Workbooks]: { ...defaultConfig },
 };
 
 export class StorageClass {

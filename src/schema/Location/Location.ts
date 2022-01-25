@@ -1,3 +1,4 @@
+import { ProductionLine } from './../ProductionLine/ProductionLine';
 import { getBaseLoader } from './../Loader';
 import { createUnionType, Field, ObjectType } from 'type-graphql';
 import { Address } from '../Address/Address';
@@ -31,6 +32,9 @@ export class Location extends Base {
     @Field({ nullable: true })
     @prop({ required: false })
     label?: string;
+
+    @Field(() => [ProductionLine], { nullable: true })
+    production_lines?: ProductionLine[];
 }
 
 export const LocationModel = getModelForClass(Location);

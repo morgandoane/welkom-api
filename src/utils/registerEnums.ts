@@ -16,6 +16,7 @@ export enum StorageBucketProxy {
     ldbbakery_documents = 'ldbbakery_documents',
     ldbbakery_images = 'ldbbakery_images',
     ldbbakery_profiles = 'ldbbakery_profiles',
+    ldbbakery_workbooks = 'ldbbakery_workbooks',
 }
 
 export const registerEnums = (): void => {

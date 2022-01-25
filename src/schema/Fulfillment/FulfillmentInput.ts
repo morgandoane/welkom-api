@@ -54,15 +54,19 @@ export class FulfillmentInput {
     company!: ObjectId;
 
     public async validateFulfillment(context: Context): Promise<Fulfillment> {
-        loaderResult(await LocationLoader.load(this.location.toString()));
-        loaderResult(await CompanyLoader.load(this.company.toString()));
+        const location = loaderResult(
+            await LocationLoader.load(this.location.toString())
+        );
+        const company = loaderResult(
+            await CompanyLoader.load(this.company.toString())
+        );
 
         const fulfillment: Fulfillment = {
             ...context.base,
             bol: new mongoose.Types.ObjectId(this.bol.toString()),
             type: this.type,
-            location: new mongoose.Types.ObjectId(this.location.toString()),
-            company: new mongoose.Types.ObjectId(this.company.toString()),
+            location: location._id,
+            company: company._id,
             lots: [],
         };
 
@@ -117,6 +121,8 @@ export class FulfillmentInput {
                 start_quantity,
                 item: item._id,
                 fulfillment_type: this.type,
+                location: location._id,
+                company: company._id,
             };
 
             for (const lotfinder of lots) {

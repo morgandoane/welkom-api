@@ -11,10 +11,24 @@ export class BatchFilter extends BaseFilter {
     @Field(() => DateRangeInput, { nullable: true })
     date_completed?: DateRangeInput;
 
+    @Field({ nullable: true })
+    item?: string;
+
+    @Field({ nullable: true })
+    location?: string;
+
     public serializeBatchFilter(): FilterQuery<DocumentType<Batch>> {
         const res: FilterQuery<DocumentType<Batch>> = {
             ...this.serializeBaseFilter(),
         } as FilterQuery<DocumentType<Batch>>;
+
+        if (this.item) {
+            res.item = this.item;
+        }
+
+        if (this.location) {
+            res.location = this.location;
+        }
 
         if (this.date_completed !== undefined) {
             if (this.date_completed == null) {

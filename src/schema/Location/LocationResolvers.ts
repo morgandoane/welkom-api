@@ -1,3 +1,8 @@
+import {
+    ProductionLine,
+    ProductionLineLoader,
+    ProductionLineModel,
+} from './../ProductionLine/ProductionLine';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { Context } from '@src/auth/context';
 import { CreateLocationInput, UpdateLocationInput } from './LocationInput';
@@ -134,5 +139,17 @@ export class LocationResolvers extends BaseResolver {
                 { upsert: true, new: true }
             )
         ).toJSON();
+    }
+
+    @FieldResolver(() => [ProductionLine])
+    async production_lines(
+        @Root() { _id }: Location
+    ): Promise<ProductionLine[]> {
+        const res = await ProductionLineModel.find({
+            deleted: false,
+            location: _id,
+        });
+
+        return res.map((r) => r.toJSON());
     }
 }

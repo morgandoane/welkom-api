@@ -1,3 +1,7 @@
+import {
+    ProductionLine,
+    ProductionLineLoader,
+} from './../ProductionLine/ProductionLine';
 import { Profile } from './../Profile/Profile';
 import { UserLoader } from './../../services/AuthProvider/AuthProvider';
 import { Location, LocationLoader } from './../Location/Location';
@@ -101,6 +105,16 @@ export class MixingCardResolvers extends BaseResolver {
     @FieldResolver(() => Location)
     async location(@Root() { location }: MixingCard): Promise<Location> {
         return loaderResult(await LocationLoader.load(location.toString()));
+    }
+
+    @FieldResolver(() => ProductionLine, { nullable: true })
+    async production_line(
+        @Root() { production_line }: MixingCard
+    ): Promise<ProductionLine> {
+        if (!production_line) return null;
+        return loaderResult(
+            await ProductionLineLoader.load(production_line.toString())
+        );
     }
 
     @FieldResolver(() => Profile)

@@ -1,3 +1,4 @@
+import { TrayModel } from './../../schema/Tray/Tray';
 import { ProfileIdentifierModel } from './../../schema/ProfileIdentifier/ProfileIdentifier';
 import { LotModel } from './../../schema/Lot/Lot';
 import { OrderModel } from './../../schema/Order/Order';
@@ -10,6 +11,7 @@ export enum CodeType {
     ITIN = 'I',
     LOT = 'L',
     ID = 'ID',
+    TR = 'TR',
 }
 
 export class CodeGenerator {
@@ -66,6 +68,13 @@ export class CodeGenerator {
                 if (match) return await this.obtain(type);
                 else return codeAttempt;
             }
+            case CodeType.TR: {
+                const match = await TrayModel.findOne({
+                    code: codeAttempt,
+                });
+                if (match) return await this.obtain(type);
+                else return codeAttempt;
+            }
         }
     }
 
@@ -104,6 +113,13 @@ export class CodeGenerator {
             }
             case CodeType.ID: {
                 const match = await ProfileIdentifierModel.findOne({
+                    code: type + attempt,
+                });
+                if (match) return true;
+                else return false;
+            }
+            case CodeType.TR: {
+                const match = await TrayModel.findOne({
                     code: type + attempt,
                 });
                 if (match) return true;

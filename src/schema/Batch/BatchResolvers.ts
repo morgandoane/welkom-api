@@ -1,3 +1,8 @@
+import { Item, ItemLoader } from '@src/schema/Item/Item';
+import {
+    ProductionLine,
+    ProductionLineLoader,
+} from './../ProductionLine/ProductionLine';
 import { loaderResult } from '@src/utils/loaderResult';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { ObjectId } from 'mongoose';
@@ -32,6 +37,7 @@ import {
 import { Permission } from '@src/auth/permissions';
 import { UserInputError } from 'apollo-server-errors';
 import { RecipeLoader } from '../Recipe/Recipe';
+import { Location, LocationLoader } from '../Location/Location';
 
 export const BaseResolvers = createBaseResolver();
 
@@ -154,6 +160,26 @@ export class BatchResolvers extends BaseResolvers {
     @FieldResolver(() => ProceduralLot)
     async lot(@Root() { lot }: Batch): Promise<ProceduralLot> {
         return loaderResult(await ProceduralLotLoader.load(lot.toString()));
+    }
+
+    @FieldResolver(() => Item)
+    async item(@Root() { item }: Batch): Promise<Item> {
+        return loaderResult(await ItemLoader.load(item.toString()));
+    }
+
+    @FieldResolver(() => Location)
+    async location(@Root() { location }: Batch): Promise<Location> {
+        return loaderResult(await LocationLoader.load(location.toString()));
+    }
+
+    @FieldResolver(() => ProductionLine, { nullable: true })
+    async production_line(
+        @Root() { production_line }: Batch
+    ): Promise<ProductionLine> {
+        if (!production_line) return null;
+        return loaderResult(
+            await ProductionLineLoader.load(production_line.toString())
+        );
     }
 
     @FieldResolver(() => RecipeVersion)

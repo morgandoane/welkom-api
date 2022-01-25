@@ -1,3 +1,4 @@
+import { ProductionLine } from './../ProductionLine/ProductionLine';
 import { Base } from './../Base/Base';
 import { Profile } from '../Profile/Profile';
 import { Location } from '../Location/Location';
@@ -10,6 +11,10 @@ export class MixingCard extends Base {
     @Field(() => Location)
     @prop({ required: true, ref: () => Location })
     location!: Ref<Location>;
+
+    @Field(() => ProductionLine, { nullable: true })
+    @prop({ required: false, ref: () => ProductionLine })
+    production_line?: Ref<ProductionLine>;
 
     @Field(() => Profile)
     @prop({ required: true })

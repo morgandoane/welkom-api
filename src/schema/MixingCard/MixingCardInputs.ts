@@ -1,3 +1,4 @@
+import { ProductionLineLoader } from './../ProductionLine/ProductionLine';
 import { Context } from './../../auth/context';
 import { UserLoader } from './../../services/AuthProvider/AuthProvider';
 import { LocationLoader } from './../Location/Location';
@@ -12,6 +13,9 @@ export class CreateMixingCardInput {
     location!: string;
 
     @Field()
+    production_line?: string;
+
+    @Field()
     profile!: string;
 
     @Field(() => [MixingCardLineInput])
@@ -21,10 +25,17 @@ export class CreateMixingCardInput {
         const location = loaderResult(await LocationLoader.load(this.location));
         const profile = loaderResult(await UserLoader.load(this.profile));
 
+        const productionLine = this.production_line
+            ? loaderResult(
+                  await ProductionLineLoader.load(this.production_line)
+              )
+            : null;
+
         const res: MixingCard = {
             ...base,
             location: location._id,
             profile: profile.user_id || '',
+            production_line: productionLine ? productionLine._id : null,
             lines: [],
         };
 
@@ -43,6 +54,9 @@ export class UpdateMixingCardInput {
 
     @Field({ nullable: true })
     location?: string;
+
+    @Field({ nullable: true })
+    production_line?: string;
 
     @Field({ nullable: true })
     profile?: string;
@@ -64,6 +78,14 @@ export class UpdateMixingCardInput {
             );
 
             res.location = location._id;
+        }
+
+        if (this.production_line) {
+            const line = loaderResult(
+                await ProductionLineLoader.load(this.production_line)
+            );
+
+            res.production_line = line._id;
         }
 
         if (this.profile) {

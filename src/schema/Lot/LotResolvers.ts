@@ -1,3 +1,5 @@
+import { FulfillmentModel } from './../Fulfillment/Fulfillment';
+import { BolModel } from './../Bol/Bol';
 import { LotFinder } from './LotFinder';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { createBaseResolver } from './../Base/BaseResolvers';
@@ -9,6 +11,7 @@ import { Lot, LotModel } from './Lot';
 import {
     Arg,
     FieldResolver,
+    Mutation,
     Query,
     Resolver,
     Root,
@@ -21,6 +24,29 @@ const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Lot)
 export class LotResolvers extends BaseResolvers {
+    @Mutation(() => Boolean)
+    async cleanUpLots(): Promise<boolean> {
+        const matches = await LotModel.find({
+            fulfillment_type: { $exists: true },
+        });
+
+        let count = 0;
+
+        for (const match of matches) {
+            const fulfillment = await FulfillmentModel.findOne({
+                lots: match._id,
+            });
+            if (fulfillment) {
+                if (!match.company) match.company = fulfillment.company;
+                if (!match.location) match.location = fulfillment.location;
+                await match.save();
+                count += 1;
+                console.log(`${count}/${matches.length}`);
+            }
+        }
+        return true;
+    }
+
     @UseMiddleware(
         Permitted({ type: 'permission', permission: Permission.GetLots })
     )
