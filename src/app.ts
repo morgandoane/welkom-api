@@ -34,6 +34,7 @@ import { OrderQueueResolvers } from './schema/OrderQueue/OrderQueueResolvers';
 import { OrderQueueContentResolvers } from './schema/OrderQueue/OrderQueueContentResolvers';
 import { OrderStatisticResolvers } from './schema/OrderStatistic/OrderStatisticResolvers';
 import { PalletResolvers } from './schema/Pallet/PalletResolvers';
+import { PalletCardResolvers } from './schema/PalletCard/PalletCardResolvers';
 import { ProceduralLotResolvers } from './schema/Lot/extensions/ProceduralLot/ProceduralLotResolvers';
 import { ProductionLineResolvers } from './schema/ProductionLine/ProductionLineResolvers';
 import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
@@ -115,6 +116,7 @@ import https from 'https';
                 OrderQueueContentResolvers,
                 OrderStatisticResolvers,
                 PalletResolvers,
+                PalletCardResolvers,
                 ProceduralLotResolvers,
                 ProfileResolvers,
                 ProfileIdentifierResolvers,

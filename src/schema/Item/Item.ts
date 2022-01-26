@@ -11,6 +11,11 @@ import {
 } from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
 
+export enum ItemType {
+    Product = 'Product',
+    Cookie = 'Cookie',
+}
+
 @ObjectType()
 @modelOptions({
     schemaOptions: {
@@ -21,6 +26,14 @@ export class Item extends Base {
     @Field(() => UnitClass)
     @prop({ required: true, enum: UnitClass })
     unit_class!: UnitClass;
+
+    @Field(() => ItemType, { nullable: true })
+    @prop({ required: false })
+    type?: ItemType;
+
+    @Field(() => String, { nullable: true })
+    @prop({ required: false })
+    upc?: string;
 
     // if unit class is weight, count, or time, this is 1. If it is volume, it is a multiplier to get to weight.
     @Field()

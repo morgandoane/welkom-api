@@ -1,3 +1,4 @@
+import { PalletCard } from './../PalletCard/PalletCard';
 import { RecipeVersionList } from './../RecipeVersion/RecipeVersionList';
 import { BatchModel } from './../Batch/Batch';
 import { getPrimitiveUnit } from './../../utils/getPrimitiveUnit';
@@ -19,6 +20,8 @@ import { addHours } from 'date-fns';
 import { mongoose } from '@typegoose/typegoose';
 import { UnitClass } from '../Unit/Unit';
 import { RecipeVersionLoader } from '../RecipeVersion/RecipeVersion';
+import { Content, LotContent } from '../Content/Content';
+import { ObjectId } from 'mongoose';
 
 @InputType()
 export class CreatePalletInput {
@@ -35,7 +38,7 @@ export class CreatePalletInput {
     contents!: LotContentInput[];
 
     @Field()
-    recipe_version!: string;
+    recipe_version!: string | null;
 
     @Field({ nullable: true, defaultValue: false })
     include_trays?: boolean;
@@ -43,15 +46,45 @@ export class CreatePalletInput {
     @Field(() => [String])
     production_lines!: string[];
 
+    public static fromPalletCard(card: PalletCard): CreatePalletInput {
+        const input = new CreatePalletInput();
+        input.item = card.item.toString();
+        input.company = card.company.toString();
+        input.location = card.location.toString();
+        input.recipe_version = null;
+        input.include_trays = card.include_trays;
+        input.production_lines = card.production_lines.map((l) => l.toString());
+        input.contents = card.contents.map((content) => ({
+            quantity: content.quantity,
+            unit: content.unit as unknown as ObjectId,
+            lot: content.lot as unknown as ObjectId,
+            validateContent: async (): Promise<Content> => {
+                return {
+                    quantity: content.quantity,
+                    unit: content.unit,
+                };
+            },
+            validateLotContent: async (): Promise<LotContent> => {
+                return {
+                    quantity: content.quantity,
+                    unit: content.unit,
+                    lot: content.lot,
+                };
+            },
+        }));
+
+        return input;
+    }
+
     public async validatePallet(
         context: Context
     ): Promise<{ pallet: Pallet; lot: BucketLot }> {
         const item = loaderResult(await ItemLoader.load(this.item));
         const location = loaderResult(await LocationLoader.load(this.location));
         const company = loaderResult(await CompanyLoader.load(this.company));
-        const version = loaderResult(
-            await RecipeVersionLoader.load(this.recipe_version)
-        );
+        const version = this.recipe_version
+            ? loaderResult(await RecipeVersionLoader.load(this.recipe_version))
+            : null;
 
         const { base } = context;
 
@@ -71,7 +104,7 @@ export class CreatePalletInput {
             lot: lot._id,
             item: item._id,
             location: location._id,
-            recipe_version: version._id,
+            recipe_version: version?._id || null,
         };
 
         for (const content of this.contents) {

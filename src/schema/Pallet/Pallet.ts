@@ -33,9 +33,9 @@ export class Pallet extends Base {
     @prop({ required: true, ref: () => Location })
     location!: Ref<Location>;
 
-    @Field(() => RecipeVersion)
-    @prop({ required: true, ref: () => RecipeVersion })
-    recipe_version!: Ref<RecipeVersion>;
+    @Field(() => RecipeVersion, { nullable: true })
+    @prop({ required: false, ref: () => RecipeVersion })
+    recipe_version?: Ref<RecipeVersion>;
 }
 
 export const PalletModel = getModelForClass(Pallet);

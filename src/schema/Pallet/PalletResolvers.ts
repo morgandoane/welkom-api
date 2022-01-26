@@ -1,3 +1,7 @@
+import {
+    RecipeVersion,
+    RecipeVersionLoader,
+} from './../RecipeVersion/RecipeVersion';
 import { Context } from '@src/auth/context';
 import { CreatePalletInput } from './CreatePalletInput';
 import { Permitted } from '@src/auth/middleware/Permitted';
@@ -56,5 +60,15 @@ export class PalletResolvers extends BaseResolver {
     @FieldResolver(() => Location)
     async location(@Root() { location }: Pallet): Promise<Location> {
         return loaderResult(await LocationLoader.load(location.toString()));
+    }
+
+    @FieldResolver(() => RecipeVersion, { nullable: true })
+    async recipe_version(
+        @Root() { recipe_version }: Pallet
+    ): Promise<RecipeVersion> {
+        if (!recipe_version) return null;
+        return loaderResult(
+            await RecipeVersionLoader.load(recipe_version.toString())
+        );
     }
 }

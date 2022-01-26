@@ -10,6 +10,7 @@ import { SignedUrlAction } from '@src/schema/SignedUrl/SignedUrlResolvers';
 import { BolStatus } from '@src/schema/Bol/Bol';
 import { PromptType } from '@src/schema/Prompt/Prompt';
 import { ExpenseKey } from '@src/schema/Expense/Expense';
+import { ItemType } from '@src/schema/Item/Item';
 
 export enum StorageBucketProxy {
     ldbbakery_attachments = 'ldbbakery_attachments',
@@ -32,4 +33,5 @@ export const registerEnums = (): void => {
     registerEnumType(PromptType, { name: 'PromptType' });
     registerEnumType(VerificationStatus, { name: 'VerificationStatus' });
     registerEnumType(ExpenseKey, { name: 'ExpenseKey' });
+    registerEnumType(ItemType, { name: 'ItemType' });
 };

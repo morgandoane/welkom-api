@@ -35,6 +35,18 @@ export class LotResolvers extends BaseResolvers {
         else return doc.toJSON();
     }
 
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.GetLots })
+    )
+    @Query(() => [Lot])
+    async findLots(
+        @Arg('filter', () => LotFinder) filter: LotFinder
+    ): Promise<Lot[]> {
+        const query = await filter.serialize();
+        const docs = await LotModel.find({ ...query });
+        return docs.map((doc) => doc.toJSON());
+    }
+
     @FieldResolver(() => Item)
     async item(@Root() lot: Lot): Promise<Item> {
         return loaderResult(await ItemLoader.load(lot.item.toString()));

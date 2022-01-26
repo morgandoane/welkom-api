@@ -5,12 +5,15 @@ import { loaderResult } from './../../utils/loaderResult';
 import { Context } from '@src/auth/context';
 import { Field, InputType } from 'type-graphql';
 import { UnitClass } from '../Unit/Unit';
-import { Item } from './Item';
+import { Item, ItemType } from './Item';
 
 @InputType()
 export class CreateItemInput {
     @Field(() => UnitClass)
     unit_class!: UnitClass;
+
+    @Field(() => ItemType, { nullable: true })
+    type?: ItemType;
 
     @Field()
     english!: string;
@@ -27,6 +30,9 @@ export class CreateItemInput {
     @Field({ nullable: true })
     default_vendor?: string;
 
+    @Field({ nullable: true })
+    upc?: string;
+
     public async validateItemInput({ base }: Context): Promise<Partial<Item>> {
         const item: Item = {
             ...base,
@@ -34,6 +40,8 @@ export class CreateItemInput {
             spanish: this.spanish,
             unit_class: this.unit_class,
             to_base_unit: this.to_base_unit,
+            type: this.type || null,
+            upc: this.upc || null,
             conversions: [],
         };
 
@@ -58,6 +66,9 @@ export class CreateItemInput {
 
 @InputType()
 export class UpdateItemInput {
+    @Field(() => ItemType, { nullable: true })
+    type?: ItemType;
+
     @Field({ nullable: true })
     english?: string;
 
@@ -76,6 +87,9 @@ export class UpdateItemInput {
     @Field({ nullable: true })
     default_vendor?: string;
 
+    @Field({ nullable: true })
+    upc?: string;
+
     @Field(() => UnitClass, { nullable: true })
     unit_class?: UnitClass;
 
@@ -86,6 +100,12 @@ export class UpdateItemInput {
             date_modified: base.date_modified,
             modified_by: base.modified_by,
         };
+
+        if (this.upc !== undefined) item.upc = this.upc;
+
+        if (this.type !== undefined) {
+            item.type = this.type;
+        }
 
         if (this.unit_class || this.to_base_unit) {
             if (!this.unit_class || !this.to_base_unit) {
