@@ -63,10 +63,16 @@ export class UpdateBolInput {
     @Field(() => [ItemContentInput], { nullable: true })
     contents?: ItemContentInput[];
 
+    @Field({ nullable: true })
+    deleted?: boolean;
+
     public async serializeBolUpdate(): Promise<Partial<Bol>> {
         const bolUpdate: Partial<Bol> = {};
 
         if (this.code) bolUpdate.code = this.code;
+
+        if (this.deleted !== undefined && this.deleted !== null)
+            bolUpdate.deleted = this.deleted;
 
         if (this.from) bolUpdate.from = await this.from.validateAppointment();
 

@@ -1,3 +1,5 @@
+import { CompanyLoader } from './../Company/Company';
+import { loaderResult } from '@src/utils/loaderResult';
 import { BaseFilter } from './../Base/BaseFilter';
 import { DateRangeInput } from './../DateRange/DateRangeInput';
 import { ObjectIdScalar } from './../ObjectIdScalar';
@@ -9,6 +11,9 @@ import { endOfDay, startOfDay } from 'date-fns';
 
 @InputType()
 export class ItineraryFilter extends BaseFilter {
+    @Field({ nullable: true })
+    code?: string;
+
     @Field(() => ObjectIdScalar, { nullable: true })
     item?: ObjectId;
 
@@ -18,16 +23,32 @@ export class ItineraryFilter extends BaseFilter {
     @Field(() => ObjectIdScalar, { nullable: true })
     location?: ObjectId;
 
+    @Field(() => ObjectIdScalar, { nullable: true })
+    carrier?: ObjectId;
+
     @Field(() => DateRangeInput, { nullable: true })
     stop_date?: DateRangeInput;
 
-    public serializeItineraryFilter(): FilterQuery<DocumentType<Itinerary>> {
+    public async serializeItineraryFilter(): Promise<
+        FilterQuery<DocumentType<Itinerary>>
+    > {
         const query = this.serializeBaseFilter() as FilterQuery<
             DocumentType<Itinerary>
         >;
 
         if (this.item) {
             query['bols.content.item'] = this.item;
+        }
+
+        if (this.carrier) {
+            const carrier = loaderResult(
+                await CompanyLoader.load(this.carrier.toString())
+            );
+            query.carrier = carrier._id;
+        }
+
+        if (this.code) {
+            query.code = { $regex: new RegExp(this.code, 'i') };
         }
 
         if (this.location) {

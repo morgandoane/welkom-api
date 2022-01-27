@@ -23,6 +23,8 @@ import {
 import { ObjectIdScalar } from '../ObjectIdScalar';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
+import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
+import { AppFile } from '../AppFile/AppFile';
 
 const BaseResolvers = createBaseResolver();
 
@@ -53,7 +55,7 @@ export class ItineraryResolvers extends BaseResolvers {
     ): Promise<ItineraryList> {
         return await Paginate.paginate({
             model: ItineraryModel,
-            query: filter.serializeItineraryFilter(),
+            query: await filter.serializeItineraryFilter(),
             sort: { date_created: -1 },
             skip: filter.skip,
             take: filter.take,
@@ -90,6 +92,7 @@ export class ItineraryResolvers extends BaseResolvers {
     ): Promise<Itinerary> {
         const doc = await ItineraryModel.findById(id.toString());
         const newDoc = await data.validateUpdate(context, doc);
+        ItineraryLoader.clear(id.toString());
         await newDoc.save();
         return newDoc.toJSON();
     }
@@ -127,5 +130,18 @@ export class ItineraryResolvers extends BaseResolvers {
             if (show_deleted == true) return r;
             else if (!r.deleted) return r;
         });
+    }
+
+    @FieldResolver(() => [AppFile])
+    async files(
+        @Ctx() { storage }: Context,
+        @Root() { _id }: Itinerary
+    ): Promise<AppFile[]> {
+        const files = await storage.files(
+            StorageBucket.Documents,
+            _id.toString()
+        );
+
+        return files.map((file) => AppFile.fromFile(file, _id.toString()));
     }
 }
