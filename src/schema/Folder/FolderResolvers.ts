@@ -1,10 +1,11 @@
-import { ObjectId } from 'mongoose';
-import { Permitted } from '@src/auth/middleware/Permitted';
-import { Context } from './../../auth/context';
-import { Recipe, RecipeModel } from './../Recipe/Recipe';
-import { loaderResult } from './../../utils/loaderResult';
-import { createBaseResolver } from './../Base/BaseResolvers';
-import { Folder, FolderModel, FolderLoader } from './Folder';
+import { Paginate } from '../Pagination/Pagination';
+import { FolderFilter } from './FolderFilter';
+import { FolderList } from './FolderList';
+import { Ref } from '@typegoose/typegoose';
+import { Context } from '@src/auth/context';
+import { CreateFolderInput } from './CreateFolderInput';
+import { CompanyLoader } from '../Company/Company';
+import { createUploadEnabledResolver } from '../UploadEnabled/UploadEnabledResolvers';
 import {
     Arg,
     Ctx,
@@ -15,115 +16,77 @@ import {
     Root,
     UseMiddleware,
 } from 'type-graphql';
+import { Folder, FolderModel, FolderLoader } from './Folder';
+import { Company } from '../Company/Company';
+import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
-import { ObjectIdScalar } from '../ObjectIdScalar';
-import { CreateFolderInput, UpdateFolderInput } from './FolderInput';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
+import { UpdateFolderInput } from './UpdateFolderInput';
 
-const BaseResolvers = createBaseResolver();
+const UploadEnabledResolver = createUploadEnabledResolver();
 
 @Resolver(() => Folder)
-export class FolderResolvers extends BaseResolvers {
+export class FolderResolvers extends UploadEnabledResolver {
     @UseMiddleware(
-        Permitted({
-            type: 'permission',
-            permission: Permission.GetRecipeFolders,
-        })
+        Permitted({ type: 'permission', permission: Permission.GetFolders })
     )
-    @Query(() => Folder)
-    async folder(
-        @Ctx() context: Context,
-        @Arg('id', () => ObjectIdScalar, { nullable: true }) id: ObjectId | null
-    ): Promise<Folder> {
-        if (!id) return Folder.fromNull(context);
-        const doc = await FolderModel.findById(id.toString());
-        return doc.toJSON();
+    @Query(() => FolderList)
+    async folders(@Arg('filter') filter: FolderFilter): Promise<FolderList> {
+        return await Paginate.paginate({
+            model: FolderModel,
+            query: await filter.serializeFolderFilter(),
+            skip: filter.skip,
+            take: filter.take,
+            sort: { date_created: -1 },
+        });
     }
 
     @UseMiddleware(
-        Permitted({
-            type: 'permission',
-            permission: Permission.CreateRecipeFolder,
-        })
+        Permitted({ type: 'permission', permission: Permission.GetFolders })
+    )
+    @Query(() => Folder)
+    async folder(
+        @Arg('id', () => ObjectIdScalar) id: Ref<Folder>
+    ): Promise<Folder> {
+        return await FolderLoader.load(id, true);
+    }
+
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.CreateFolder })
     )
     @Mutation(() => Folder)
     async createFolder(
         @Ctx() context: Context,
         @Arg('data', () => CreateFolderInput) data: CreateFolderInput
     ): Promise<Folder> {
-        const doc = await data.validate(context);
+        const doc = await data.validateFolder(context);
         const res = await FolderModel.create(doc);
-        return res.toJSON();
+        return res;
     }
 
     @UseMiddleware(
-        Permitted({
-            type: 'permission',
-            permission: Permission.UpdateRecipeFolder,
-        })
+        Permitted({ type: 'permission', permission: Permission.UpdateFolder })
     )
     @Mutation(() => Folder)
     async updateFolder(
-        @Ctx() context: Context,
-        @Arg('id', () => ObjectIdScalar) id: ObjectId,
+        @Arg('id', () => ObjectIdScalar) id: Ref<Folder>,
         @Arg('data', () => UpdateFolderInput) data: UpdateFolderInput
     ): Promise<Folder> {
-        const update = await data.serializeFolderUpdate(context);
-        const res = await FolderModel.findByIdAndUpdate(id.toString(), update, {
-            new: true,
-        });
+        const res = await FolderModel.findByIdAndUpdate(
+            id,
+            await data.serializeFolder(),
+            { new: true }
+        );
 
-        FolderLoader.clearAll();
-
-        return res.toJSON();
+        return res;
     }
 
     @FieldResolver(() => Folder)
-    async parent(@Root() { parent }: Folder): Promise<Folder> {
-        if (!parent) return null;
-        return loaderResult(await FolderLoader.load(parent.toString()));
-    }
-
-    @FieldResolver(() => [Recipe])
-    async recipes(@Root() { _id, name }: Folder): Promise<Recipe[]> {
-        const res = await RecipeModel.find({
-            deleted: false,
-            folder: name == 'Home' ? null : _id,
-        }).sort({ name: 1 });
-
-        return res.map((r) => r.toJSON());
-    }
-
-    @FieldResolver(() => [Folder])
-    async folders(@Root() { _id, name }: Folder): Promise<Folder[]> {
-        const res = await FolderModel.find({
-            deleted: false,
-            parent: name == 'Home' ? null : _id,
-        }).sort({ name: 1 });
-
-        return res.map((r) => r.toJSON());
-    }
-
-    @FieldResolver(() => [Folder])
-    async ancestry(
+    async parent(
         @Ctx() context: Context,
-        @Root() folder: Folder
-    ): Promise<Folder[]> {
-        if (folder.name == 'Home') return [];
-
-        if (!folder.parent) return [Folder.fromNull(context)];
-
-        const loop = async (
-            folder: Folder,
-            stack: Folder[]
-        ): Promise<Folder[]> => {
-            const { parent } = folder;
-            if (!parent) return [Folder.fromNull(context)];
-            else {
-                const parentDoc = await FolderModel.findById(parent.toString());
-                return [...(await loop(parentDoc, stack)), parentDoc, ...stack];
-            }
-        };
-
-        return loop(folder, []);
+        @Root() { parent, class: folder_class }: Folder
+    ): Promise<Folder> {
+        if (!parent) return Folder.fromNull(context, folder_class);
+        else return await FolderLoader.load(parent, true);
     }
 }

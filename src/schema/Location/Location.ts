@@ -1,42 +1,24 @@
-import { ProductionLine } from './../ProductionLine/ProductionLine';
-import { getBaseLoader } from './../Loader';
-import { createUnionType, Field, ObjectType } from 'type-graphql';
+import { getBaseLoader } from './../../utils/baseLoader';
+import { Company } from '@src/schema/Company/Company';
+import { UploadEnabled } from './../UploadEnabled/UploadEnabled';
+import { Field, ObjectType } from 'type-graphql';
+import { prop, Ref, getModelForClass } from '@typegoose/typegoose';
 import { Address } from '../Address/Address';
-import {
-    DocumentType,
-    getModelForClass,
-    modelOptions,
-    mongoose,
-    prop,
-    Ref,
-} from '@typegoose/typegoose';
-import { Company } from '../Company/Company';
-import { Base } from '../Base/Base';
-import DataLoader from 'dataloader';
 
 @ObjectType()
-@modelOptions({
-    schemaOptions: {
-        collection: 'locations',
-    },
-})
-export class Location extends Base {
+export class Location extends UploadEnabled {
     @Field(() => Company)
-    @prop({ required: true, ref: 'Company' })
+    @prop({ required: true, ref: () => Company })
     company!: Ref<Company>;
+
+    @Field()
+    @prop({ required: true })
+    label!: string;
 
     @Field(() => Address, { nullable: true })
     @prop({ required: false })
-    address?: Address;
-
-    @Field({ nullable: true })
-    @prop({ required: false })
-    label?: string;
-
-    @Field(() => [ProductionLine], { nullable: true })
-    production_lines?: ProductionLine[];
+    address!: Address | null;
 }
 
 export const LocationModel = getModelForClass(Location);
-
 export const LocationLoader = getBaseLoader(LocationModel);

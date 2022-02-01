@@ -1,32 +1,18 @@
-import { DocumentType } from '@typegoose/typegoose';
-import { BaseFilter } from './../Base/BaseFilter';
+import { UploadEnabledFilter } from '../UploadEnabled/UploadEnabledFilter';
+import { InputType } from 'type-graphql';
 import { FilterQuery } from 'mongoose';
-import { Field, InputType } from 'type-graphql';
+import { DocumentType } from '@typegoose/typegoose';
 import { QualityCheck } from './QualityCheck';
-import { loaderResult } from '@src/utils/loaderResult';
-import { ItemLoader } from '../Item/Item';
 
 @InputType()
-export class QualityCheckFilter extends BaseFilter {
-    @Field({ nullable: true })
-    item?: string;
-
-    @Field({ nullable: true })
-    phrase?: string;
-
-    public async serializeCheckFilter(): Promise<
+export class QualityCheckFilter extends UploadEnabledFilter {
+    public async serializeQualityCheckFilter(): Promise<
         FilterQuery<DocumentType<QualityCheck>>
     > {
-        const filter: FilterQuery<DocumentType<QualityCheck>> = {
-            ...this.serializeBaseFilter(),
+        const query = {
+            ...(await this.serializeUploadEnabledFilter()),
         } as FilterQuery<DocumentType<QualityCheck>>;
 
-        if (this.item) {
-            const item = loaderResult(await ItemLoader.load(this.item));
-            filter.item = item._id;
-        }
-        if (this.phrase) filter['prompt.phrase'] = this.phrase;
-
-        return filter;
+        return query;
     }
 }

@@ -1,6 +1,6 @@
-import { Pagination } from '@src/schema/Pagination/Pagination';
-import { ObjectType } from 'type-graphql';
 import { QualityCheck } from './QualityCheck';
+import { Pagination } from '../Pagination/Pagination';
+import { ObjectType } from 'type-graphql';
 
 @ObjectType()
 export class QualityCheckList extends Pagination(QualityCheck) {}

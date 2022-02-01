@@ -1,24 +1,24 @@
-import { Context } from './../../auth/context';
-import { getBaseLoader } from './../Loader';
+import { getBaseLoader } from '@src/utils/baseLoader';
+import { Base } from '@src/schema/Base/Base';
 import {
+    modelOptions,
     prop,
     Ref,
     getModelForClass,
-    modelOptions,
 } from '@typegoose/typegoose';
 import { Field, ObjectType } from 'type-graphql';
-import { Base } from '../Base/Base';
+import { Context } from '@src/auth/context';
 
 export enum FolderClass {
     Recipe = 'Recipe',
 }
 
+@ObjectType()
 @modelOptions({
     schemaOptions: {
         collection: 'folders',
     },
 })
-@ObjectType()
 export class Folder extends Base {
     @Field(() => FolderClass)
     @prop({ required: true, enum: FolderClass })
@@ -28,15 +28,19 @@ export class Folder extends Base {
     @prop({ required: true })
     name!: string;
 
-    @Field(() => Folder, { nullable: true })
-    @prop({ required: false, ref: () => Folder })
-    parent?: Ref<Folder>;
+    @Field(() => Folder)
+    @prop({ required: true, ref: () => Folder })
+    parent!: Ref<Folder> | null;
 
-    public static fromNull(context: Context): Folder {
+    public static fromNull(
+        context: Context,
+        folder_class: FolderClass
+    ): Folder {
         return {
             ...context.base,
+            class: folder_class,
             name: 'Home',
-            class: FolderClass.Recipe,
+            parent: null,
         };
     }
 }

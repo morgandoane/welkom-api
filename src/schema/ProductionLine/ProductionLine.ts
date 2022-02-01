@@ -1,22 +1,27 @@
-import { getBaseLoader } from '@src/schema/Loader';
-import { Company } from '@src/schema/Company/Company';
-import { Base } from '@src/schema/Base/Base';
-import { prop, Ref, getModelForClass } from '@typegoose/typegoose';
+import { UploadEnabled } from './../UploadEnabled/UploadEnabled';
+import {
+    modelOptions,
+    getModelForClass,
+    prop,
+    Ref,
+} from '@typegoose/typegoose';
 import { Field, ObjectType } from 'type-graphql';
+import { getBaseLoader } from '@src/utils/baseLoader';
 import { Location } from '../Location/Location';
 
 @ObjectType()
-export class ProductionLine extends Base {
-    @Field(() => String)
+@modelOptions({
+    schemaOptions: {
+        collection: 'productionlines',
+    },
+})
+export class ProductionLine extends UploadEnabled {
+    @Field()
     @prop({ required: true })
     name!: string;
 
-    @Field(() => Company)
-    @prop({ required: true, ref: 'Company' })
-    company!: Ref<Company>;
-
     @Field(() => Location)
-    @prop({ required: true, ref: 'Location' })
+    @prop({ required: true, ref: () => Location })
     location!: Ref<Location>;
 }
 

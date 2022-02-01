@@ -2,17 +2,6 @@ import { prop } from '@typegoose/typegoose';
 import { Field, ObjectType } from 'type-graphql';
 
 @ObjectType()
-export class Coordinate {
-    @Field()
-    @prop({ required: true })
-    lat!: number;
-
-    @Field()
-    @prop({ required: true })
-    lon!: number;
-}
-
-@ObjectType()
 export class Address {
     @Field()
     @prop({ required: true })
@@ -35,10 +24,6 @@ export class Address {
     postal!: string;
 
     @Field()
-    @prop({ required: false })
-    country?: string;
-
-    @Field(() => Coordinate, { nullable: true })
-    @prop({ required: false })
-    coordinate?: Coordinate;
+    @prop({ required: true })
+    country!: string;
 }

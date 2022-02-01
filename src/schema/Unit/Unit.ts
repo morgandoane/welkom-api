@@ -1,42 +1,26 @@
-import { getBaseLoader } from './../Loader';
+import { getBaseLoader } from '@src/utils/baseLoader';
+import { NamesPlural } from './../Names/Names';
+import { Base } from '@src/schema/Base/Base';
 import { Field, ObjectType } from 'type-graphql';
-import { getModelForClass, prop } from '@typegoose/typegoose';
-import { Base } from '../Base/Base';
-
-export enum UnitClass {
-    Count = 'Count',
-    Time = 'Time',
-    Volume = 'Volume',
-    Weight = 'Weight',
-}
+import { prop, getModelForClass } from '@typegoose/typegoose';
+import { UnitClass } from './UnitClass';
+import { Min } from 'class-validator';
 
 @ObjectType()
 export class Unit extends Base {
+    @Field(() => NamesPlural)
+    @prop({ required: true })
+    names!: NamesPlural;
+
     @Field(() => UnitClass)
     @prop({ required: true, enum: UnitClass })
-    class!: UnitClass;
+    unit_class!: UnitClass;
 
+    @Min(0)
     @Field()
-    @prop({ required: true })
-    english!: string;
-
-    @Field({ nullable: true })
-    @prop({ required: false })
-    spanish?: string;
-
-    @Field({ nullable: true })
-    @prop({ required: false })
-    english_plural?: string;
-
-    @Field({ nullable: true })
-    @prop({ required: false })
-    spanish_plural?: string;
-
-    @Field()
-    @prop({ required: true })
-    base_per_unit!: number;
+    @prop({ required: true, min: 0 })
+    to_base_unit!: number;
 }
 
 export const UnitModel = getModelForClass(Unit);
-
 export const UnitLoader = getBaseLoader(UnitModel);

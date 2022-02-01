@@ -1,29 +1,14 @@
-import { Item, ItemLoader } from '@src/schema/Item/Item';
-import {
-    ProductionLine,
-    ProductionLineLoader,
-} from './../ProductionLine/ProductionLine';
-import { loaderResult } from '@src/utils/loaderResult';
-import { ObjectIdScalar } from './../ObjectIdScalar';
-import { ObjectId } from 'mongoose';
-import {
-    RecipeVersion,
-    RecipeVersionLoader,
-} from './../RecipeVersion/RecipeVersion';
-import { Paginate } from './../Paginate';
+import { LotModel, LotLoader } from './../Lot/Lot';
+import { Paginate } from './../Pagination/Pagination';
 import { BatchFilter } from './BatchFilter';
 import { BatchList } from './BatchList';
-import { MixingCardModel } from './../MixingCard/MixingCard';
-import {
-    ProceduralLot,
-    ProceduralLotLoader,
-    ProceduralLotModel,
-} from './../Lot/extensions/ProceduralLot/ProceduralLot';
+import { Ref } from '@typegoose/typegoose';
+import { Context } from '@src/auth/context';
 import { CreateBatchInput } from './CreateBatchInput';
-import { Context } from './../../auth/context';
-import { Permitted } from '@src/auth/middleware/Permitted';
-import { createBaseResolver } from './../Base/BaseResolvers';
-import { Batch, BatchModel, BatchLoader } from './Batch';
+import { CompanyLoader } from './../Company/Company';
+import { BatchLotLoader, BatchLotModel } from './../BatchLot/BatchLot';
+import { ProductionLineLoader } from './../ProductionLine/ProductionLine';
+import { createUploadEnabledResolver } from './../UploadEnabled/UploadEnabledResolvers';
 import {
     Arg,
     Ctx,
@@ -34,15 +19,24 @@ import {
     Root,
     UseMiddleware,
 } from 'type-graphql';
+import { Batch, BatchModel, BatchLoader } from './Batch';
+import { BatchLot } from '../BatchLot/BatchLot';
+import { Company } from '../Company/Company';
+import { ProductionLine } from '../ProductionLine/ProductionLine';
+import {
+    RecipeVersion,
+    RecipeVersionLoader,
+} from '../RecipeVersion/RecipeVersion';
+import { LocationLoader, Location } from '../Location/Location';
+import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
-import { UserInputError } from 'apollo-server-errors';
-import { RecipeLoader } from '../Recipe/Recipe';
-import { Location, LocationLoader } from '../Location/Location';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
+import { UpdateBatchInput } from './UpdateBatchInput';
 
-export const BaseResolvers = createBaseResolver();
+const UploadEnabledResolver = createUploadEnabledResolver();
 
 @Resolver(() => Batch)
-export class BatchResolvers extends BaseResolvers {
+export class BatchResolvers extends UploadEnabledResolver {
     @UseMiddleware(
         Permitted({ type: 'permission', permission: Permission.GetBatches })
     )
@@ -50,7 +44,7 @@ export class BatchResolvers extends BaseResolvers {
     async batches(@Arg('filter') filter: BatchFilter): Promise<BatchList> {
         return await Paginate.paginate({
             model: BatchModel,
-            query: filter.serializeBatchFilter(),
+            query: await filter.serializeBatchFilter(),
             skip: filter.skip,
             take: filter.take,
             sort: { date_created: -1 },
@@ -61,8 +55,10 @@ export class BatchResolvers extends BaseResolvers {
         Permitted({ type: 'permission', permission: Permission.GetBatches })
     )
     @Query(() => Batch)
-    async batch(@Arg('id', () => ObjectIdScalar) id: ObjectId): Promise<Batch> {
-        return loaderResult(await BatchLoader.load(id.toString()));
+    async batch(
+        @Arg('id', () => ObjectIdScalar) id: Ref<Batch>
+    ): Promise<Batch> {
+        return await BatchLoader.load(id, true);
     }
 
     @UseMiddleware(
@@ -71,123 +67,64 @@ export class BatchResolvers extends BaseResolvers {
     @Mutation(() => Batch)
     async createBatch(
         @Ctx() context: Context,
-        @Arg('data') data: CreateBatchInput
+        @Arg('data', () => CreateBatchInput) data: CreateBatchInput
     ): Promise<Batch> {
-        const { lot, batch, card_update } = await data.validateBatchCreation(
-            context
-        );
-
-        const lotDoc = await ProceduralLotModel.create(lot);
-        const batchDoc = await BatchModel.create(batch);
-
-        if (card_update) {
-            await MixingCardModel.findByIdAndUpdate(
-                card_update.id,
-                card_update.update
-            );
-        }
-
-        return batchDoc.toJSON();
+        const { batch, lot } = await data.validateBatch(context);
+        await BatchLotModel.create(lot);
+        const batchRes = await BatchModel.create(batch);
+        return batchRes;
     }
 
     @UseMiddleware(
-        Permitted({ type: 'permission', permission: Permission.CreateBatch })
+        Permitted({ type: 'permission', permission: Permission.UpdateBatch })
     )
     @Mutation(() => Batch)
-    async completeBatch(
-        @Ctx() context: Context,
-        @Arg('id', () => ObjectIdScalar) id: ObjectId
+    async updateBatch(
+        @Arg('id', () => ObjectIdScalar) id: Ref<Batch>,
+        @Arg('data', () => UpdateBatchInput) data: UpdateBatchInput
     ): Promise<Batch> {
-        const batch = await BatchModel.findById(id.toString());
+        const { batch, lot } = await data.serializeBatchUpdate();
 
-        const version = loaderResult(
-            await RecipeVersionLoader.load(batch.recipe_version.toString())
-        );
-
-        const parentRecipe = loaderResult(
-            await RecipeLoader.load(version.recipe.toString())
-        );
-
-        if (!batch)
-            throw new UserInputError(
-                `Failed to find batch with id ${id.toString()}`
-            );
-
-        batch.date_completed = new Date();
-
-        await batch.save();
-
-        const card = await MixingCardModel.findOne({
-            profile: context.base.created_by,
-            deleted: false,
+        const res = await BatchModel.findByIdAndUpdate(id, batch, {
+            new: true,
         });
 
-        const match = card.lines.find(
-            (line) =>
-                line.recipe.toString() == parentRecipe.toString() &&
-                (line.recipe_version
-                    ? line.recipe_version.toString() == version._id.toString()
-                    : true)
-        );
+        const lotRes = await LotModel.findByIdAndUpdate(res.lot, lot, {
+            new: true,
+        });
 
-        if (card && match) {
-            const updateIndex = card.lines
-                .map((l) => l._id.toString())
-                .indexOf(match._id.toString());
+        BatchLoader.clear(id);
+        BatchLotLoader.clear(lotRes._id);
+        LotLoader.clear(lotRes._id);
 
-            if (updateIndex !== -1) {
-                if (
-                    card.lines[updateIndex].limit !== undefined &&
-                    card.lines[updateIndex].limit !== null
-                ) {
-                    if (card.lines[updateIndex].limit == 1) {
-                        card.lines = card.lines.splice(updateIndex, 1);
-                    } else {
-                        card.lines[updateIndex].limit =
-                            card.lines[updateIndex].limit - 1;
-                    }
-
-                    await card.save();
-                }
-            }
-        }
-
-        BatchLoader.clear(batch._id.toString());
-
-        return batch.toJSON();
+        return res;
     }
 
-    @FieldResolver(() => ProceduralLot)
-    async lot(@Root() { lot }: Batch): Promise<ProceduralLot> {
-        return loaderResult(await ProceduralLotLoader.load(lot.toString()));
+    @FieldResolver(() => RecipeVersion, { nullable: true })
+    async recipe_version(@Root() batch: Batch): Promise<RecipeVersion> {
+        if (!batch.recipe_version) return null;
+        else return await RecipeVersionLoader.load(batch.recipe_version, true);
     }
 
-    @FieldResolver(() => Item)
-    async item(@Root() { item }: Batch): Promise<Item> {
-        return loaderResult(await ItemLoader.load(item.toString()));
+    @FieldResolver(() => BatchLot)
+    async lot(@Root() batch: Batch): Promise<BatchLot> {
+        return await BatchLotLoader.load(batch.lot, true);
     }
 
     @FieldResolver(() => Location)
-    async location(@Root() { location }: Batch): Promise<Location> {
-        return loaderResult(await LocationLoader.load(location.toString()));
+    async location(@Root() batch: Batch): Promise<Location> {
+        return await LocationLoader.load(batch.location, true);
+    }
+
+    @FieldResolver(() => Company)
+    async company(@Root() batch: Batch): Promise<Company> {
+        return await CompanyLoader.load(batch.company, true);
     }
 
     @FieldResolver(() => ProductionLine, { nullable: true })
-    async production_line(
-        @Root() { production_line }: Batch
-    ): Promise<ProductionLine> {
-        if (!production_line) return null;
-        return loaderResult(
-            await ProductionLineLoader.load(production_line.toString())
-        );
-    }
-
-    @FieldResolver(() => RecipeVersion)
-    async recipe_version(
-        @Root() { recipe_version }: Batch
-    ): Promise<RecipeVersion> {
-        return loaderResult(
-            await RecipeVersionLoader.load(recipe_version.toString())
-        );
+    async production_line(@Root() batch: Batch): Promise<ProductionLine> {
+        if (!batch.production_line) return null;
+        else
+            return await ProductionLineLoader.load(batch.production_line, true);
     }
 }

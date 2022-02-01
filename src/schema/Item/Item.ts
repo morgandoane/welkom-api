@@ -1,20 +1,12 @@
-import { Conversion } from './../Conversion/Conversion';
-import { Base } from './../Base/Base';
-import { getBaseLoader } from './../Loader';
+import { UploadEnabled } from './../UploadEnabled/UploadEnabled';
+import { PalletConfiguration } from './../PalletConfiguration/PalletConfiguration';
+import { Names } from './../Names/Names';
+import { Base } from '@src/schema/Base/Base';
+import { modelOptions, getModelForClass, prop } from '@typegoose/typegoose';
 import { Field, ObjectType } from 'type-graphql';
-import { Unit, UnitClass } from '../Unit/Unit';
-import {
-    getModelForClass,
-    prop,
-    modelOptions,
-    Ref,
-} from '@typegoose/typegoose';
-import { Company } from '../Company/Company';
-
-export enum ItemType {
-    Product = 'Product',
-    Cookie = 'Cookie',
-}
+import { BaseUnit } from '../Unit/BaseUnit';
+import { Min, MinLength } from 'class-validator';
+import { getBaseLoader } from '@src/utils/baseLoader';
 
 @ObjectType()
 @modelOptions({
@@ -22,56 +14,28 @@ export enum ItemType {
         collection: 'items',
     },
 })
-export class Item extends Base {
-    @Field(() => UnitClass)
-    @prop({ required: true, enum: UnitClass })
-    unit_class!: UnitClass;
-
-    @Field(() => ItemType, { nullable: true })
-    @prop({ required: false })
-    type?: ItemType;
-
-    @Field(() => String, { nullable: true })
-    @prop({ required: false })
-    upc?: string;
-
-    // if unit class is weight, count, or time, this is 1. If it is volume, it is a multiplier to get to weight.
-    @Field()
-    @prop({ required: true, default: 1 })
-    to_base_unit!: number;
-
-    @prop({ required: false, type: () => [[Number]] })
-    order_queue_qtys?: [number, number][];
-
-    @Field(() => Number, { nullable: true })
-    @prop({ required: false })
-    order_queue_qty?: number;
-
-    @Field(() => Unit, { nullable: true })
-    @prop({ required: false, ref: () => Unit })
-    default_unit?: Ref<Unit>;
-
-    @Field(() => Company, { nullable: true })
-    @prop({ required: false, ref: () => Company })
-    default_vendor?: Ref<Company>;
-
-    @Field()
+export class Item extends UploadEnabled {
+    @Field(() => Names)
     @prop({ required: true })
-    english!: string;
+    names!: Names;
 
+    @Field(() => BaseUnit)
+    @prop({ required: true, enum: BaseUnit })
+    base_unit!: BaseUnit;
+
+    // Count = 1;
+    // Weight = 1;
+    // Volume = X Gallons / 1 Pound
+    @Min(0)
     @Field()
-    @prop({ required: true })
-    spanish!: string;
+    @prop({ required: true, min: 0 })
+    per_base_unit!: number;
 
-    @Field(() => [Conversion])
-    @prop({ required: true, type: () => Conversion })
-    conversions!: Conversion[];
-
-    @Field({ nullable: true })
-    @prop({ required: false, default: false })
-    primitive?: boolean;
+    @MinLength(1)
+    @Field(() => [PalletConfiguration])
+    @prop({ required: true, type: () => PalletConfiguration, minLength: 1 })
+    pallet_configurations!: PalletConfiguration[];
 }
 
 export const ItemModel = getModelForClass(Item);
-
 export const ItemLoader = getBaseLoader(ItemModel);

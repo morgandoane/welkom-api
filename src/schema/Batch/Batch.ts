@@ -1,17 +1,18 @@
-import { ProductionLine } from './../ProductionLine/ProductionLine';
-import { Item } from '@src/schema/Item/Item';
-import { Location } from '@src/schema/Location/Location';
-import { getBaseLoader } from './../Loader';
-import { ProceduralLot } from './../Lot/extensions/ProceduralLot/ProceduralLot';
 import { RecipeVersion } from './../RecipeVersion/RecipeVersion';
-import { Base } from './../Base/Base';
+import { ProductionLine } from './../ProductionLine/ProductionLine';
+import { UploadEnabled } from './../UploadEnabled/UploadEnabled';
 import {
     modelOptions,
+    getModelForClass,
     prop,
     Ref,
-    getModelForClass,
 } from '@typegoose/typegoose';
 import { Field, ObjectType } from 'type-graphql';
+import { getBaseLoader } from '@src/utils/baseLoader';
+import { differenceInMinutes } from 'date-fns';
+import { Location } from '../Location/Location';
+import { BatchLot } from '../BatchLot/BatchLot';
+import { Company } from '../Company/Company';
 
 @ObjectType()
 @modelOptions({
@@ -19,32 +20,30 @@ import { Field, ObjectType } from 'type-graphql';
         collection: 'batches',
     },
 })
-export class Batch extends Base {
-    @Field(() => Date, { nullable: true })
-    @prop({ required: false })
-    date_completed?: Date;
+export class Batch extends UploadEnabled {
+    @Field(() => RecipeVersion, { nullable: true })
+    @prop({ required: false, ref: () => RecipeVersion })
+    recipe_version!: Ref<RecipeVersion> | null;
 
-    @Field(() => RecipeVersion)
-    @prop({ required: true, ref: () => RecipeVersion })
-    recipe_version!: Ref<RecipeVersion>;
+    @Field(() => BatchLot)
+    @prop({ required: true, ref: () => BatchLot })
+    lot!: Ref<BatchLot>;
 
-    @Field(() => ProceduralLot)
-    @prop({ required: true, ref: () => ProceduralLot })
-    lot!: Ref<ProceduralLot>;
-
-    @Field(() => ProductionLine, { nullable: true })
-    @prop({ required: false, ref: () => ProductionLine })
-    production_line?: Ref<ProductionLine>;
-
-    // denormalized
-    @Field(() => Item)
-    @prop({ required: true, ref: () => Item })
-    item!: Ref<Item>;
-
-    // denormalized
     @Field(() => Location)
     @prop({ required: true, ref: () => Location })
     location!: Ref<Location>;
+
+    @Field(() => Company)
+    @prop({ required: true, ref: () => Company })
+    company!: Ref<Company>;
+
+    @Field(() => ProductionLine, { nullable: true })
+    @prop({ required: false, ref: () => ProductionLine })
+    production_line!: Ref<ProductionLine> | null;
+
+    @Field({ nullable: true })
+    @prop({ required: false })
+    date_completed!: Date | null;
 }
 
 export const BatchModel = getModelForClass(Batch);

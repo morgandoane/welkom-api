@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { mongoose } from '@typegoose/typegoose';
 import { UserRole } from './UserRole';
 import { Base } from '@src/schema/Base/Base';
+import { getId } from '@src/utils/getId';
 
 export class Context {
     jwt: jwt.JwtPayload | null;
@@ -28,11 +29,9 @@ export class Context {
 
     public get base(): Base {
         return {
-            _id: new mongoose.Types.ObjectId(),
+            ...getId(),
             created_by: this.jwt.sub,
-            modified_by: this.jwt.sub,
             date_created: new Date(),
-            date_modified: new Date(),
             deleted: false,
         };
     }

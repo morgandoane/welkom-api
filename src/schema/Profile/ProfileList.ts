@@ -1,5 +1,5 @@
 import { Profile } from './Profile';
-import { Pagination } from '@src/schema/Pagination/Pagination';
+import { Pagination } from '../Pagination/Pagination';
 import { ObjectType } from 'type-graphql';
 
 @ObjectType()

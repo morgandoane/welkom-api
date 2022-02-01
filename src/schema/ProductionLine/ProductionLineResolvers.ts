@@ -1,55 +1,103 @@
-import { CompanyLoader } from './../Company/Company';
-import { Company } from '@src/schema/Company/Company';
-import { LocationLoader } from './../Location/Location';
-import { CreateProductionLineInput } from './ProductionLineInput';
-import { Permitted } from '@src/auth/middleware/Permitted';
-import { createBaseResolver } from './../Base/BaseResolvers';
-import { ProductionLine, ProductionLineModel } from './ProductionLine';
+import { LocationLoader, Location } from './../Location/Location';
+import { UpdateProductionLineInput } from './UpdateProductionLineInput';
+import { ProductionLineFilter } from './ProductionLineFilter';
+import { ProductionLineList } from './ProductionLineList';
+import { Paginate } from '../Pagination/Pagination';
+import { Ref } from '@typegoose/typegoose';
+import { Context } from '@src/auth/context';
+import { createUploadEnabledResolver } from '../UploadEnabled/UploadEnabledResolvers';
 import {
+    Arg,
+    Ctx,
+    FieldResolver,
+    Mutation,
     Query,
     Resolver,
-    UseMiddleware,
-    Mutation,
-    Ctx,
-    Arg,
-    FieldResolver,
     Root,
+    UseMiddleware,
 } from 'type-graphql';
-import { UserRole } from '@src/auth/UserRole';
-import { Context } from '@src/auth/context';
-import { Location } from '../Location/Location';
-import { loaderResult } from '@src/utils/loaderResult';
+import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
+import {
+    ProductionLine,
+    ProductionLineLoader,
+    ProductionLineModel,
+} from './ProductionLine';
+import { CreateProductionLineInput } from './CreateProductionLineInput';
 
-const BaseResolver = createBaseResolver();
+const UploadEnabledResolver = createUploadEnabledResolver();
 
 @Resolver(() => ProductionLine)
-export class ProductionLineResolvers extends BaseResolver {
-    @UseMiddleware(Permitted())
-    @Query(() => [ProductionLine])
-    async productionLines(): Promise<ProductionLine[]> {
-        const res = await ProductionLineModel.find({ deleted: false });
-        return res.map((doc) => doc.toJSON());
+export class ProductionLineResolvers extends UploadEnabledResolver {
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.GetCompanies })
+    )
+    @Query(() => ProductionLineList)
+    async companies(
+        @Arg('filter') filter: ProductionLineFilter
+    ): Promise<ProductionLineList> {
+        return await Paginate.paginate({
+            model: ProductionLineModel,
+            query: await filter.serializeProductionLineFilter(),
+            skip: filter.skip,
+            take: filter.take,
+            sort: { date_created: -1 },
+        });
     }
 
-    @UseMiddleware(Permitted({ type: 'role', role: UserRole.Manager }))
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.GetCompanies })
+    )
+    @Query(() => ProductionLine)
+    async ProductionLine(
+        @Arg('id', () => ObjectIdScalar) id: Ref<ProductionLine>
+    ): Promise<ProductionLine> {
+        return await ProductionLineLoader.load(id, true);
+    }
+
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateProductionLine,
+        })
+    )
     @Mutation(() => ProductionLine)
     async createProductionLine(
         @Ctx() context: Context,
         @Arg('data', () => CreateProductionLineInput)
         data: CreateProductionLineInput
     ): Promise<ProductionLine> {
-        const doc = await data.validate(context);
-        const res = await ProductionLineModel.create(doc);
-        return res.toJSON();
+        const ProductionLine = await data.validateProductionLine(context);
+        const res = await ProductionLineModel.create(ProductionLine);
+        return res;
+    }
+
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.UpdateProductionLine,
+        })
+    )
+    @Mutation(() => ProductionLine)
+    async updateProductionLine(
+        @Arg('id', () => ObjectIdScalar) id: Ref<ProductionLine>,
+        @Arg('data', () => UpdateProductionLineInput)
+        data: UpdateProductionLineInput
+    ): Promise<ProductionLine> {
+        const res = await ProductionLineModel.findByIdAndUpdate(
+            id,
+            await data.serializeProductionLineUpdate(),
+            { new: true }
+        );
+
+        ProductionLineLoader.clear(id);
+
+        return res;
     }
 
     @FieldResolver(() => Location)
     async location(@Root() { location }: ProductionLine): Promise<Location> {
-        return loaderResult(await LocationLoader.load(location.toString()));
-    }
-
-    @FieldResolver(() => Company)
-    async company(@Root() { company }: ProductionLine): Promise<Company> {
-        return loaderResult(await CompanyLoader.load(company.toString()));
+        return await LocationLoader.load(location, true);
     }
 }

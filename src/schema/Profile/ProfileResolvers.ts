@@ -1,46 +1,55 @@
-import {
-    ProfileIdentifier,
-    ProfileIdentifierModel,
-} from './../ProfileIdentifier/ProfileIdentifier';
-import { UserRole } from '@src/auth/UserRole';
-import { ForbiddenError } from 'apollo-server-express';
-import { randomNumber } from './../../utils/randomNumber';
-import { Paginate } from '@src/schema/Paginate';
-import { ProfileFilter } from './ProfileFilter';
-import { ProfileList } from './ProfileList';
-import { UserInputError } from 'apollo-server-errors';
 import { loaderResult } from './../../utils/loaderResult';
-import { Context } from '@src/auth/context';
 import {
     assignUserRole,
     AuthProvider,
-    synchronizeProfiles,
     UserLoader,
 } from './../../services/AuthProvider/AuthProvider';
-import {
-    Profile,
-    AppMetaData,
-    UserMetaData,
-    ProfileModel,
-    UserMetaDataInput,
-} from './Profile';
+import { UpdateProfileInput } from './UpdateProfileInput';
+import { ProfileFilter } from './ProfileFilter';
+import { ProfileList } from './ProfileList';
+import { Paginate } from '../Pagination/Pagination';
+import { Ref } from '@typegoose/typegoose';
+import { Context } from '@src/auth/context';
+import { createUploadEnabledResolver } from '../UploadEnabled/UploadEnabledResolvers';
 import {
     Arg,
     Ctx,
-    FieldResolver,
     Mutation,
     Query,
     Resolver,
-    Root,
     UseMiddleware,
 } from 'type-graphql';
-import { CreateProfileInput, UpdateProfileInput } from './ProfileInput';
-import { CreateUserData, User, UserData } from 'auth0';
-import { getModelForClass, mongoose } from '@typegoose/typegoose';
 import { Permitted } from '@src/auth/middleware/Permitted';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
+import { AppMetaData, Profile, ProfileModel, UserMetaData } from './Profile';
+import { CreateProfileInput } from './CreateProfileInput';
+import { UserRole } from '@src/auth/UserRole';
+import { UserInputError } from 'apollo-server-express';
+import { CreateUserData, User, UserData } from 'auth0';
+import { getId } from '@src/utils/getId';
+
+const UploadEnabledResolver = createUploadEnabledResolver();
 
 @Resolver(() => Profile)
-export class ProfileResolvers {
+export class ProfileResolvers extends UploadEnabledResolver {
+    @UseMiddleware(Permitted({ type: 'role', role: UserRole.Manager }))
+    @Query(() => ProfileList)
+    async profiles(@Arg('filter') filter: ProfileFilter): Promise<ProfileList> {
+        return await Paginate.paginate({
+            model: ProfileModel,
+            query: await filter.serializeProfileFilter(),
+            skip: filter.skip,
+            take: filter.take,
+            sort: { date_created: -1 },
+        });
+    }
+
+    @UseMiddleware(Permitted({ type: 'role', role: UserRole.Manager }))
+    @Query(() => Profile)
+    async profile(@Arg('id') id: string): Promise<Profile> {
+        return loaderResult(await UserLoader.load(id));
+    }
+
     @UseMiddleware(
         Permitted({
             type: 'role',
@@ -50,37 +59,11 @@ export class ProfileResolvers {
     @Mutation(() => Profile)
     async createProfile(
         @Ctx() context: Context,
-        @Arg('data')
-        {
-            given_name,
-            family_name,
-            email,
-            username,
-            phone_number,
-            temporary_password: password,
-            role,
-        }: CreateProfileInput
+        @Arg('data', () => CreateProfileInput)
+        data: CreateProfileInput
     ): Promise<Profile> {
-        const ProfileModel = getModelForClass(Profile);
-
-        if (!username && !email)
-            throw new UserInputError('Please provide a username or email.');
-
         const userData: UserData<AppMetaData, UserMetaData> = {
-            username,
-            email: email || `${username}@littledutchboy.com`,
-            blocked: false,
-            password,
-            given_name,
-            family_name,
-            user_metadata: {
-                prefers_dark_mode: true,
-                phone_number,
-            },
-            app_metadata: {
-                created_by: context.base.created_by,
-                require_password_reset: true,
-            },
+            ...(await data.validateProfile(context)),
         };
 
         const createUserData: CreateUserData = {
@@ -95,21 +78,21 @@ export class ProfileResolvers {
         )) as User<AppMetaData, UserMetaData>;
 
         const profile: Profile = {
-            _id: new mongoose.Types.ObjectId().toString(),
+            ...getId(),
             ...auth0res,
             email: auth0res.email || '',
             family_name: auth0res.family_name || '',
             given_name: auth0res.given_name || '',
             name: auth0res.name || '',
-            roles: [role],
+            roles: [data.role],
             app_metadata: auth0res.app_metadata as AppMetaData,
         };
 
-        await assignUserRole(context, auth0res.user_id || '', role);
+        await assignUserRole(context, auth0res.user_id || '', data.role);
 
         const res = await ProfileModel.create(profile);
 
-        return res.toJSON();
+        return res;
     }
 
     @UseMiddleware(
@@ -120,47 +103,17 @@ export class ProfileResolvers {
     )
     @Mutation(() => Profile)
     async updateProfile(
-        @Ctx() context: Context,
-        @Arg('id') id: string,
-        @Arg('data')
-        {
-            role,
-            given_name,
-            family_name,
-            email,
-            username,
-            phone_number,
-            password,
-        }: UpdateProfileInput
+        @Arg('id', () => ObjectIdScalar) id: Ref<Profile>,
+        @Arg('data', () => UpdateProfileInput)
+        data: UpdateProfileInput
     ): Promise<Profile> {
-        const ProfileModel = getModelForClass(Profile);
-        const current = await ProfileModel.findOne({
-            $or: [{ _id: id }, { user_id: id }],
-        });
-        const updateData: UserData<AppMetaData, UserMetaData> = {};
+        const update = await data.serializeProfileUpdate();
 
-        if (given_name) updateData.given_name = given_name;
-        if (username) updateData.username = username;
-        if (password) updateData.password = password;
-        if (family_name) updateData.family_name = family_name;
-        if (email) {
-            updateData.email = email;
-        }
-        if (phone_number) {
-            updateData.user_metadata = {
-                ...current.user_metadata,
-                phone_number,
-            };
-        }
+        await AuthProvider.updateUser({ id: id.toString() }, update);
 
-        await AuthProvider.updateUser({ id }, updateData);
+        const { password, ...rest } = update;
 
-        const profileUpdate: Partial<Profile> = { ...updateData };
-
-        if (role) {
-            await assignUserRole(context, id, role);
-            profileUpdate.roles = [role];
-        }
+        const profileUpdate: Partial<Profile> = { ...rest };
 
         const res = await ProfileModel.findOneAndUpdate(
             { $or: [{ _id: id }, { user_id: id }] },
@@ -168,96 +121,8 @@ export class ProfileResolvers {
             { new: true }
         );
 
-        UserLoader.clear(id);
+        UserLoader.clear(id.toString());
 
         return res.toJSON();
-    }
-
-    @UseMiddleware(
-        Permitted({
-            type: 'role',
-            role: UserRole.Manager,
-        })
-    )
-    @Query(() => Profile)
-    async profile(@Arg('id') id: string): Promise<Profile> {
-        return loaderResult(await UserLoader.load(id));
-    }
-
-    @UseMiddleware(
-        Permitted({
-            type: 'role',
-            role: UserRole.Manager,
-        })
-    )
-    @Query(() => ProfileList)
-    async profiles(
-        @Ctx() context: Context,
-        @Arg('filter') filter: ProfileFilter
-    ): Promise<ProfileList> {
-        if (randomNumber(15, 1) == 1 && !filter.skip_sync) {
-            console.log('synchronizing profiles');
-            await synchronizeProfiles();
-        }
-        return await Paginate.paginate({
-            model: ProfileModel,
-            query: await filter.serializeProfileFilter(context),
-            sort: { name: 1 },
-            skip: filter.skip,
-            take: filter.take,
-        });
-    }
-
-    @UseMiddleware(
-        Permitted({
-            type: 'role',
-            role: UserRole.Manager,
-        })
-    )
-    @Mutation(() => Profile)
-    async blockProfile(@Arg('id') id: string): Promise<Profile> {
-        const ProfileModel = getModelForClass(Profile);
-        loaderResult(await UserLoader.load(id));
-        await AuthProvider.updateUser({ id }, { blocked: true });
-        const res = await ProfileModel.findByIdAndUpdate(
-            id,
-            { blocked: true },
-            { new: true }
-        );
-        return res.toJSON();
-    }
-
-    @UseMiddleware(Permitted())
-    @Mutation(() => UserMetaData)
-    async updateUserPreferences(
-        @Ctx() { jwt }: Context,
-        @Arg('data') user_metadata: UserMetaDataInput
-    ): Promise<UserMetaData> {
-        const id = jwt.sub || '';
-        loaderResult(await UserLoader.load(id));
-        const res = await AuthProvider.updateUser({ id }, { user_metadata });
-        return user_metadata;
-    }
-
-    @FieldResolver()
-    name(@Root() profile: Profile): string {
-        if (profile.given_name && profile.family_name)
-            return `${profile.given_name} ${profile.family_name}`;
-        if (profile.name) return profile.name;
-        if (profile.email) return profile.email;
-        return 'Anonymous user';
-    }
-
-    @UseMiddleware(Permitted({ type: 'role', role: UserRole.Admin }))
-    @FieldResolver(() => ProfileIdentifier, { nullable: true })
-    async identifier(@Root() { user_id }: Profile): Promise<ProfileIdentifier> {
-        const identifier = await ProfileIdentifierModel.findOne({
-            profile: user_id,
-            deleted: false,
-        });
-
-        if (!identifier) return null;
-
-        return identifier.toJSON();
     }
 }

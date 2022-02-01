@@ -1,17 +1,11 @@
-import { TrayModel } from './../../schema/Tray/Tray';
-import { ProfileIdentifierModel } from './../../schema/ProfileIdentifier/ProfileIdentifier';
 import { LotModel } from './../../schema/Lot/Lot';
-import { OrderModel } from './../../schema/Order/Order';
 import { ItineraryModel } from '@src/schema/Itinerary/Itinerary';
 import crypto from 'crypto';
 
 export enum CodeType {
-    PO = 'P',
     BOL = 'B',
     ITIN = 'I',
     LOT = 'L',
-    ID = 'ID',
-    TR = 'TR',
 }
 
 export class CodeGenerator {
@@ -27,10 +21,7 @@ export class CodeGenerator {
     }
 
     private static async obtain(type: CodeType): Promise<string> {
-        const attempt = crypto
-            .randomBytes(type == CodeType.ID ? 8 : 3)
-            .toString('hex')
-            .toUpperCase();
+        const attempt = crypto.randomBytes(3).toString('hex').toUpperCase();
         const codeAttempt = `${attempt}${type}`;
         switch (type) {
             case CodeType.BOL: {
@@ -49,27 +40,6 @@ export class CodeGenerator {
             }
             case CodeType.LOT: {
                 const match = await LotModel.findOne({
-                    code: codeAttempt,
-                });
-                if (match) return await this.obtain(type);
-                else return codeAttempt;
-            }
-            case CodeType.PO: {
-                const match = await OrderModel.findOne({
-                    code: codeAttempt,
-                });
-                if (match) return await this.obtain(type);
-                else return codeAttempt;
-            }
-            case CodeType.ID: {
-                const match = await ProfileIdentifierModel.findOne({
-                    code: codeAttempt,
-                });
-                if (match) return await this.obtain(type);
-                else return codeAttempt;
-            }
-            case CodeType.TR: {
-                const match = await TrayModel.findOne({
                     code: codeAttempt,
                 });
                 if (match) return await this.obtain(type);
@@ -99,27 +69,6 @@ export class CodeGenerator {
             }
             case CodeType.LOT: {
                 const match = await LotModel.findOne({
-                    code: type + attempt,
-                });
-                if (match) return true;
-                else return false;
-            }
-            case CodeType.PO: {
-                const match = await OrderModel.findOne({
-                    code: type + attempt,
-                });
-                if (match) return true;
-                else return false;
-            }
-            case CodeType.ID: {
-                const match = await ProfileIdentifierModel.findOne({
-                    code: type + attempt,
-                });
-                if (match) return true;
-                else return false;
-            }
-            case CodeType.TR: {
-                const match = await TrayModel.findOne({
                     code: type + attempt,
                 });
                 if (match) return true;

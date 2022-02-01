@@ -1,18 +1,18 @@
-import { QualityCheck } from './../QualityCheck/QualityCheck';
-import { Field, ObjectType } from 'type-graphql';
 import { prop, Ref } from '@typegoose/typegoose';
+import { Identified } from './../Base/Base';
+import { Field, ObjectType } from 'type-graphql';
+import { QualityCheck } from '../QualityCheck/QualityCheck';
 
 @ObjectType()
-export class QualityCheckResponse {
+export class QualityCheckResponse extends Identified {
     @Field(() => QualityCheck)
     @prop({ required: true, ref: () => QualityCheck })
-    qualityCheck!: Ref<QualityCheck>;
+    quality_check!: Ref<QualityCheck>;
 
-    @Field()
-    @prop({ required: true })
-    response!: string;
+    @Field({ nullable: true })
+    @prop({ required: false })
+    response!: string | null;
 
-    // set upon save
     @Field()
     @prop({ required: true })
     passed!: boolean;

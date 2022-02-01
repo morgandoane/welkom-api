@@ -1,74 +1,114 @@
-import { UserInputError } from 'apollo-server-errors';
-import {
-    QualityCheck,
-    QualityCheckLoader,
-} from './../QualityCheck/QualityCheck';
-import { Context } from '@src/auth/context';
-import { ObjectIdScalar } from '@src/schema/ObjectIdScalar';
-import { loaderResult } from '@src/utils/loaderResult';
-import { ObjectId } from 'mongoose';
+import { QualityCheckClass } from '@src/schema/QualityCheck/QualityCheck';
+import { QualityCheckLoader } from './../QualityCheck/QualityCheck';
+import { Ref } from '@typegoose/typegoose';
 import { Field, InputType } from 'type-graphql';
+import { QualityCheck } from '../QualityCheck/QualityCheck';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
 import { QualityCheckResponse } from './QualityCheckResponse';
-import { PromptType } from '../Prompt/Prompt';
+import { getId } from '@src/utils/getId';
+import { UserInputError } from 'apollo-server-core';
+import { isValid } from 'date-fns';
 
 @InputType()
 export class QualityCheckResponseInput {
     @Field(() => ObjectIdScalar)
-    qualityCheck!: ObjectId;
+    quality_check!: Ref<QualityCheck>;
 
-    @Field()
-    response!: string;
+    @Field({ nullable: true })
+    response!: string | null;
 
-    public async validateResponse({
-        base,
-    }: Context): Promise<QualityCheckResponse> {
-        const check = loaderResult(
-            await QualityCheckLoader.load(this.qualityCheck.toString())
-        );
+    public async validate(): Promise<QualityCheckResponse> {
+        const check = await QualityCheckLoader.load(this.quality_check, true);
 
-        const res: QualityCheckResponse = {
-            ...base,
-            qualityCheck: check._id,
-            response: this.response,
-            passed: validateResponse(check, this.response),
-        };
+        if ((this.response == null || this.response == '') && check.required)
+            throw new UserInputError('Quality check is required.');
 
-        return res;
+        switch (check.quality_check_class) {
+            case QualityCheckClass.Boolean: {
+                if (
+                    this.response !== null &&
+                    !['true', 'false'].includes(this.response)
+                )
+                    throw new UserInputError('Invalid boolean response.');
+
+                const res: QualityCheckResponse = {
+                    ...getId(),
+                    quality_check: check._id,
+                    passed: this.response == 'true' ? true : false,
+                    response: this.response,
+                };
+            }
+            case QualityCheckClass.Date: {
+                if (this.response !== null && !isValid(this.response))
+                    throw new UserInputError('Invalid date response.');
+
+                const res: QualityCheckResponse = {
+                    ...getId(),
+                    quality_check: check._id,
+                    passed: true,
+                    response: this.response,
+                };
+
+                return res;
+            }
+            case QualityCheckClass.Number: {
+                let val = null;
+                if (this.response !== null && this.response == '') {
+                    const parsed = parseFloat(this.response);
+                    if (isNaN(parsed))
+                        throw new UserInputError('Invalid number input');
+
+                    val = parsed.toString();
+                }
+                const res: QualityCheckResponse = {
+                    ...getId(),
+                    quality_check: check._id,
+                    passed:
+                        val !== null && check.number_range
+                            ? parseFloat(val) <= check.number_range.max &&
+                              parseFloat(val) >= check.number_range.min
+                            : true,
+                    response: val,
+                };
+
+                return res;
+            }
+
+            case QualityCheckClass.Options: {
+                let val = null;
+                if (this.response !== null && this.response == '') {
+                    val = this.response;
+                }
+                const res: QualityCheckResponse = {
+                    ...getId(),
+                    quality_check: check._id,
+                    passed:
+                        val !== null && check.options
+                            ? check.options
+                                  .filter((o) => o.acceptable)
+                                  .map((a) => a.value)
+                                  .includes(val)
+                            : true,
+                    response: val,
+                };
+
+                return res;
+            }
+
+            case QualityCheckClass.Text: {
+                let val = null;
+                if (this.response !== null && this.response == '') {
+                    val = this.response;
+                }
+                const res: QualityCheckResponse = {
+                    ...getId(),
+                    quality_check: check._id,
+                    passed: true,
+                    response: val,
+                };
+
+                return res;
+            }
+        }
     }
 }
-
-export const validateResponse = (
-    check: QualityCheck,
-    response: string
-): boolean => {
-    switch (check.prompt.type) {
-        case PromptType.Boolean: {
-            if (!['true', 'false'].includes(response))
-                throw new UserInputError(
-                    "Boolean checks require a 'true' or 'false' response string."
-                );
-
-            const value =
-                check.prompt.valid_boolean == undefined
-                    ? true
-                    : response == 'true';
-
-            return value == check.prompt.valid_boolean;
-        }
-        case PromptType.Number: {
-            const value = parseFloat(response);
-            if (isNaN(value))
-                throw new UserInputError(
-                    'Number checks require a number response string.'
-                );
-
-            if (check.prompt.valid_range == undefined) return true;
-            else
-                return (
-                    value <= check.prompt.valid_range.max &&
-                    value >= check.prompt.valid_range.min
-                );
-        }
-    }
-    return true;
-};

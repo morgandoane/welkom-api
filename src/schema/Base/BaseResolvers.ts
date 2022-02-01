@@ -11,12 +11,6 @@ export const createBaseResolver = () => {
             if (!base.created_by) return null;
             return await UserLoader.load(base.created_by.toString());
         }
-
-        @FieldResolver(() => Profile, { nullable: true })
-        async modified_by?(@Root() { modified_by }: Base): Promise<Profile> {
-            if (!modified_by) return null;
-            return await UserLoader.load(modified_by.toString());
-        }
     }
 
     return BaseResolver;

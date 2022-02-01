@@ -1,24 +1,24 @@
-import { Recipe } from './../Recipe/Recipe';
-import { RecipeSection } from './../RecipeStep/RecipeStep';
-import { getBaseLoader } from './../Loader';
-import { Base } from './../Base/Base';
-import { Field, ObjectType } from 'type-graphql';
 import {
     modelOptions,
     getModelForClass,
     prop,
     Ref,
 } from '@typegoose/typegoose';
+import { Field, ObjectType } from 'type-graphql';
+import { Base } from '@src/schema/Base/Base';
+import { getBaseLoader } from '@src/utils/baseLoader';
+import { RecipeSection } from '../RecipeSection/RecipeSection';
+import { Recipe } from '../Recipe/Recipe';
 
 @ObjectType()
 @modelOptions({
     schemaOptions: {
-        collection: 'recipeVersions',
+        collection: 'recipeversions',
     },
 })
 export class RecipeVersion extends Base {
     @Field(() => Recipe)
-    @prop({ required: true, ref: 'Recipe' })
+    @prop({ required: true, ref: () => Recipe })
     recipe!: Ref<Recipe>;
 
     @Field(() => [RecipeSection])
@@ -28,14 +28,6 @@ export class RecipeVersion extends Base {
     @Field(() => [String])
     @prop({ required: true, type: () => String })
     parameters!: string[];
-
-    @Field()
-    @prop({ required: true })
-    base_units_produced!: number;
-
-    @Field({ nullable: true })
-    @prop({ required: false })
-    note?: string;
 }
 
 export const RecipeVersionModel = getModelForClass(RecipeVersion);

@@ -1,35 +1,24 @@
-import { BaseFilter } from './../Base/BaseFilter';
-import { ObjectIdScalar } from './../ObjectIdScalar';
+import { Fulfillment } from './Fulfillment';
+import { UploadEnabledFilter } from './../UploadEnabled/UploadEnabledFilter';
 import { Field, InputType } from 'type-graphql';
-import { Fulfillment, FulfillmentType } from './Fulfillment';
-import { DocumentType } from '@typegoose/typegoose';
-import { FilterQuery, ObjectId } from 'mongoose';
+import { FilterQuery } from 'mongoose';
+import { DocumentType, Ref } from '@typegoose/typegoose';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
+import { Bol } from '../Bol/Bol';
 
 @InputType()
-export class FulfillmentFilter extends BaseFilter {
-    @Field(() => FulfillmentType, { nullable: true })
-    type?: FulfillmentType;
-
+export class FulfillmentFilter extends UploadEnabledFilter {
     @Field(() => ObjectIdScalar, { nullable: true })
-    location?: ObjectId;
+    bol?: Ref<Bol>;
 
-    @Field(() => ObjectIdScalar, { nullable: true })
-    company?: ObjectId;
-
-    @Field(() => ObjectIdScalar, { nullable: true })
-    item?: ObjectId;
-
-    public serializeFulfillmentFilter(): FilterQuery<
-        DocumentType<Fulfillment>
+    public async serializeFulfillmentFilter(): Promise<
+        FilterQuery<DocumentType<Fulfillment>>
     > {
-        const query = this.serializeBaseFilter() as FilterQuery<
-            DocumentType<Fulfillment>
-        >;
+        const query = {
+            ...(await this.serializeUploadEnabledFilter()),
+        } as FilterQuery<DocumentType<Fulfillment>>;
 
-        if (this.type) query.type = this.type;
-        if (this.location) query.location = this.location.toString();
-        if (this.company) query.company = this.company.toString();
-        if (this.item) query.items = this.item.toString() as any;
+        if (this.bol) query.bol = this.bol;
 
         return query;
     }

@@ -1,13 +1,22 @@
-import { LotFinder } from './LotFinder';
-import { Permitted } from '@src/auth/middleware/Permitted';
-import { createBaseResolver } from './../Base/BaseResolvers';
 import { Location, LocationLoader } from './../Location/Location';
-import { loaderResult } from './../../utils/loaderResult';
-import { Item, ItemLoader } from './../Item/Item';
 import { Company, CompanyLoader } from './../Company/Company';
-import { Lot, LotModel } from './Lot';
+import {
+    ProductionLine,
+    ProductionLineLoader,
+} from './../ProductionLine/ProductionLine';
+import { Item, ItemLoader } from '@src/schema/Item/Item';
+import { ExpenseClass } from './../Expense/ExpenseClass';
+import { ExpenseModifier } from './../Expense/Expense';
+import { Paginate } from '../Pagination/Pagination';
+import { LotFilter } from './LotFilter';
+import { LotList } from './LotList';
+import { Ref } from '@typegoose/typegoose';
+import { Context } from '@src/auth/context';
+import { CreateLotInput } from './CreateLotInput';
+import { createUploadEnabledResolver } from '../UploadEnabled/UploadEnabledResolvers';
 import {
     Arg,
+    Ctx,
     FieldResolver,
     Mutation,
     Query,
@@ -15,61 +24,94 @@ import {
     Root,
     UseMiddleware,
 } from 'type-graphql';
-import { Expense, ExpenseModel } from '../Expense/Expense';
+import { Lot, LotModel, LotLoader } from './Lot';
+import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
+import { UpdateLotInput } from './UpdateLotInput';
 
-const BaseResolvers = createBaseResolver();
+const UploadEnabledResolver = createUploadEnabledResolver();
 
 @Resolver(() => Lot)
-export class LotResolvers extends BaseResolvers {
+export class LotResolvers extends UploadEnabledResolver {
     @UseMiddleware(
         Permitted({ type: 'permission', permission: Permission.GetLots })
     )
-    @Query(() => Lot, { nullable: true })
-    async findLot(
-        @Arg('filter', () => LotFinder) filter: LotFinder
-    ): Promise<Lot> {
-        const query = await filter.serialize();
-        const doc = await LotModel.findOne({ ...query });
-        if (!doc) return null;
-        else return doc.toJSON();
+    @Query(() => LotList)
+    async lots(@Arg('filter') filter: LotFilter): Promise<LotList> {
+        return await Paginate.paginate({
+            model: LotModel,
+            query: await filter.serializeLotFilter(),
+            skip: filter.skip,
+            take: filter.take,
+            sort: { date_created: -1 },
+        });
     }
 
     @UseMiddleware(
         Permitted({ type: 'permission', permission: Permission.GetLots })
     )
-    @Query(() => [Lot])
-    async findLots(
-        @Arg('filter', () => LotFinder) filter: LotFinder
-    ): Promise<Lot[]> {
-        const query = await filter.serialize();
-        const docs = await LotModel.find({ ...query });
-        return docs.map((doc) => doc.toJSON());
+    @Query(() => Lot)
+    async lot(@Arg('id', () => ObjectIdScalar) id: Ref<Lot>): Promise<Lot> {
+        return await LotLoader.load(id, true);
+    }
+
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.CreateLot })
+    )
+    @Mutation(() => Lot)
+    async createLot(
+        @Ctx() context: Context,
+        @Arg('data', () => CreateLotInput) data: CreateLotInput
+    ): Promise<Lot> {
+        const doc = await data.validateLot(context);
+        const res = await LotModel.create(doc);
+
+        await ExpenseModifier[ExpenseClass.Lot](doc._id);
+
+        return res;
+    }
+
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.UpdateLot })
+    )
+    @Mutation(() => Lot)
+    async updateLot(
+        @Arg('id', () => ObjectIdScalar) id: Ref<Lot>,
+        @Arg('data', () => UpdateLotInput) data: UpdateLotInput
+    ): Promise<Lot> {
+        const res = await LotModel.findByIdAndUpdate(
+            id,
+            await data.serializeLotUpdate(),
+            { new: true }
+        );
+
+        await ExpenseModifier[ExpenseClass.Lot](res._id);
+
+        return res;
     }
 
     @FieldResolver(() => Item)
-    async item(@Root() lot: Lot): Promise<Item> {
-        return loaderResult(await ItemLoader.load(lot.item.toString()));
+    async item(@Root() { item }: Lot): Promise<Item> {
+        return await ItemLoader.load(item, true);
+    }
+
+    @FieldResolver(() => ProductionLine)
+    async production_line(
+        @Root() { production_line }: Lot
+    ): Promise<ProductionLine> {
+        if (!production_line) return null;
+        return await ProductionLineLoader.load(production_line, true);
     }
 
     @FieldResolver(() => Company)
     async company(@Root() { company }: Lot): Promise<Company> {
-        if (!company) return null;
-        return loaderResult(await CompanyLoader.load(company.toString()));
+        return await CompanyLoader.load(company, true);
     }
 
     @FieldResolver(() => Location)
     async location(@Root() { location }: Lot): Promise<Location> {
         if (!location) return null;
-        return loaderResult(await LocationLoader.load(location.toString()));
-    }
-
-    @FieldResolver(() => [Expense])
-    async expenses(@Root() { _id }: Lot): Promise<Expense[]> {
-        const res = await ExpenseModel.find({
-            against: _id.toString(),
-            deleted: false,
-        });
-        return res.map((doc) => doc.toJSON());
+        return await LocationLoader.load(location, true);
     }
 }

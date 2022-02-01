@@ -146,10 +146,6 @@ export class Profile implements User<AppMetaData, UserMetaData> {
 
     @Field({ nullable: true })
     @prop({ required: false })
-    _id?: string | undefined;
-
-    @Field({ nullable: true })
-    @prop({ required: false })
     created_at?: string | undefined;
 
     @Field({ nullable: true })

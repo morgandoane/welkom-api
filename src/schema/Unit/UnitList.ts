@@ -1,5 +1,5 @@
 import { Unit } from './Unit';
-import { Pagination } from './../Pagination/Pagination';
+import { Pagination } from '../Pagination/Pagination';
 import { ObjectType } from 'type-graphql';
 
 @ObjectType()

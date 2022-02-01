@@ -1,65 +1,52 @@
-import { LotModel } from './../Lot/Lot';
-import { TeamModel } from './../Team/Team';
-import { UserRole } from '@src/auth/UserRole';
-import { loaderResult } from '@src/utils/loaderResult';
-import { Contact, ContactLoader, ContactModel } from './../Contact/Contact';
-import { createBaseResolver } from './../Base/BaseResolvers';
-import { LocationModel } from './../Location/Location';
-import { ObjectIdScalar } from './../ObjectIdScalar';
+import { UpdateCompanyInput } from './UpdateCompanyInput';
 import { CompanyFilter } from './CompanyFilter';
 import { CompanyList } from './CompanyList';
+import { Paginate } from './../Pagination/Pagination';
+import { Ref } from '@typegoose/typegoose';
 import { Context } from '@src/auth/context';
-import { CreateCompanyInput, UpdateCompanyInput } from './CompanyInput';
-import { Company, CompanyModel, CompanyLoader } from './Company';
+import { createUploadEnabledResolver } from './../UploadEnabled/UploadEnabledResolvers';
 import {
     Arg,
-    Mutation,
-    Resolver,
     Ctx,
+    Mutation,
     Query,
-    FieldResolver,
-    Root,
+    Resolver,
     UseMiddleware,
 } from 'type-graphql';
-import { Paginate } from '../Paginate';
-import { FilterQuery, ObjectId } from 'mongoose';
-import { Location } from '../Location/Location';
-import { AppFile } from '../AppFile/AppFile';
-import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
-import { Ref, mongoose } from '@typegoose/typegoose';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
+import { Company, CompanyLoader, CompanyModel } from './Company';
+import { CreateCompanyInput } from './CreateCompanyInput';
 
-const BaseResolver = createBaseResolver();
+const UploadEnabledResolver = createUploadEnabledResolver();
 
 @Resolver(() => Company)
-export class CompanyResolvers extends BaseResolver {
-    @UseMiddleware(
-        Permitted({ type: 'permission', permission: Permission.GetCompanies })
-    )
-    @Query(() => Company)
-    async company(
-        @Arg('id', () => ObjectIdScalar) id: ObjectId
-    ): Promise<Company> {
-        return await CompanyModel.findById(id).lean();
-    }
-
+export class CompanyResolvers extends UploadEnabledResolver {
     @UseMiddleware(
         Permitted({ type: 'permission', permission: Permission.GetCompanies })
     )
     @Query(() => CompanyList)
     async companies(
-        @Ctx() context: Context,
         @Arg('filter') filter: CompanyFilter
     ): Promise<CompanyList> {
-        const query = await filter.serializeCompanyFilter(context);
         return await Paginate.paginate({
             model: CompanyModel,
-            query,
-            sort: { name: 1 },
+            query: await filter.serializeCompanyFilter(),
             skip: filter.skip,
             take: filter.take,
+            sort: { date_created: -1 },
         });
+    }
+
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.GetCompanies })
+    )
+    @Query(() => Company)
+    async company(
+        @Arg('id', () => ObjectIdScalar) id: Ref<Company>
+    ): Promise<Company> {
+        return await CompanyLoader.load(id, true);
     }
 
     @UseMiddleware(
@@ -67,12 +54,12 @@ export class CompanyResolvers extends BaseResolver {
     )
     @Mutation(() => Company)
     async createCompany(
-        @Arg('data') data: CreateCompanyInput,
-        @Ctx() { base, storage }: Context
+        @Ctx() context: Context,
+        @Arg('data', () => CreateCompanyInput) data: CreateCompanyInput
     ): Promise<Company> {
-        const doc: Company = { ...base, name: data.name, contacts: [] };
-        const res = await CompanyModel.create(doc);
-        return res.toJSON();
+        const company = await data.validateCompany(context);
+        const res = await CompanyModel.create(company);
+        return res;
     }
 
     @UseMiddleware(
@@ -80,46 +67,17 @@ export class CompanyResolvers extends BaseResolver {
     )
     @Mutation(() => Company)
     async updateCompany(
-        @Arg('id', () => ObjectIdScalar) id: ObjectId,
-        @Arg('data') data: UpdateCompanyInput,
-        @Ctx() context: Context
+        @Arg('id', () => ObjectIdScalar) id: Ref<Company>,
+        @Arg('data', () => UpdateCompanyInput) data: UpdateCompanyInput
     ): Promise<Company> {
-        const doc = await CompanyModel.findById(id);
-        if (data.name !== undefined) doc.name = data.name;
-        if (data.deleted !== undefined) doc.deleted = data.deleted;
-        doc.modified_by = context.base.modified_by;
-        doc.date_modified = context.base.date_modified;
-        await doc.save();
-        return doc.toJSON();
-    }
-
-    @FieldResolver(() => [Location])
-    async locations(@Root() { _id }: Company): Promise<Location[]> {
-        return await LocationModel.find({
-            company: _id,
-            deleted: false,
-        }).lean();
-    }
-
-    @FieldResolver(() => [Contact])
-    async contacts(@Root() { contacts }: Company): Promise<Contact[]> {
-        const res = await ContactModel.find({
-            deleted: false,
-            _id: { $in: (contacts ? contacts : []).map((c) => c.toString()) },
-        });
-        return res.map((doc) => doc.toJSON());
-    }
-
-    @FieldResolver(() => [AppFile])
-    async files(
-        @Ctx() { storage }: Context,
-        @Root() { _id }: Company
-    ): Promise<AppFile[]> {
-        const files = await storage.files(
-            StorageBucket.Attachments,
-            _id.toString()
+        const res = await CompanyModel.findByIdAndUpdate(
+            id,
+            await data.serializeCompanyUpdate(),
+            { new: true }
         );
 
-        return files.map((file) => AppFile.fromFile(file, _id.toString()));
+        CompanyLoader.clear(id);
+
+        return res;
     }
 }

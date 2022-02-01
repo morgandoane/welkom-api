@@ -1,68 +1,56 @@
-import { Context } from '@src/auth/context';
-import {
-    CreateQualityCheckInput,
-    UpdateQualityCheckInput,
-} from './QualityCheckInput';
-import { ObjectIdScalar } from '@src/schema/ObjectIdScalar';
-import { ObjectId } from 'mongoose';
-import { Paginate } from '@src/schema/Paginate';
+import { UpdateQualityCheckInput } from './UpdateQualityCheckInput';
 import { QualityCheckFilter } from './QualityCheckFilter';
 import { QualityCheckList } from './QualityCheckList';
-import { Item, ItemLoader } from './../Item/Item';
-import {
-    QualityCheck,
-    QualityCheckModel,
-    QualityCheckLoader,
-} from './QualityCheck';
+import { Paginate } from '../Pagination/Pagination';
+import { Ref } from '@typegoose/typegoose';
+import { Context } from '@src/auth/context';
+import { createUploadEnabledResolver } from '../UploadEnabled/UploadEnabledResolvers';
 import {
     Arg,
-    FieldResolver,
+    Ctx,
+    Mutation,
     Query,
     Resolver,
-    Root,
-    Mutation,
-    Ctx,
     UseMiddleware,
 } from 'type-graphql';
-import { createBaseResolver } from './../Base/BaseResolvers';
-import { loaderResult } from '@src/utils/loaderResult';
-import { Permission } from '@src/auth/permissions';
 import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
+import {
+    QualityCheck,
+    QualityCheckLoader,
+    QualityCheckModel,
+} from './QualityCheck';
+import { CreateQualityCheckInput } from './CreateQualityCheckInput';
 
-const BaseResolver = createBaseResolver();
+const UploadEnabledResolver = createUploadEnabledResolver();
 
 @Resolver(() => QualityCheck)
-export class QualityCheckResolvers extends BaseResolver {
+export class QualityCheckResolvers extends UploadEnabledResolver {
     @UseMiddleware(
-        Permitted({
-            type: 'permission',
-            permission: Permission.GetQualityChecks,
-        })
-    )
-    @Query(() => QualityCheck)
-    async qualityCheck(
-        @Arg('id', () => ObjectIdScalar) id: ObjectId
-    ): Promise<QualityCheck> {
-        return loaderResult(await QualityCheckLoader.load(id.toString()));
-    }
-
-    @UseMiddleware(
-        Permitted({
-            type: 'permission',
-            permission: Permission.GetQualityChecks,
-        })
+        Permitted({ type: 'permission', permission: Permission.GetCompanies })
     )
     @Query(() => QualityCheckList)
     async qualityChecks(
-        @Arg('filter', () => QualityCheckFilter) filter: QualityCheckFilter
+        @Arg('filter') filter: QualityCheckFilter
     ): Promise<QualityCheckList> {
         return await Paginate.paginate({
             model: QualityCheckModel,
-            query: await filter.serializeCheckFilter(),
+            query: await filter.serializeQualityCheckFilter(),
             skip: filter.skip,
             take: filter.take,
             sort: { date_created: -1 },
         });
+    }
+
+    @UseMiddleware(
+        Permitted({ type: 'permission', permission: Permission.GetCompanies })
+    )
+    @Query(() => QualityCheck)
+    async qualityCheck(
+        @Arg('id', () => ObjectIdScalar) id: Ref<QualityCheck>
+    ): Promise<QualityCheck> {
+        return await QualityCheckLoader.load(id, true);
     }
 
     @UseMiddleware(
@@ -77,11 +65,9 @@ export class QualityCheckResolvers extends BaseResolver {
         @Arg('data', () => CreateQualityCheckInput)
         data: CreateQualityCheckInput
     ): Promise<QualityCheck> {
-        const doc = await QualityCheckModel.create(
-            await data.validate(context)
-        );
-
-        return doc.toJSON();
+        const qualityCheck = await data.validateQualityCheck(context);
+        const res = await QualityCheckModel.create(qualityCheck);
+        return res;
     }
 
     @UseMiddleware(
@@ -92,22 +78,18 @@ export class QualityCheckResolvers extends BaseResolver {
     )
     @Mutation(() => QualityCheck)
     async updateQualityCheck(
-        @Ctx() context: Context,
-        @Arg('id', () => ObjectIdScalar) id: ObjectId,
+        @Arg('id', () => ObjectIdScalar) id: Ref<QualityCheck>,
         @Arg('data', () => UpdateQualityCheckInput)
         data: UpdateQualityCheckInput
     ): Promise<QualityCheck> {
         const res = await QualityCheckModel.findByIdAndUpdate(
             id,
-            await data.validate(context),
+            await data.serializeQualityCheckUpdate(),
             { new: true }
         );
 
-        return res.toJSON();
-    }
+        QualityCheckLoader.clear(id);
 
-    @FieldResolver(() => Item)
-    async item(@Root() { item }: QualityCheck): Promise<Item> {
-        return loaderResult(await ItemLoader.load(item.toString()));
+        return res;
     }
 }

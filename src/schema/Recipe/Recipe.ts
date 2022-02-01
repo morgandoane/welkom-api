@@ -1,24 +1,22 @@
-import { RecipeVersion } from './../RecipeVersion/RecipeVersion';
-import { DateGroup } from './../DateGroup/DateGroup';
-import { getBaseLoader } from './../Loader';
+import { getBaseLoader } from './../../utils/baseLoader';
+import { UploadEnabled } from './../UploadEnabled/UploadEnabled';
 import {
-    prop,
-    Ref,
-    getModelForClass,
     modelOptions,
+    prop,
+    getModelForClass,
+    Ref,
 } from '@typegoose/typegoose';
 import { Field, ObjectType } from 'type-graphql';
-import { Base } from '../Base/Base';
 import { Folder } from '../Folder/Folder';
 import { Item } from '../Item/Item';
 
+@ObjectType()
 @modelOptions({
     schemaOptions: {
         collection: 'recipes',
     },
 })
-@ObjectType()
-export class Recipe extends Base {
+export class Recipe extends UploadEnabled {
     @Field()
     @prop({ required: true })
     name!: string;
@@ -29,13 +27,7 @@ export class Recipe extends Base {
 
     @Field(() => Folder, { nullable: true })
     @prop({ required: false, ref: () => Folder })
-    folder?: Ref<Folder>;
-
-    @Field(() => [DateGroup])
-    version_date_groups?: DateGroup[];
-
-    @Field(() => RecipeVersion, { nullable: true })
-    active?: RecipeVersion;
+    folder!: Ref<Folder> | null;
 }
 
 export const RecipeModel = getModelForClass(Recipe);

@@ -1,140 +1,91 @@
-import { ProductionLineLoader } from './../ProductionLine/ProductionLine';
-import { UserInputError } from 'apollo-server-errors';
+import { CompanyLoader } from './../Company/Company';
+import { ObjectIdScalar } from './../ObjectIdScalar/ObjectIdScalar';
+import { ItemLoader } from './../Item/Item';
+import { RecipeLoader } from './../Recipe/Recipe';
 import {
     CodeGenerator,
     CodeType,
 } from './../../services/CodeGeneration/CodeGeneration';
-import { RecipeLoader } from './../Recipe/Recipe';
-import { LocationLoader } from './../Location/Location';
-import { RecipeVersionLoader } from './../RecipeVersion/RecipeVersion';
-import { loaderResult } from './../../utils/loaderResult';
 import { Context } from './../../auth/context';
-import { MixingCard, MixingCardModel } from './../MixingCard/MixingCard';
-import { UpdateQuery } from 'mongoose';
-import { ProceduralLot } from './../Lot/extensions/ProceduralLot/ProceduralLot';
-import { Batch } from './Batch';
+import {
+    RecipeVersion,
+    RecipeVersionLoader,
+} from '../RecipeVersion/RecipeVersion';
+import { ProductionLine } from '../ProductionLine/ProductionLine';
+import { Ref } from '@typegoose/typegoose';
 import { Field, InputType } from 'type-graphql';
+import { Location, LocationLoader } from '../Location/Location';
+import { Batch } from './Batch';
+import { BatchLot } from '../BatchLot/BatchLot';
+import { Company } from '../Company/Company';
 
 @InputType()
 export class CreateBatchInput {
-    @Field({ nullable: true })
-    mixing_card_line?: string;
+    @Field(() => ObjectIdScalar, { nullable: true })
+    recipe_version!: Ref<RecipeVersion> | null;
 
-    @Field()
-    recipe_version!: string;
+    @Field(() => ObjectIdScalar)
+    location!: Ref<Location>;
 
-    @Field()
-    location!: string;
+    @Field(() => ObjectIdScalar)
+    company!: Ref<Company>;
 
-    @Field({ nullable: true })
-    production_line?: string;
+    @Field(() => ObjectIdScalar, { nullable: true })
+    production_line!: Ref<ProductionLine> | null;
 
-    public async validateBatchCreation({ base }: Context): Promise<{
+    public async validateBatch(context: Context): Promise<{
         batch: Batch;
-        lot: ProceduralLot;
-        card_update?: { id: string; update: UpdateQuery<MixingCard> };
+        lot: BatchLot;
     }> {
-        const recipeVersion = loaderResult(
-            await RecipeVersionLoader.load(this.recipe_version)
+        const { _id: recipe_version, recipe: recipe_id } =
+            await RecipeVersionLoader.load(
+                this.recipe_version.toString(),
+                true
+            );
+
+        const recipe = await RecipeLoader.load(recipe_id.toString(), true);
+        const { _id: item, base_unit } = await ItemLoader.load(
+            recipe.item.toString(),
+            true
+        );
+        const { _id: company } = await CompanyLoader.load(
+            this.company.toString(),
+            true
         );
 
-        const recipe = loaderResult(
-            await RecipeLoader.load(recipeVersion.recipe.toString())
+        const { _id: location } = await LocationLoader.load(
+            this.location.toString(),
+            true
         );
 
-        const location = loaderResult(await LocationLoader.load(this.location));
-        const production_line = !this.production_line
-            ? null
-            : loaderResult(
-                  await ProductionLineLoader.load(this.production_line)
-              );
+        const { _id: production_line } = !this.production_line
+            ? { _id: null }
+            : await LocationLoader.load(this.location.toString(), true);
 
-        const lot: ProceduralLot = {
-            ...base,
+        const lot: BatchLot = {
+            ...context.base,
             code: await CodeGenerator.generate(CodeType.LOT),
-            start_quantity: 0,
-            item: recipe.item,
-            quality_check_responses: [],
-            location: location._id,
-            company: location.company,
+            item,
+            company,
             contents: [],
+            quantity: 0,
+            base_unit,
+            expense_summaries: null,
+            expenses: [],
+            location,
+            production_line,
         };
 
         const batch: Batch = {
-            ...base,
-            recipe_version: recipeVersion._id,
+            ...context.base,
+            recipe_version,
+            location,
+            company,
+            production_line,
             lot: lot._id,
-            item: recipe.item,
-            location: location._id,
-            production_line: production_line?._id || null,
+            date_completed: null,
         };
 
-        if (!this.mixing_card_line) {
-            return {
-                lot,
-                batch,
-            };
-        }
-
-        const card = await MixingCardModel.findOne({
-            ['lines._id']: this.mixing_card_line,
-        });
-
-        if (!card)
-            throw new UserInputError(
-                'Failed to find card for line with id ' + this.mixing_card_line
-            );
-
-        const matches = card.lines.filter(
-            (line) => line.recipe.toString() == recipe._id.toString()
-        );
-
-        const bestMatch = matches.find((line) => {
-            (line.recipe_version || '').toString() ===
-                recipeVersion._id.toString();
-        });
-
-        const lineIndex = card.lines
-            .map((line) => line._id.toString())
-            .indexOf(
-                bestMatch ? bestMatch._id.toString() : matches[0]._id.toString()
-            );
-
-        if (!card.lines[lineIndex].limit) {
-            // do nothing to the mixing card
-            return {
-                lot,
-                batch,
-            };
-        } else {
-            // adjust the limit
-            if (card.lines[lineIndex].limit > 2) {
-                // drop the limit
-                const copy = [...card.lines];
-                copy[lineIndex].limit = copy[lineIndex].limit - 1;
-                return {
-                    lot,
-                    batch,
-                    card_update: {
-                        id: card._id.toString(),
-                        update: { lines: copy },
-                    },
-                };
-            } else {
-                // drop the line
-                const copy = [...card.lines];
-                copy.splice(lineIndex, 1);
-                return {
-                    lot,
-                    batch,
-                    card_update: {
-                        id: card._id.toString(),
-                        update: {
-                            lines: copy,
-                        },
-                    },
-                };
-            }
-        }
+        return { batch, lot };
     }
 }

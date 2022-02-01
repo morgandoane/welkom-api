@@ -1,6 +1,5 @@
 import { env } from './config';
 
-import { ApolloServer } from 'apollo-server-express';
 import express from 'express';
 
 // GraphQL
@@ -8,56 +7,35 @@ import { buildSchema } from 'type-graphql';
 import { registerEnums } from './utils/registerEnums';
 
 // Resolvers
-import { AppFileResolvers } from './schema/AppFile/AppFileResolvers';
+import { AppointmentResolvers } from './schema/Appointment/AppointmentResolvers';
+import { BatchLotContentResolvers } from './schema/BatchLotContent/BatchLotContentResolvers';
 import { BatchResolvers } from './schema/Batch/BatchResolvers';
-import { BatchLineResolvers } from './schema/BatchLine/BatchLineResolvers';
-import { BolFileResolvers } from './schema/AppFile/extensons/BolFile/BolFile';
-import { BaseUnionResolvers } from './schema/Fragments';
+import { BolContentResolvers } from './schema/BolContent/BolContentResolvers';
 import { BolResolvers } from './schema/Bol/BolResolvers';
-import { BolAppointmentResolvers } from './schema/Bol/BolAppointmentResolvers';
-import { BucketLotResolvers } from './schema/Lot/extensions/BucketLot/BucketLotResolvers';
-import { CodeResolvers } from './schema/Code/CodeResolvers';
 import { CompanyResolvers } from './schema/Company/CompanyResolvers';
-import { ContactResolvers } from './schema/Contact/ContactResolvers';
-import { ConversionResolvers } from './schema/Conversion/ConversionResolvers';
+import { CookieResolvers } from './schema/Item/extensions/Cookie/CookieResolvers';
 import { ExpenseResolvers } from './schema/Expense/ExpenseResolvers';
+import { ExpenseSummaryResolvers } from './schema/ExpenseSummary/ExpenseSummaryResolvers';
 import { FolderResolvers } from './schema/Folder/FolderResolvers';
 import { FulfillmentResolvers } from './schema/Fulfillment/FulfillmentResolvers';
-import { ItemResolvers } from './schema/Item/ItemResolvers';
+import { IngredientResolvers } from './schema/Item/extensions/Ingredient/IngredientResolvers';
 import { ItineraryResolvers } from './schema/Itinerary/ItineraryResolvers';
 import { LocationResolvers } from './schema/Location/LocationResolvers';
 import { LotResolvers } from './schema/Lot/LotResolvers';
-import { MixingCardResolvers } from './schema/MixingCard/MixingCardResolvers';
-import { MixingCardLineResolvers } from './schema/MixingCardLine/MixingLineResolvers';
-import { OrderResolvers } from './schema/Order/OrderResolvers';
-import { OrderQueueResolvers } from './schema/OrderQueue/OrderQueueResolvers';
-import { OrderQueueContentResolvers } from './schema/OrderQueue/OrderQueueContentResolvers';
-import { OrderStatisticResolvers } from './schema/OrderStatistic/OrderStatisticResolvers';
-import { PalletResolvers } from './schema/Pallet/PalletResolvers';
-import { PalletCardResolvers } from './schema/PalletCard/PalletCardResolvers';
-import { ProceduralLotResolvers } from './schema/Lot/extensions/ProceduralLot/ProceduralLotResolvers';
-import { ProductionLineResolvers } from './schema/ProductionLine/ProductionLineResolvers';
-import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
-import { ProfileIdentifierResolvers } from './schema/ProfileIdentifier/ProfileIdentifierResolvers';
-import { QualityCheckResponseResolvers } from './schema/QualityCheckResponse/QualityCheckResponseResolvers';
-import { QualityCheckResolvers } from './schema/QualityCheck/QualityCheckResolvers';
-import { RecipeResolvers } from './schema/Recipe/RecipeResolvers';
-import { RecipeVersionResolvers } from './schema/RecipeVersion/RecipeVersionResolvers';
-import { SignedUrlResolvers } from './schema/SignedUrl/SignedUrlResolvers';
-import { TeamResolvers } from './schema/Team/TeamResolvers';
-import { TrayResolvers } from './schema/Tray/TrayResolvers';
+import { LotContentResolvers } from './schema/LotContent/LotContentResolvers';
+import { MiscItemResolvers } from './schema/Item/extensions/Misc/MiscItemResolvers';
+import { MyContextResolvers } from './contextual/MyContextResolvers';
+import { OrganizationResolvers } from './schema/Organization/OrganizationResolvers';
+import { PackagingResolvers } from './schema/Item/extensions/Packaging/PackagingResolvers';
+import { ProductResolvers } from './schema/Item/extensions/Product/ProductResolvers';
 import { UnitResolvers } from './schema/Unit/UnitResolvers';
-import { VerificationResolvers } from './schema/Verification/VerificationResolvers';
-import { WorkbookResolvers } from './schema/Workbook/WorkbookResolvers';
-import {
-    BolItemContentResolver,
-    ContentResolver,
-    ItemContentResolver,
-    ItemPluralContentResolver,
-    LotContentResolver,
-    OrderContentResolver,
-    ProceduralLotContentResolver,
-} from './schema/Content/ContentResolvers';
+import { RecipeVersionResolvers } from './schema/RecipeVersion/RecipeVersionResolvers';
+import { RecipeStepContentResolvers } from './schema/RecipeStepContent/RecipeStepContentResolvers';
+import { RecipeResolvers } from './schema/Recipe/RecipeResolvers';
+import { QualityCheckResolvers } from './schema/QualityCheck/QualityCheckResolvers';
+import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
+import { ProductionLineResolvers } from './schema/ProductionLine/ProductionLineResolvers';
+import { TeamResolvers } from './schema/Team/TeamResolvers';
 
 import { mongoose } from '@typegoose/typegoose';
 import { AuthProvider } from './services/AuthProvider/AuthProvider';
@@ -65,6 +43,7 @@ import createContext from './auth/middleware/ContextMiddleware';
 
 import fs from 'fs';
 import https from 'https';
+import { ApolloServer } from 'apollo-server-express';
 
 (async () => {
     try {
@@ -74,64 +53,40 @@ import https from 'https';
         registerEnums();
 
         mongoose.Promise = global.Promise;
-        await mongoose.connect(env.ATLAS_URL, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            useFindAndModify: false,
-            useCreateIndex: true,
-        });
+        await mongoose.connect(env.ATLAS_URL, {});
 
         // Setup GraphQL with Apollo
         const schema = await buildSchema({
             resolvers: [
-                AppFileResolvers,
+                AppointmentResolvers,
                 BatchResolvers,
-                BatchLineResolvers,
-                BolFileResolvers,
-                BaseUnionResolvers,
+                BatchLotContentResolvers,
+                BolContentResolvers,
                 BolResolvers,
-                BolAppointmentResolvers,
-                BolItemContentResolver,
-                BucketLotResolvers,
-                CodeResolvers,
                 CompanyResolvers,
-                ContactResolvers,
-                ContentResolver,
-                ConversionResolvers,
+                CookieResolvers,
                 ExpenseResolvers,
+                ExpenseSummaryResolvers,
                 FolderResolvers,
                 FulfillmentResolvers,
-                ItemResolvers,
-                ItemContentResolver,
-                ItemPluralContentResolver,
+                IngredientResolvers,
                 ItineraryResolvers,
                 LocationResolvers,
                 LotResolvers,
-                LotContentResolver,
-                MixingCardResolvers,
-                MixingCardLineResolvers,
-                OrderContentResolver,
-                OrderResolvers,
-                OrderQueueResolvers,
-                OrderQueueContentResolvers,
-                OrderStatisticResolvers,
-                PalletResolvers,
-                PalletCardResolvers,
-                ProceduralLotResolvers,
-                ProfileResolvers,
-                ProfileIdentifierResolvers,
-                ProceduralLotContentResolver,
+                LotContentResolvers,
+                MiscItemResolvers,
+                MyContextResolvers,
+                OrganizationResolvers,
+                PackagingResolvers,
+                ProductResolvers,
                 ProductionLineResolvers,
+                ProfileResolvers,
                 QualityCheckResolvers,
-                QualityCheckResponseResolvers,
                 RecipeResolvers,
+                RecipeStepContentResolvers,
                 RecipeVersionResolvers,
-                SignedUrlResolvers,
                 TeamResolvers,
-                TrayResolvers,
                 UnitResolvers,
-                VerificationResolvers,
-                WorkbookResolvers,
             ],
             validate: true,
         });

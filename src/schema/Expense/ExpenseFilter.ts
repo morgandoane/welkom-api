@@ -1,35 +1,40 @@
-import { mongoose } from '@typegoose/typegoose';
-import { ObjectIdScalar } from './../ObjectIdScalar';
-import { FilterQuery, ObjectId } from 'mongoose';
-import { RangeInput } from './../Range/RangeInput';
-import { Expense, ExpenseKey } from './Expense';
-import { BaseFilter } from './../Base/BaseFilter';
+import { Itinerary } from './../Itinerary/Itinerary';
+import { Lot } from './../Lot/Lot';
+import { UploadEnabledFilter } from './../UploadEnabled/UploadEnabledFilter';
 import { Field, InputType } from 'type-graphql';
+import { FilterQuery } from 'mongoose';
+import { DocumentType, Ref } from '@typegoose/typegoose';
+import { Company } from '../Company/Company';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
+import { Expense } from './Expense';
+import { ExpenseClass } from './ExpenseClass';
 
 @InputType()
-export class ExpenseFilter extends BaseFilter {
-    @Field(() => ExpenseKey, { nullable: true })
-    key?: ExpenseKey;
+export class ExpenseFilter extends UploadEnabledFilter {
+    @Field(() => ObjectIdScalar, { nullable: true })
+    customer?: Ref<Company>;
 
-    @Field(() => RangeInput, { nullable: true })
-    amount?: RangeInput;
+    @Field(() => ObjectIdScalar, { nullable: true })
+    vendor?: Ref<Company>;
 
-    @Field(() => [ObjectIdScalar], { nullable: true })
-    against?: ObjectId[];
+    @Field(() => ObjectIdScalar, { nullable: true })
+    against?: Ref<Lot | Itinerary>;
 
-    public serializeExpenseFilter(): FilterQuery<Expense> {
-        const res: FilterQuery<Expense> = { ...this.serializeBaseFilter() };
+    @Field(() => ExpenseClass, { nullable: true })
+    expense_class?: ExpenseClass;
 
-        if (this.key) res.key = this.key;
-        if (this.amount)
-            res.amount = { $gte: this.amount.min, $lte: this.amount.max };
-        if (this.against)
-            res.against = {
-                $in: this.against.map(
-                    (a) => new mongoose.Types.ObjectId(a.toString())
-                ),
-            };
+    public async serializeExpenseFilter(): Promise<
+        FilterQuery<DocumentType<Expense>>
+    > {
+        const query = {
+            ...(await this.serializeUploadEnabledFilter()),
+        } as FilterQuery<DocumentType<Expense>>;
 
-        return res;
+        if (this.vendor) query.vendor = this.vendor;
+        if (this.customer) query.customer = this.customer;
+        if (this.against) query.against = this.against;
+        if (this.expense_class) query.expense_class = this.expense_class;
+
+        return query;
     }
 }

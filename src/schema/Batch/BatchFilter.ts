@@ -1,50 +1,55 @@
-import { DateRangeInput } from './../DateRange/DateRangeInput';
-import { startOfDay, endOfDay } from 'date-fns';
+import { DateRangeInput } from './../Range/DateRange/DateRangeInput';
 import { Batch } from './Batch';
-import { BaseFilter } from './../Base/BaseFilter';
+import { UploadEnabledFilter } from './../UploadEnabled/UploadEnabledFilter';
 import { Field, InputType } from 'type-graphql';
 import { FilterQuery } from 'mongoose';
-import { DocumentType } from '@typegoose/typegoose';
+import { DocumentType, Ref } from '@typegoose/typegoose';
+import { BatchLot } from '../BatchLot/BatchLot';
+import { Company } from '../Company/Company';
+import { Location } from '../Location/Location';
+import { ProductionLine } from '../ProductionLine/ProductionLine';
+import { RecipeVersion } from '../RecipeVersion/RecipeVersion';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
+import { endOfDay, startOfDay } from 'date-fns';
 
 @InputType()
-export class BatchFilter extends BaseFilter {
+export class BatchFilter extends UploadEnabledFilter {
+    @Field(() => ObjectIdScalar, { nullable: true })
+    recipe_version?: Ref<RecipeVersion> | null;
+
+    @Field(() => ObjectIdScalar, { nullable: true })
+    lot?: Ref<BatchLot>;
+
+    @Field(() => ObjectIdScalar, { nullable: true })
+    location?: Ref<Location>;
+
+    @Field(() => ObjectIdScalar, { nullable: true })
+    company?: Ref<Company>;
+
+    @Field(() => ObjectIdScalar, { nullable: true })
+    production_line?: Ref<ProductionLine> | null;
+
     @Field(() => DateRangeInput, { nullable: true })
     date_completed?: DateRangeInput;
 
-    @Field({ nullable: true })
-    item?: string;
-
-    @Field({ nullable: true })
-    location?: string;
-
-    public serializeBatchFilter(): FilterQuery<DocumentType<Batch>> {
-        const res: FilterQuery<DocumentType<Batch>> = {
-            ...this.serializeBaseFilter(),
+    public async serializeBatchFilter(): Promise<
+        FilterQuery<DocumentType<Batch>>
+    > {
+        const query = {
+            ...(await this.serializeUploadEnabledFilter()),
         } as FilterQuery<DocumentType<Batch>>;
 
-        if (this.item) {
-            res.item = this.item;
-        }
+        if (this.recipe_version) query.recipe_version = this.recipe_version;
+        if (this.lot) query.lot = this.lot;
+        if (this.location) query.location = this.location;
+        if (this.company) query.company = this.company;
+        if (this.production_line) query.production_line = this.production_line;
+        if (this.date_completed)
+            query.date_completed = {
+                $gte: startOfDay(this.date_completed.start),
+                $lte: endOfDay(this.date_completed.end),
+            };
 
-        if (this.location) {
-            res.location = this.location;
-        }
-
-        if (this.date_completed !== undefined) {
-            if (this.date_completed == null) {
-                res.$or = [
-                    ...(res.$or || []),
-                    { date_completed: null },
-                    { date_completed: { $exists: false } },
-                ];
-            } else {
-                res.date_completed = {
-                    $gte: startOfDay(this.date_completed.start),
-                    $lte: endOfDay(this.date_completed.end),
-                };
-            }
-        }
-
-        return res;
+        return query;
     }
 }

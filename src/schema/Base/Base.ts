@@ -1,30 +1,29 @@
 import { Profile } from './../Profile/Profile';
-import { mongoose, prop } from '@typegoose/typegoose';
-import { Directive, Field, ID, ObjectType } from 'type-graphql';
+import { prop, mongoose } from '@typegoose/typegoose';
+import { Field, ID, ObjectType } from 'type-graphql';
 
 @ObjectType()
-export class Base {
+export class Identified {
     @Field(() => ID)
-    @prop({ required: true })
+    @prop({ required: true, type: () => mongoose.Types.ObjectId })
     _id!: mongoose.Types.ObjectId;
+}
 
+@ObjectType()
+export class Base extends Identified {
     @Field()
     @prop({ required: true })
     date_created!: Date;
-
-    @Field({ nullable: true })
-    @prop({ required: false })
-    date_modified?: Date;
 
     @Field(() => Profile)
     @prop({ required: true })
     created_by!: string;
 
-    @Field(() => Profile, { nullable: true })
-    @prop({ required: false })
-    modified_by?: string;
-
     @Field()
     @prop({ required: true, default: false })
     deleted!: boolean;
+
+    @Field({ nullable: true })
+    @prop({ required: false })
+    note?: string;
 }

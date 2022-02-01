@@ -1,117 +1,79 @@
-import { UserRole } from '@src/auth/UserRole';
-import { UserLoader } from '@src/services/AuthProvider/AuthProvider';
-import { Profile } from './../Profile/Profile';
-import { Location, LocationLoader } from './../Location/Location';
-import { Company, CompanyLoader } from './../Company/Company';
-import { CreateTeamInput, UpdateTeamInput } from './TeamInput';
-import { ObjectIdScalar } from '@src/schema/ObjectIdScalar';
-import { ObjectId } from 'mongoose';
-import { Paginate } from '@src/schema/Paginate';
+import { MyContextLoader } from './../../contextual/MyContext';
+import { UpdateTeamInput } from './UpdateTeamInput';
 import { TeamFilter } from './TeamFilter';
-import { Context } from '@src/auth/context';
 import { TeamList } from './TeamList';
-import { createBaseResolver } from './../Base/BaseResolvers';
+import { Paginate } from '../Pagination/Pagination';
+import { Ref } from '@typegoose/typegoose';
+import { Context } from '@src/auth/context';
+import { createUploadEnabledResolver } from '../UploadEnabled/UploadEnabledResolvers';
 import {
     Arg,
     Ctx,
-    FieldResolver,
     Mutation,
     Query,
     Resolver,
-    Root,
     UseMiddleware,
 } from 'type-graphql';
-import { Team, TeamModel, TeamLoader } from './Team';
-import { loaderResult } from '@src/utils/loaderResult';
 import { Permitted } from '@src/auth/middleware/Permitted';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
+import { Team, TeamLoader, TeamModel } from './Team';
+import { CreateTeamInput } from './CreateTeamInput';
+import { UserRole } from '@src/auth/UserRole';
 
-const BaseResolver = createBaseResolver();
+const UploadEnabledResolver = createUploadEnabledResolver();
 
 @Resolver(() => Team)
-export class TeamResolvers extends BaseResolver {
-    @UseMiddleware(
-        Permitted({
-            type: 'role',
-            role: UserRole.Manager,
-        })
-    )
-    @Query(() => Team)
-    async team(@Arg('id', () => ObjectIdScalar) id: ObjectId): Promise<Team> {
-        return loaderResult(await TeamLoader.load(id.toString()));
-    }
-
-    @UseMiddleware(
-        Permitted({
-            type: 'role',
-            role: UserRole.Manager,
-        })
-    )
+export class TeamResolvers extends UploadEnabledResolver {
+    @UseMiddleware(Permitted({ type: 'role', role: UserRole.Manager }))
     @Query(() => TeamList)
     async teams(@Arg('filter') filter: TeamFilter): Promise<TeamList> {
         return await Paginate.paginate({
             model: TeamModel,
-            query: filter.serializeTeamFilter(),
+            query: await filter.serializeTeamFilter(),
             skip: filter.skip,
             take: filter.take,
-            sort: { name: 1 },
+            sort: { date_created: -1 },
         });
     }
 
-    @UseMiddleware(
-        Permitted({
-            type: 'role',
-            role: UserRole.Manager,
-        })
-    )
+    @UseMiddleware(Permitted({ type: 'role', role: UserRole.Manager }))
+    @Query(() => Team)
+    async team(@Arg('id', () => ObjectIdScalar) id: Ref<Team>): Promise<Team> {
+        return await TeamLoader.load(id, true);
+    }
+
+    @UseMiddleware(Permitted({ type: 'role', role: UserRole.Manager }))
     @Mutation(() => Team)
     async createTeam(
         @Ctx() context: Context,
-        @Arg('data') data: CreateTeamInput
+        @Arg('data', () => CreateTeamInput) data: CreateTeamInput
     ): Promise<Team> {
-        const team = await data.serialize(context);
-        const doc = await TeamModel.create(team);
-        return doc.toJSON();
+        const team = await data.validateTeam(context);
+        const res = await TeamModel.create(team);
+        for (const member of res.members) {
+            MyContextLoader.clear(member);
+        }
+        return res;
     }
 
-    @UseMiddleware(
-        Permitted({
-            type: 'role',
-            role: UserRole.Manager,
-        })
-    )
+    @UseMiddleware(Permitted({ type: 'role', role: UserRole.Manager }))
     @Mutation(() => Team)
     async updateTeam(
-        @Ctx() context: Context,
-        @Arg('id', () => ObjectIdScalar) id: ObjectId,
-        @Arg('data') data: UpdateTeamInput
+        @Arg('id', () => ObjectIdScalar) id: Ref<Team>,
+        @Arg('data', () => UpdateTeamInput) data: UpdateTeamInput
     ): Promise<Team> {
-        const team = loaderResult(await TeamLoader.load(id.toString()));
-
         const res = await TeamModel.findByIdAndUpdate(
-            id.toString(),
-            await data.serializeTeamUpdate(context),
+            id,
+            await data.serializeTeamUpdate(),
             { new: true }
         );
 
-        TeamLoader.clear(id.toString());
+        for (const member of res.members) {
+            MyContextLoader.clear(member);
+        }
 
-        return res.toJSON();
-    }
+        TeamLoader.clear(id);
 
-    @FieldResolver(() => Company)
-    async company(@Root() { company }: Team): Promise<Company> {
-        return loaderResult(await CompanyLoader.load(company.toString()));
-    }
-
-    @FieldResolver(() => Company)
-    async location(@Root() { location }: Team): Promise<Location> {
-        if (!location) return null;
-        return loaderResult(await LocationLoader.load(location.toString()));
-    }
-
-    @FieldResolver(() => [Profile])
-    async members(@Root() { members }: Team): Promise<Profile[]> {
-        const res = await UserLoader.loadMany(members);
-        return res.map((r) => loaderResult(r));
+        return res;
     }
 }

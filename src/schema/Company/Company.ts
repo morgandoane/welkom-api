@@ -1,32 +1,20 @@
-import { Contact } from './../Contact/Contact';
-import { Base } from './../Base/Base';
-import { getBaseLoader } from './../Loader';
+import { getBaseLoader } from './../../utils/baseLoader';
+import { UploadEnabled } from './../UploadEnabled/UploadEnabled';
+import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose';
 import { Field, ObjectType } from 'type-graphql';
-import {
-    getModelForClass,
-    modelOptions,
-    prop,
-    Ref,
-} from '@typegoose/typegoose';
-import { Location } from '../Location/Location';
+import { MinLength } from 'class-validator';
 
 @ObjectType()
 @modelOptions({
     schemaOptions: {
-        collection: 'companies',
+        collection: 'companyies',
     },
 })
-export class Company extends Base {
+export class Company extends UploadEnabled {
+    @MinLength(2)
     @Field()
-    @prop({ required: true })
+    @prop({ required: true, minlength: 2 })
     name!: string;
-
-    @Field(() => [Location])
-    locations?: Location[];
-
-    @Field(() => [Contact])
-    @prop({ required: true, ref: () => Contact })
-    contacts: Ref<Contact>[];
 }
 
 export const CompanyModel = getModelForClass(Company);

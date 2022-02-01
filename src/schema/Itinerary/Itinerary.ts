@@ -1,39 +1,23 @@
-import { Base } from './../Base/Base';
-import { getBaseLoader } from './../Loader';
-import { Company } from './../Company/Company';
+import { getModelForClass, prop, Ref } from '@typegoose/typegoose';
+import { UploadEnabled } from './../UploadEnabled/UploadEnabled';
 import { Field, ObjectType } from 'type-graphql';
-import { Bol } from '../Bol/Bol';
-import {
-    getModelForClass,
-    modelOptions,
-    prop,
-    Ref,
-} from '@typegoose/typegoose';
-import { Order } from '../Order/Order';
+import { getBaseLoader } from '@src/utils/baseLoader';
+import { Company } from '../Company/Company';
 
 @ObjectType()
-@modelOptions({
-    schemaOptions: {
-        collection: 'itineraries',
-    },
-})
-export class Itinerary extends Base {
-    @Field()
-    @prop({ required: true })
-    code!: string;
-
-    @Field(() => [Order])
-    @prop({ required: true, ref: 'Order' })
-    orders!: Ref<Order>[];
-
-    @Field(() => [Bol])
-    bols?: Bol[];
+export class Itinerary extends UploadEnabled {
+    @Field({ nullable: true })
+    @prop({ required: false })
+    code!: string | null;
 
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
-    carrier?: Ref<Company>;
+    carrier!: Ref<Company> | null;
+
+    @Field(() => Company)
+    @prop({ required: true, ref: () => Company })
+    commissioned_by!: Ref<Company>;
 }
 
 export const ItineraryModel = getModelForClass(Itinerary);
-
 export const ItineraryLoader = getBaseLoader(ItineraryModel);

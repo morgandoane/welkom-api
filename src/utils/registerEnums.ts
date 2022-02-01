@@ -1,16 +1,14 @@
-import { VerificationStatus } from './../schema/Verification/Verification';
+import { FolderClass } from './../schema/Folder/Folder';
+import { QualityCheckCategory } from './../schema/QualityCheck/QualityCheck';
+import { UnitClass } from './../schema/Unit/UnitClass';
+import { BaseUnit } from './../schema/Unit/BaseUnit';
 import { CodeType } from './../services/CodeGeneration/CodeGeneration';
 import { Permission } from '@src/auth/permissions';
 import { UserRole } from '@src/auth/UserRole';
-import { FulfillmentType } from '@src/schema/Fulfillment/Fulfillment';
-import { UnitClass } from '@src/schema/Unit/Unit';
 import { registerEnumType } from 'type-graphql';
-import { FolderClass } from '@src/schema/Folder/Folder';
-import { SignedUrlAction } from '@src/schema/SignedUrl/SignedUrlResolvers';
-import { BolStatus } from '@src/schema/Bol/Bol';
-import { PromptType } from '@src/schema/Prompt/Prompt';
-import { ExpenseKey } from '@src/schema/Expense/Expense';
-import { ItemType } from '@src/schema/Item/Item';
+import { QualityCheckClass } from '@src/schema/QualityCheck/QualityCheck';
+import { ExpenseClass } from '@src/schema/Expense/ExpenseClass';
+import { FulfillmentType } from '@src/schema/Fulfillment/Fulfillment';
 
 export enum StorageBucketProxy {
     ldbbakery_attachments = 'ldbbakery_attachments',
@@ -23,15 +21,13 @@ export enum StorageBucketProxy {
 export const registerEnums = (): void => {
     registerEnumType(Permission, { name: 'Permission' });
     registerEnumType(UserRole, { name: 'UserRole' });
-    registerEnumType(UnitClass, { name: 'UnitClass' });
-    registerEnumType(FulfillmentType, { name: 'FulfillmentType' });
-    registerEnumType(FolderClass, { name: 'FolderClass' });
     registerEnumType(StorageBucketProxy, { name: 'StorageBucketProxy' });
-    registerEnumType(SignedUrlAction, { name: 'SignedUrlAction' });
     registerEnumType(CodeType, { name: 'CodeType' });
-    registerEnumType(BolStatus, { name: 'BolStatus' });
-    registerEnumType(PromptType, { name: 'PromptType' });
-    registerEnumType(VerificationStatus, { name: 'VerificationStatus' });
-    registerEnumType(ExpenseKey, { name: 'ExpenseKey' });
-    registerEnumType(ItemType, { name: 'ItemType' });
+    registerEnumType(QualityCheckClass, { name: 'QualityCheckClass' });
+    registerEnumType(QualityCheckCategory, { name: 'QualityCheckCategory' });
+    registerEnumType(BaseUnit, { name: 'BaseUnit' });
+    registerEnumType(UnitClass, { name: 'UnitClass' });
+    registerEnumType(FolderClass, { name: 'FolderClass' });
+    registerEnumType(ExpenseClass, { name: 'ExpenseClass' });
+    registerEnumType(FulfillmentType, { name: 'FulfillmentType' });
 };

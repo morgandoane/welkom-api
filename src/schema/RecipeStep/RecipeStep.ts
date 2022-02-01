@@ -1,33 +1,16 @@
-import { ItemContent, ItemPluralContent } from './../Content/Content';
-import { mongoose, prop } from '@typegoose/typegoose';
-import { Field, ObjectType, ID } from 'type-graphql';
+import { RecipeStepContent } from './../RecipeStepContent/RecipeStepContent';
+import { Names } from './../Names/Names';
+import { Identified } from '../Base/Base';
+import { Field, ObjectType } from 'type-graphql';
+import { prop } from '@typegoose/typegoose';
 
 @ObjectType()
-export class RecipeSection {
-    @Field(() => ID)
-    @prop({ required: true, type: mongoose.Types.ObjectId })
-    _id: mongoose.Types.ObjectId;
-
-    @Field({ nullable: true })
+export class RecipeStep extends Identified {
+    @Field(() => Names, { nullable: true })
     @prop({ required: false })
-    label?: string;
+    instruction!: Names | null;
 
-    @Field(() => [RecipeStep])
-    @prop({ required: true, type: () => RecipeStep })
-    steps!: RecipeStep[];
-}
-
-@ObjectType()
-export class RecipeStep {
-    @Field(() => ID)
-    @prop({ required: true, type: mongoose.Types.ObjectId })
-    _id: mongoose.Types.ObjectId;
-
-    @Field({ nullable: true })
+    @Field(() => RecipeStepContent, { nullable: true })
     @prop({ required: false })
-    instruction?: string;
-
-    @Field(() => ItemPluralContent, { nullable: true })
-    @prop({ required: false })
-    content?: ItemPluralContent;
+    content!: RecipeStepContent | null;
 }

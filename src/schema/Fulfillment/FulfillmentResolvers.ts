@@ -1,30 +1,11 @@
-import { mongoose } from '@typegoose/typegoose';
-import { UserInputError } from 'apollo-server-errors';
-import { createVerifiedResolver } from './../Verified/VerifiedResolvers';
-import { CreateVerificationInput } from './../Verification/VerificationInput';
-import {
-    VerificationModel,
-    VerificationLoader,
-} from './../Verification/Verification';
-import { Bol, BolLoader, BolModel } from './../Bol/Bol';
-import { ObjectId } from 'mongoose';
-import { ObjectIdScalar } from './../ObjectIdScalar';
-import { Item, ItemLoader } from './../Item/Item';
-import { Company, CompanyLoader } from './../Company/Company';
-import { Context } from './../../auth/context';
-import { Paginate } from './../Paginate';
+import { BolLoader } from './../Bol/Bol';
+import { Paginate } from '../Pagination/Pagination';
 import { FulfillmentFilter } from './FulfillmentFilter';
 import { FulfillmentList } from './FulfillmentList';
-import { Lot, LotLoader, LotModel } from './../Lot/Lot';
-import { FulfillmentInput, UpdateFulfillmentInput } from './FulfillmentInput';
-import { Location, LocationLoader } from './../Location/Location';
-import { loaderResult } from './../../utils/loaderResult';
-import {
-    Fulfillment,
-    FulfillmentModel,
-    FulfillmentLoader,
-    FulfillmentType,
-} from './Fulfillment';
+import { Ref } from '@typegoose/typegoose';
+import { Context } from '@src/auth/context';
+import { CreateFulfillmentInput } from './CreateFulfillmentInput';
+import { createUploadEnabledResolver } from '../UploadEnabled/UploadEnabledResolvers';
 import {
     Arg,
     Ctx,
@@ -35,28 +16,21 @@ import {
     Root,
     UseMiddleware,
 } from 'type-graphql';
-import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
-import { AppFile } from '../AppFile/AppFile';
+import {
+    Fulfillment,
+    FulfillmentModel,
+    FulfillmentLoader,
+} from './Fulfillment';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
+import { UpdateFulfillmentInput } from './UpdateFulfillmentInput';
+import { Bol } from '../Bol/Bol';
 
-const VerifiedResolvers = createVerifiedResolver();
+const UploadEnabledResolver = createUploadEnabledResolver();
 
 @Resolver(() => Fulfillment)
-export class FulfillmentResolvers extends VerifiedResolvers {
-    @UseMiddleware(
-        Permitted({
-            type: 'permission',
-            permission: Permission.GetFulfillments,
-        })
-    )
-    @Query(() => Fulfillment)
-    async fulfillment(
-        @Arg('id', () => ObjectIdScalar) id: ObjectId
-    ): Promise<Fulfillment> {
-        return loaderResult(await FulfillmentLoader.load(id.toString()));
-    }
-
+export class FulfillmentResolvers extends UploadEnabledResolver {
     @UseMiddleware(
         Permitted({
             type: 'permission',
@@ -69,11 +43,24 @@ export class FulfillmentResolvers extends VerifiedResolvers {
     ): Promise<FulfillmentList> {
         return await Paginate.paginate({
             model: FulfillmentModel,
-            query: filter.serializeFulfillmentFilter(),
-            sort: { date_created: -1 },
+            query: await filter.serializeFulfillmentFilter(),
             skip: filter.skip,
             take: filter.take,
+            sort: { date_created: -1 },
         });
+    }
+
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetFulfillments,
+        })
+    )
+    @Query(() => Fulfillment)
+    async fulfillment(
+        @Arg('id', () => ObjectIdScalar) id: Ref<Fulfillment>
+    ): Promise<Fulfillment> {
+        return await FulfillmentLoader.load(id, true);
     }
 
     @UseMiddleware(
@@ -85,27 +72,11 @@ export class FulfillmentResolvers extends VerifiedResolvers {
     @Mutation(() => Fulfillment)
     async createFulfillment(
         @Ctx() context: Context,
-        @Arg('data') data: FulfillmentInput
+        @Arg('data', () => CreateFulfillmentInput) data: CreateFulfillmentInput
     ): Promise<Fulfillment> {
-        const bol = await BolModel.findOne({ _id: data.bol.toString() });
-        const doc = await data.validateFulfillment(context);
-        const res = await FulfillmentModel.create(doc);
-
-        if (data.bol_code_override) {
-            bol.code = data.bol_code_override;
-        }
-
-        if (data.seal) {
-            bol.seal = data.seal;
-        }
-
-        await BolModel.findOneAndUpdate(
-            { _id: bol._id },
-            { code: bol.code, seal: bol.seal }
-        );
-        BolLoader.clear(bol._id.toString());
-
-        return res.toJSON() as Fulfillment;
+        const execute = await data.validateFulfillment(context);
+        const fulfillmentRes = await FulfillmentModel.create(await execute());
+        return fulfillmentRes;
     }
 
     @UseMiddleware(
@@ -117,110 +88,23 @@ export class FulfillmentResolvers extends VerifiedResolvers {
     @Mutation(() => Fulfillment)
     async updateFulfillment(
         @Ctx() context: Context,
-        @Arg('id', () => ObjectIdScalar) id: ObjectId,
-        @Arg('data') data: UpdateFulfillmentInput
+        @Arg('id', () => ObjectIdScalar) id: Ref<Fulfillment>,
+        @Arg('data', () => UpdateFulfillmentInput) data: UpdateFulfillmentInput
     ): Promise<Fulfillment> {
-        const bol = await BolModel.findOne({ _id: data.bol.toString() });
-        const fulfillment = loaderResult(
-            await FulfillmentLoader.load(id.toString())
+        const execute = await data.validateFulfillment(context);
+        const res = await FulfillmentModel.findByIdAndUpdate(
+            id,
+            await execute(),
+            { new: true }
         );
-        const update = await data.validateFulfillmentUpdate(context);
-        const { created_by, date_created, _id, ...rest } = update;
-        const res = await FulfillmentModel.findByIdAndUpdate(id, rest, {
-            new: true,
-        });
 
-        FulfillmentLoader.clear(res._id.toString());
+        FulfillmentLoader.clear(id);
 
-        if (data.bol_code_override) {
-            bol.code = data.bol_code_override;
-        }
-
-        if (data.seal) {
-            bol.seal = data.seal;
-        }
-
-        await BolModel.findOneAndUpdate(
-            { _id: bol._id },
-            { code: bol.code, seal: bol.seal }
-        );
-        BolLoader.clear(bol._id.toString());
-
-        return res.toJSON() as Fulfillment;
-    }
-
-    @UseMiddleware(
-        Permitted({
-            type: 'permission',
-            permission: Permission.VerifyFulfillment,
-        })
-    )
-    @Mutation(() => Fulfillment)
-    async verifyFulfillment(
-        @Ctx() context: Context,
-        @Arg('id', () => ObjectIdScalar) id: ObjectId,
-        @Arg('data', () => CreateVerificationInput)
-        data: CreateVerificationInput
-    ): Promise<Fulfillment> {
-        const fulfillment = await FulfillmentModel.findById(id);
-        if (!fulfillment)
-            throw new UserInputError(
-                'Failed to find fulfillment with id ' + id.toString()
-            );
-
-        if (fulfillment.verification) {
-            await VerificationModel.findByIdAndDelete(fulfillment.verification);
-            VerificationLoader.clear(fulfillment.verification.toString());
-        }
-
-        const res = await VerificationModel.create(data.validate(context));
-        fulfillment.verification = res._id;
-        await fulfillment.save();
-        FulfillmentLoader.clear(id.toString());
-
-        return loaderResult(await FulfillmentLoader.load(id.toString()));
-    }
-
-    @FieldResolver(() => Location)
-    async location(@Root() { location }: Fulfillment): Promise<Location> {
-        return loaderResult(await LocationLoader.load(location.toString()));
-    }
-
-    @FieldResolver(() => Company)
-    async company(@Root() { company }: Fulfillment): Promise<Company> {
-        return loaderResult(await CompanyLoader.load(company.toString()));
+        return res;
     }
 
     @FieldResolver(() => Bol)
     async bol(@Root() { bol }: Fulfillment): Promise<Bol> {
-        return loaderResult(await BolLoader.load(bol.toString()));
-    }
-
-    @FieldResolver(() => [Item])
-    async items(@Root() { items }: Fulfillment): Promise<Item[]> {
-        const results = await ItemLoader.loadMany(
-            items.map((i) => i.toString())
-        );
-        const itemDocs = results.map((result) => loaderResult(result));
-        return itemDocs;
-    }
-
-    @FieldResolver(() => [Lot])
-    async lots(@Root() { lots }: Fulfillment): Promise<Lot[]> {
-        const res = await LotLoader.loadMany(lots.map((lot) => lot.toString()));
-        return res.map((result) => loaderResult(result));
-    }
-
-    @FieldResolver(() => [AppFile])
-    async files(
-        @Ctx() { storage }: Context,
-        @Root() { _id }: Fulfillment
-    ): Promise<AppFile[]> {
-        const files = await storage.files(
-            StorageBucket.Attachments,
-            _id.toString()
-        );
-
-        return files.map((file) => AppFile.fromFile(file, _id.toString()));
+        return await BolLoader.load(bol, true);
     }
 }

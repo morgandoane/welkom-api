@@ -1,55 +1,49 @@
-import { Recipe, RecipeLoader } from './../Recipe/Recipe';
-import { Context } from './../../auth/context';
+import { RecipeLoader } from './../Recipe/Recipe';
+import { UpdateRecipeVersionInput } from './UpdateRecipeVersionInput';
 import { RecipeVersionFilter } from './RecipeVersionFilter';
-import { Paginate } from './../Paginate';
 import { RecipeVersionList } from './RecipeVersionList';
-import { loaderResult } from './../../utils/loaderResult';
-import { ObjectIdScalar } from './../ObjectIdScalar';
-import { ObjectId } from 'mongoose';
+import { Paginate } from '../Pagination/Pagination';
+import { Ref } from '@typegoose/typegoose';
+import { Context } from '@src/auth/context';
+import { createUploadEnabledResolver } from '../UploadEnabled/UploadEnabledResolvers';
+import {
+    Arg,
+    Ctx,
+    FieldResolver,
+    Mutation,
+    Query,
+    Resolver,
+    Root,
+    UseMiddleware,
+} from 'type-graphql';
 import { Permitted } from '@src/auth/middleware/Permitted';
+import { Permission } from '@src/auth/permissions';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
 import {
     RecipeVersion,
     RecipeVersionLoader,
     RecipeVersionModel,
 } from './RecipeVersion';
-import { createBaseResolver } from './../Base/BaseResolvers';
-import {
-    Arg,
-    Ctx,
-    Query,
-    Resolver,
-    UseMiddleware,
-    Mutation,
-    FieldResolver,
-    Root,
-} from 'type-graphql';
-import { Permission } from '@src/auth/permissions';
-import { RecipeVersionInput } from './RecipeVersionInput';
+import { CreateRecipeVersionInput } from './CreateRecipeVersionInput';
+import { Recipe } from '../Recipe/Recipe';
 
-export const BaseResolver = createBaseResolver();
+const UploadEnabledResolver = createUploadEnabledResolver();
 
 @Resolver(() => RecipeVersion)
-export class RecipeVersionResolvers extends BaseResolver {
+export class RecipeVersionResolvers extends UploadEnabledResolver {
     @UseMiddleware(
-        Permitted({ type: 'permission', permission: Permission.GetRecipes })
-    )
-    @Query(() => RecipeVersion)
-    async recipeVersion(
-        @Arg('id', () => ObjectIdScalar) id: ObjectId
-    ): Promise<RecipeVersion> {
-        return loaderResult(await RecipeVersionLoader.load(id.toString()));
-    }
-
-    @UseMiddleware(
-        Permitted({ type: 'permission', permission: Permission.GetRecipes })
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetRecipes,
+        })
     )
     @Query(() => RecipeVersionList)
     async recipeVersions(
-        @Arg('filter', () => RecipeVersionFilter) filter: RecipeVersionFilter
+        @Arg('filter') filter: RecipeVersionFilter
     ): Promise<RecipeVersionList> {
         return await Paginate.paginate({
             model: RecipeVersionModel,
-            query: await filter.serializeVersionFilter(),
+            query: await filter.serializeRecipeVersionFilter(),
             skip: filter.skip,
             take: filter.take,
             sort: { date_created: -1 },
@@ -57,21 +51,60 @@ export class RecipeVersionResolvers extends BaseResolver {
     }
 
     @UseMiddleware(
-        Permitted({ type: 'permission', permission: Permission.CreateRecipe })
+        Permitted({
+            type: 'permission',
+            permission: Permission.GetRecipes,
+        })
+    )
+    @Query(() => RecipeVersion)
+    async recipeVersion(
+        @Arg('id', () => ObjectIdScalar) id: Ref<RecipeVersion>
+    ): Promise<RecipeVersion> {
+        return await RecipeVersionLoader.load(id, true);
+    }
+
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateRecipe,
+        })
     )
     @Mutation(() => RecipeVersion)
     async createRecipeVersion(
         @Ctx() context: Context,
-        @Arg('data', () => RecipeVersionInput) data: RecipeVersionInput
+        @Arg('data', () => CreateRecipeVersionInput)
+        data: CreateRecipeVersionInput
     ): Promise<RecipeVersion> {
-        const doc = await data.validateRecipeVersion(context);
-        const res = await RecipeVersionModel.create(doc);
-        RecipeLoader.clear(data.recipe.toString());
-        return res.toJSON();
+        const recipeVersion = await data.validateRecipeVersion(context);
+        const res = await RecipeVersionModel.create(recipeVersion);
+        return res;
+    }
+
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.CreateRecipe,
+        })
+    )
+    @Mutation(() => RecipeVersion)
+    async updateRecipeVersion(
+        @Arg('id', () => ObjectIdScalar) id: Ref<RecipeVersion>,
+        @Arg('data', () => UpdateRecipeVersionInput)
+        data: UpdateRecipeVersionInput
+    ): Promise<RecipeVersion> {
+        const res = await RecipeVersionModel.findByIdAndUpdate(
+            id,
+            await data.serializeRecipeVersionUpdate(),
+            { new: true }
+        );
+
+        RecipeVersionLoader.clear(id);
+
+        return res;
     }
 
     @FieldResolver(() => Recipe)
     async recipe(@Root() { recipe }: RecipeVersion): Promise<Recipe> {
-        return loaderResult(await RecipeLoader.load(recipe.toString()));
+        return await RecipeLoader.load(recipe, true);
     }
 }

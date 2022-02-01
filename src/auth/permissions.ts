@@ -15,6 +15,10 @@ export enum Permission {
     CreateCompany = 'CreateCompany',
     UpdateCompany = 'UpdateCompany',
 
+    GetProductionLines = 'GetProductionLines',
+    CreateProductionLine = 'CreateProductionLine',
+    UpdateProductionLine = 'UpdateProductionLine',
+
     GetContacts = 'GetContacts',
     CreateContact = 'CreateContact',
     UpdateContact = 'UpdateContact',
@@ -27,9 +31,9 @@ export enum Permission {
     CreateExpenses = 'CreateExpenses',
     UpdateExpenses = 'UpdateExpenses',
 
-    GetRecipeFolders = 'GetRecipeFolders',
-    CreateRecipeFolder = 'CreateRecipeFolder',
-    UpdateRecipeFolder = 'UpdateRecipeFolder',
+    GetFolders = 'GetFolders',
+    CreateFolder = 'CreateFolder',
+    UpdateFolder = 'UpdateFolder',
 
     GetFulfillments = 'GetFulfillments',
     CreateFulfillment = 'CreateFulfillment',
