@@ -23,7 +23,7 @@ export class Address {
     @prop({ required: true })
     postal!: string;
 
-    @Field()
-    @prop({ required: true })
-    country!: string;
+    @Field({ nullable: true })
+    @prop({ required: false })
+    country?: string;
 }

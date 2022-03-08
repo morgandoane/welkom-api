@@ -1,11 +1,14 @@
+import { Company, CompanyLoader } from './../../../Company/Company';
 import { Context } from '../../../../auth/context';
 import { Product, ProductLoader, ProductModel } from './Product';
 import {
     Arg,
     Ctx,
+    FieldResolver,
     Mutation,
     Query,
     Resolver,
+    Root,
     UseMiddleware,
 } from 'type-graphql';
 import { createItemResolver } from '../../ItemResolver';
@@ -57,7 +60,7 @@ export class ProductResolvers extends ItemResolver {
     ): Promise<Product> {
         const doc = await data.validateProduct(context);
         const res = await ProductModel.create(doc);
-        return res;
+        return res.toJSON() as unknown as Product;
     }
 
     @UseMiddleware(
@@ -76,6 +79,11 @@ export class ProductResolvers extends ItemResolver {
 
         ProductLoader.clear(id);
 
-        return res;
+        return res.toJSON() as unknown as Product;
+    }
+
+    @FieldResolver(() => Company)
+    async company(@Root() { company }: Product): Promise<Company> {
+        return await CompanyLoader.load(company, true);
     }
 }

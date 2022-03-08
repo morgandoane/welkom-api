@@ -59,7 +59,7 @@ export class PackagingResolvers extends ItemResolver {
     ): Promise<Packaging> {
         const doc = await data.validatePackaging(context);
         const res = await PackagingModel.create(doc);
-        return res;
+        return res.toJSON() as unknown as Packaging;
     }
 
     @UseMiddleware(
@@ -78,6 +78,6 @@ export class PackagingResolvers extends ItemResolver {
 
         PackagingLoader.clear(id);
 
-        return res;
+        return res.toJSON() as unknown as Packaging;
     }
 }

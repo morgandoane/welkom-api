@@ -2,8 +2,14 @@ import { getBaseLoader } from '@src/utils/baseLoader';
 import { NumberRange } from '../Range/NumberRange/NumberRange';
 import { Names } from '../Names/Names';
 import { Base } from '@src/schema/Base/Base';
-import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose';
+import {
+    modelOptions,
+    prop,
+    getModelForClass,
+    Ref,
+} from '@typegoose/typegoose';
 import { Field, ObjectType, InputType } from 'type-graphql';
+import { Item } from '../Item/Item';
 
 export enum QualityCheckClass {
     Boolean = 'Boolean',
@@ -48,6 +54,10 @@ export class QualityCheckOptionInput {
     },
 })
 export class QualityCheck extends Base {
+    @Field(() => Item, { nullable: true })
+    @prop({ required: false, ref: () => Item })
+    item!: Ref<Item> | null;
+
     @Field(() => QualityCheckCategory)
     @prop({ required: true, enum: QualityCheckCategory })
     quality_check_category!: QualityCheckCategory;

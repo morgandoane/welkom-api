@@ -28,7 +28,7 @@ export class CompanyResolvers extends UploadEnabledResolver {
     )
     @Query(() => CompanyList)
     async companies(
-        @Arg('filter') filter: CompanyFilter
+        @Arg('filter', () => CompanyFilter) filter: CompanyFilter
     ): Promise<CompanyList> {
         return await Paginate.paginate({
             model: CompanyModel,
@@ -59,7 +59,7 @@ export class CompanyResolvers extends UploadEnabledResolver {
     ): Promise<Company> {
         const company = await data.validateCompany(context);
         const res = await CompanyModel.create(company);
-        return res;
+        return res.toJSON() as unknown as Company;
     }
 
     @UseMiddleware(
@@ -78,6 +78,6 @@ export class CompanyResolvers extends UploadEnabledResolver {
 
         CompanyLoader.clear(id);
 
-        return res;
+        return res.toJSON() as unknown as Company;
     }
 }

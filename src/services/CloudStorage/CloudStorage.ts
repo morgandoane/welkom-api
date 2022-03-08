@@ -1,4 +1,4 @@
-import { addMinutes } from 'date-fns';
+import { addMinutes, format } from 'date-fns';
 import { CloudStorageError } from './CloudStorageError';
 import {
     Bucket,
@@ -9,11 +9,9 @@ import {
 import { CreateBucketRequest } from '@google-cloud/storage/build/src/storage';
 
 export enum StorageBucket {
-    Attachments = 'ldbbakery_attachments',
-    Documents = 'ldbbakery_documents',
-    Images = 'ldbbakery_images',
-    Profiles = 'ldbbakery_profiles',
-    Workbooks = 'ldbbakery_workbooks',
+    ldbbakery_attachments = 'ldbbakery_attachments',
+    ldbbakery_images = 'ldbbakery_images',
+    ldbbakery_profiles = 'ldbbakery_profiles',
 }
 
 export type StorageRecord = Record<StorageBucket, CreateBucketRequest>;
@@ -34,11 +32,9 @@ const defaultConfig: CreateBucketRequest = {
 };
 
 const StorageSchema: StorageRecord = {
-    [StorageBucket.Attachments]: { ...defaultConfig },
-    [StorageBucket.Documents]: { ...defaultConfig },
-    [StorageBucket.Images]: { ...defaultConfig },
-    [StorageBucket.Profiles]: { ...defaultConfig },
-    [StorageBucket.Workbooks]: { ...defaultConfig },
+    [StorageBucket.ldbbakery_attachments]: { ...defaultConfig },
+    [StorageBucket.ldbbakery_images]: { ...defaultConfig },
+    [StorageBucket.ldbbakery_profiles]: { ...defaultConfig },
 };
 
 export class StorageClass {
@@ -82,13 +78,14 @@ export class StorageClass {
     }
 
     public async signedWriteUrl(
+        timestamp: Date,
         bucket_name: StorageBucket,
         folder: string,
         filename: string,
         identity: string,
         action: GetSignedUrlConfig['action'] = 'write'
     ): Promise<string> {
-        const expires = addMinutes(new Date(), 30);
+        const expires = addMinutes(new Date(), 10);
         const bucket = await this.bucket(bucket_name);
 
         const [url] = await bucket
@@ -99,6 +96,7 @@ export class StorageClass {
                 expires,
                 extensionHeaders: {
                     'x-goog-meta-created_by': identity,
+                    'x-goog-meta-date_modified': timestamp.toISOString(),
                 },
             })
             .catch((e) => {
@@ -113,7 +111,7 @@ export class StorageClass {
         folder: string,
         filename: string
     ): Promise<string> {
-        const expires = addMinutes(new Date(), 30);
+        const expires = addMinutes(new Date(), 60);
 
         const bucket = await this.bucket(bucket_name);
 
@@ -146,6 +144,18 @@ export class StorageClass {
         await file.delete().catch((e) => {
             throw new CloudStorageError(e);
         });
+    }
+
+    public async renameFile(
+        bucket_name: StorageBucket,
+        folder: string,
+        filename: string,
+        new_filename: string
+    ): Promise<void> {
+        const bucket = await this.bucket(bucket_name);
+        const file = await bucket
+            .file(this.filename(folder, filename))
+            .rename(this.filename(folder, new_filename));
     }
 
     public async bucket(bucket_name: StorageBucket): Promise<Bucket> {

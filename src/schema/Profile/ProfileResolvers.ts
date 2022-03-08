@@ -78,7 +78,7 @@ export class ProfileResolvers extends UploadEnabledResolver {
         )) as User<AppMetaData, UserMetaData>;
 
         const profile: Profile = {
-            ...getId(),
+            _id: getId()._id.toString(),
             ...auth0res,
             email: auth0res.email || '',
             family_name: auth0res.family_name || '',

@@ -1,3 +1,4 @@
+import { Contact } from './../Contact/Contact';
 import { getBaseLoader } from './../../utils/baseLoader';
 import { UploadEnabled } from './../UploadEnabled/UploadEnabled';
 import { modelOptions, prop, getModelForClass } from '@typegoose/typegoose';
@@ -7,7 +8,7 @@ import { MinLength } from 'class-validator';
 @ObjectType()
 @modelOptions({
     schemaOptions: {
-        collection: 'companyies',
+        collection: 'companies',
     },
 })
 export class Company extends UploadEnabled {
@@ -15,6 +16,10 @@ export class Company extends UploadEnabled {
     @Field()
     @prop({ required: true, minlength: 2 })
     name!: string;
+
+    @Field(() => [Contact])
+    @prop({ required: true, type: () => Contact })
+    contacts!: Contact[];
 }
 
 export const CompanyModel = getModelForClass(Company);

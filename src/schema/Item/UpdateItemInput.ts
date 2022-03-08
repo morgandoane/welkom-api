@@ -1,7 +1,6 @@
 import { PalletConfigurationInput } from './../PalletConfiguration/PalletConfigurationInput';
 import { NamesInput } from './../Names/NamesInput';
 import { prop } from '@typegoose/typegoose';
-import { MinLength } from 'class-validator';
 import { Field, InputType } from 'type-graphql';
 import { Item } from './Item';
 
@@ -14,7 +13,6 @@ export class UpdateItemInput {
     @prop({ required: true })
     names?: NamesInput;
 
-    @MinLength(1)
     @Field(() => [PalletConfigurationInput], { nullable: true })
     pallet_configurations?: PalletConfigurationInput[];
 

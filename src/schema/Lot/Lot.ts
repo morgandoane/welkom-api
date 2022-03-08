@@ -1,6 +1,4 @@
 import { ProductionLine } from './../ProductionLine/ProductionLine';
-import { Base } from './../Base/Base';
-import { QualityCheckResponse } from './../QualityCheckResponse/QualityCheckResponse';
 import { BolLoader } from './../Bol/Bol';
 import { FulfillmentModel } from './../Fulfillment/Fulfillment';
 import { ExpenseSummary } from './../ExpenseSummary/ExpenseSummary';

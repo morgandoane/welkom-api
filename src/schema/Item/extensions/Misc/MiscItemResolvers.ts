@@ -59,7 +59,7 @@ export class MiscItemResolvers extends ItemResolver {
     ): Promise<MiscItem> {
         const doc = await data.validateMiscItem(context);
         const res = await MiscItemModel.create(doc);
-        return res;
+        return res.toJSON() as unknown as MiscItem;
     }
 
     @UseMiddleware(
@@ -78,6 +78,6 @@ export class MiscItemResolvers extends ItemResolver {
 
         MiscItemLoader.clear(id);
 
-        return res;
+        return res.toJSON() as unknown as MiscItem;
     }
 }

@@ -114,6 +114,10 @@ export class ProfileIdentity {
 export class Profile implements User<AppMetaData, UserMetaData> {
     @Field()
     @prop({ required: true })
+    _id!: string;
+
+    @Field()
+    @prop({ required: true })
     email!: string;
 
     @Field(() => [UserRole])

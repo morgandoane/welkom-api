@@ -18,8 +18,8 @@ export class AddressInput {
     @Field()
     postal!: string;
 
-    @Field()
-    country!: string;
+    @Field({ nullable: true })
+    country?: string;
 
     public async validateAddress(): Promise<Address> {
         return this;

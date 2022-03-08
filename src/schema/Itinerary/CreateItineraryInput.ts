@@ -29,6 +29,7 @@ export class CreateItineraryInput {
             ...context.base,
             ...this,
             expense_summaries: [],
+            expenses: [],
         };
 
         return res;

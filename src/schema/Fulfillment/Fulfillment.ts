@@ -17,7 +17,7 @@ export class Fulfillment extends UploadEnabled {
     type!: FulfillmentType;
 
     @Field(() => Bol)
-    @prop({ required: true, ref: () => Bol })
+    @prop({ required: true, ref: 'Bol' })
     bol!: Ref<Bol>;
 
     @Field(() => [FulfillmentContent])

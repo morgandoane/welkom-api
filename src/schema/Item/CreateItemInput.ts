@@ -17,11 +17,9 @@ export class CreateItemInput {
     // Count = 1;
     // Weight = 1;
     // Volume = X Gallons / 1 Pound
-    @Min(0)
     @Field()
     per_base_unit!: number;
 
-    @MinLength(1)
     @Field(() => [PalletConfigurationInput])
     pallet_configurations!: PalletConfigurationInput[];
 

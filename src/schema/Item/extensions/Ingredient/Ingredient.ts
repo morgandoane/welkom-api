@@ -1,11 +1,18 @@
+import { UnitClass } from './../../../Unit/UnitClass';
 import { ItemModel } from '../../Item';
 import {
     modelOptions,
     getDiscriminatorModelForClass,
+    prop,
 } from '@typegoose/typegoose';
-import { ObjectType } from 'type-graphql';
+import { Field, ObjectType } from 'type-graphql';
 import { Item } from '../../Item';
 import { getBaseLoader } from '@src/utils/baseLoader';
+
+export enum IngredientUnitClass {
+    Weight = 'Weight',
+    Volume = 'Volume',
+}
 
 @ObjectType()
 @modelOptions({
@@ -13,7 +20,11 @@ import { getBaseLoader } from '@src/utils/baseLoader';
         discriminatorKey: 'ingredient',
     },
 })
-export class Ingredient extends Item {}
+export class Ingredient extends Item {
+    @Field(() => IngredientUnitClass)
+    @prop({ required: true, enum: IngredientUnitClass })
+    unit_class!: IngredientUnitClass;
+}
 
 export const IngredientModel = getDiscriminatorModelForClass(
     ItemModel,

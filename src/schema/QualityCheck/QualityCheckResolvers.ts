@@ -1,3 +1,4 @@
+import { Item, ItemLoader } from './../Item/Item';
 import { UpdateQualityCheckInput } from './UpdateQualityCheckInput';
 import { QualityCheckFilter } from './QualityCheckFilter';
 import { QualityCheckList } from './QualityCheckList';
@@ -8,9 +9,11 @@ import { createUploadEnabledResolver } from '../UploadEnabled/UploadEnabledResol
 import {
     Arg,
     Ctx,
+    FieldResolver,
     Mutation,
     Query,
     Resolver,
+    Root,
     UseMiddleware,
 } from 'type-graphql';
 import { Permitted } from '@src/auth/middleware/Permitted';
@@ -67,7 +70,7 @@ export class QualityCheckResolvers extends UploadEnabledResolver {
     ): Promise<QualityCheck> {
         const qualityCheck = await data.validateQualityCheck(context);
         const res = await QualityCheckModel.create(qualityCheck);
-        return res;
+        return res.toJSON() as unknown as QualityCheck;
     }
 
     @UseMiddleware(
@@ -90,6 +93,12 @@ export class QualityCheckResolvers extends UploadEnabledResolver {
 
         QualityCheckLoader.clear(id);
 
-        return res;
+        return res.toJSON() as unknown as QualityCheck;
+    }
+
+    @FieldResolver(() => Item, { nullable: true })
+    async item(@Root() { item }: QualityCheck): Promise<Item> {
+        if (!item) return null;
+        return await ItemLoader.load(item, true);
     }
 }

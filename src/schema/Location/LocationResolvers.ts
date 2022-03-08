@@ -60,9 +60,9 @@ export class LocationResolvers extends UploadEnabledResolver {
         @Ctx() context: Context,
         @Arg('data', () => CreateLocationInput) data: CreateLocationInput
     ): Promise<Location> {
-        const Location = await data.validateLocation(context);
-        const res = await LocationModel.create(Location);
-        return res;
+        const location = await data.validateLocation(context);
+        const res = await LocationModel.create(location);
+        return res.toJSON() as unknown as Location;
     }
 
     @UseMiddleware(
@@ -81,7 +81,7 @@ export class LocationResolvers extends UploadEnabledResolver {
 
         LocationLoader.clear(id);
 
-        return res;
+        return res.toJSON() as unknown as Location;
     }
 
     @FieldResolver(() => Company)

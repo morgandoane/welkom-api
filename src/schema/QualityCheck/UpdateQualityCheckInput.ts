@@ -1,3 +1,5 @@
+import { Ref } from '@typegoose/typegoose';
+import { ObjectIdScalar } from './../ObjectIdScalar/ObjectIdScalar';
 import { Field, InputType } from 'type-graphql';
 import { NamesInput } from '../Names/NamesInput';
 import { NumberRangeInput } from '../Range/NumberRange/NumberRangeInput';
@@ -7,6 +9,7 @@ import {
     QualityCheckClass,
     QualityCheckOptionInput,
 } from './QualityCheck';
+import { Item } from '../Item/Item';
 
 @InputType()
 export class UpdateQualityCheckInput {
@@ -15,6 +18,9 @@ export class UpdateQualityCheckInput {
 
     @Field(() => QualityCheckCategory, { nullable: true })
     quality_check_category?: QualityCheckCategory;
+
+    @Field(() => ObjectIdScalar, { nullable: true })
+    item?: Ref<Item> | null;
 
     @Field(() => QualityCheckClass, { nullable: true })
     quality_check_class?: QualityCheckClass;
@@ -41,6 +47,7 @@ export class UpdateQualityCheckInput {
             res.deleted = this.deleted;
         if (this.quality_check_category)
             res.quality_check_category = this.quality_check_category;
+        if (this.item !== undefined) res.item = this.item;
         if (this.quality_check_class)
             res.quality_check_class = this.quality_check_class;
         if (this.required !== null && this.required !== undefined)

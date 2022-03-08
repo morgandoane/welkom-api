@@ -7,13 +7,14 @@ import { buildSchema } from 'type-graphql';
 import { registerEnums } from './utils/registerEnums';
 
 // Resolvers
+import { AppFileResolvers } from './schema/AppFile/AppFileResolvers';
 import { AppointmentResolvers } from './schema/Appointment/AppointmentResolvers';
 import { BatchLotContentResolvers } from './schema/BatchLotContent/BatchLotContentResolvers';
 import { BatchResolvers } from './schema/Batch/BatchResolvers';
 import { BolContentResolvers } from './schema/BolContent/BolContentResolvers';
 import { BolResolvers } from './schema/Bol/BolResolvers';
 import { CompanyResolvers } from './schema/Company/CompanyResolvers';
-import { CookieResolvers } from './schema/Item/extensions/Cookie/CookieResolvers';
+import { DesignResolvers } from './schema/Design/DesignResolvers';
 import { ExpenseResolvers } from './schema/Expense/ExpenseResolvers';
 import { ExpenseSummaryResolvers } from './schema/ExpenseSummary/ExpenseSummaryResolvers';
 import { FolderResolvers } from './schema/Folder/FolderResolvers';
@@ -35,7 +36,13 @@ import { RecipeResolvers } from './schema/Recipe/RecipeResolvers';
 import { QualityCheckResolvers } from './schema/QualityCheck/QualityCheckResolvers';
 import { ProfileResolvers } from './schema/Profile/ProfileResolvers';
 import { ProductionLineResolvers } from './schema/ProductionLine/ProductionLineResolvers';
+import { SignedUrlResolvers } from './schema/SignedUrl/SignedUrlResolvers';
 import { TeamResolvers } from './schema/Team/TeamResolvers';
+import { ItemUnionResolvers } from './schema/Unions/ItemUnion';
+import { ExpensedUnionResolvers } from './schema/Unions/ExpensedUnion';
+import { BaseUnionResolvers } from './schema/Unions/BaseUnion';
+import { HoldResolvers } from './schema/Hold/HoldResolvers';
+import { UploadEnabledResolvers } from './schema/Unions/UploadEnabledUnion';
 
 import { mongoose } from '@typegoose/typegoose';
 import { AuthProvider } from './services/AuthProvider/AuthProvider';
@@ -58,18 +65,23 @@ import { ApolloServer } from 'apollo-server-express';
         // Setup GraphQL with Apollo
         const schema = await buildSchema({
             resolvers: [
+                AppFileResolvers,
                 AppointmentResolvers,
+                BaseUnionResolvers,
                 BatchResolvers,
                 BatchLotContentResolvers,
                 BolContentResolvers,
                 BolResolvers,
                 CompanyResolvers,
-                CookieResolvers,
+                DesignResolvers,
                 ExpenseResolvers,
                 ExpenseSummaryResolvers,
+                ExpensedUnionResolvers,
                 FolderResolvers,
                 FulfillmentResolvers,
+                HoldResolvers,
                 IngredientResolvers,
+                ItemUnionResolvers,
                 ItineraryResolvers,
                 LocationResolvers,
                 LotResolvers,
@@ -85,8 +97,10 @@ import { ApolloServer } from 'apollo-server-express';
                 RecipeResolvers,
                 RecipeStepContentResolvers,
                 RecipeVersionResolvers,
+                SignedUrlResolvers,
                 TeamResolvers,
                 UnitResolvers,
+                UploadEnabledResolvers,
             ],
             validate: true,
         });

@@ -1,10 +1,10 @@
+import { createBaseResolver } from './../Base/BaseResolvers';
 import { UpdateUnitInput } from './UpdateUnitInput';
 import { UnitFilter } from './UnitFilter';
 import { UnitList } from './UnitList';
 import { Paginate } from '../Pagination/Pagination';
 import { Ref } from '@typegoose/typegoose';
 import { Context } from '@src/auth/context';
-import { createUploadEnabledResolver } from '../UploadEnabled/UploadEnabledResolvers';
 import {
     Arg,
     Ctx,
@@ -19,10 +19,10 @@ import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
 import { Unit, UnitLoader, UnitModel } from './Unit';
 import { CreateUnitInput } from './CreateUnitInput';
 
-const UploadEnabledResolver = createUploadEnabledResolver();
+const BaseResolvers = createBaseResolver();
 
 @Resolver(() => Unit)
-export class UnitResolvers extends UploadEnabledResolver {
+export class UnitResolvers extends BaseResolvers {
     @UseMiddleware(
         Permitted({ type: 'permission', permission: Permission.GetUnits })
     )
@@ -55,7 +55,7 @@ export class UnitResolvers extends UploadEnabledResolver {
     ): Promise<Unit> {
         const unit = await data.validateUnit(context);
         const res = await UnitModel.create(unit);
-        return res;
+        return res.toJSON() as unknown as Unit;
     }
 
     @UseMiddleware(
@@ -74,6 +74,6 @@ export class UnitResolvers extends UploadEnabledResolver {
 
         UnitLoader.clear(id);
 
-        return res;
+        return res.toJSON() as unknown as Unit;
     }
 }

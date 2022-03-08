@@ -3,6 +3,10 @@ export enum Permission {
     CreateBatch = 'CreateBatch',
     UpdateBatch = 'UpdateBatch',
 
+    GetDesigns = 'GetDesigns',
+    CreateDesign = 'CreateDesign',
+    UpdateDesign = 'UpdateDesign',
+
     GetPallets = 'GetPallets',
     CreatePallet = 'CreatePallet',
     UpdatePallet = 'UpdatePallet',

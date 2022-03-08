@@ -59,7 +59,7 @@ export class IngredientResolvers extends ItemResolver {
     ): Promise<Ingredient> {
         const doc = await data.validateIngredient(context);
         const res = await IngredientModel.create(doc);
-        return res;
+        return res.toJSON() as unknown as Ingredient;
     }
 
     @UseMiddleware(
@@ -78,6 +78,6 @@ export class IngredientResolvers extends ItemResolver {
 
         IngredientLoader.clear(id);
 
-        return res;
+        return res.toJSON() as unknown as Ingredient;
     }
 }

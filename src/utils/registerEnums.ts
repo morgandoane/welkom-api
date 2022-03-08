@@ -1,3 +1,5 @@
+import { DesignCategory, DesignLocation } from './../schema/Design/Design';
+import { StorageBucket } from './../services/CloudStorage/CloudStorage';
 import { FolderClass } from './../schema/Folder/Folder';
 import { QualityCheckCategory } from './../schema/QualityCheck/QualityCheck';
 import { UnitClass } from './../schema/Unit/UnitClass';
@@ -9,19 +11,12 @@ import { registerEnumType } from 'type-graphql';
 import { QualityCheckClass } from '@src/schema/QualityCheck/QualityCheck';
 import { ExpenseClass } from '@src/schema/Expense/ExpenseClass';
 import { FulfillmentType } from '@src/schema/Fulfillment/Fulfillment';
-
-export enum StorageBucketProxy {
-    ldbbakery_attachments = 'ldbbakery_attachments',
-    ldbbakery_documents = 'ldbbakery_documents',
-    ldbbakery_images = 'ldbbakery_images',
-    ldbbakery_profiles = 'ldbbakery_profiles',
-    ldbbakery_workbooks = 'ldbbakery_workbooks',
-}
+import { IngredientUnitClass } from '@src/schema/Item/extensions/Ingredient/Ingredient';
 
 export const registerEnums = (): void => {
     registerEnumType(Permission, { name: 'Permission' });
     registerEnumType(UserRole, { name: 'UserRole' });
-    registerEnumType(StorageBucketProxy, { name: 'StorageBucketProxy' });
+    registerEnumType(StorageBucket, { name: 'StorageBucket' });
     registerEnumType(CodeType, { name: 'CodeType' });
     registerEnumType(QualityCheckClass, { name: 'QualityCheckClass' });
     registerEnumType(QualityCheckCategory, { name: 'QualityCheckCategory' });
@@ -30,4 +25,7 @@ export const registerEnums = (): void => {
     registerEnumType(FolderClass, { name: 'FolderClass' });
     registerEnumType(ExpenseClass, { name: 'ExpenseClass' });
     registerEnumType(FulfillmentType, { name: 'FulfillmentType' });
+    registerEnumType(DesignCategory, { name: 'DesignCategory' });
+    registerEnumType(DesignLocation, { name: 'DesignLocation' });
+    registerEnumType(IngredientUnitClass, { name: 'IngredientUnitClass' });
 };

@@ -17,8 +17,8 @@ export class CreateProductInput extends CreateItemInput {
     company!: Ref<Company>;
 
     public async validateProduct(context: Context): Promise<Product> {
-        if (this.base_unit !== BaseUnit.Pounds)
-            throw new UserInputError('Products must be measured in Pounds.');
+        if (this.base_unit !== BaseUnit.Count)
+            throw new UserInputError('Products must be measured in Count.');
         const item: Product = { ...context.base, ...this };
         return item;
     }

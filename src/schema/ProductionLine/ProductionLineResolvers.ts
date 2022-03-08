@@ -34,7 +34,7 @@ export class ProductionLineResolvers extends UploadEnabledResolver {
         Permitted({ type: 'permission', permission: Permission.GetCompanies })
     )
     @Query(() => ProductionLineList)
-    async companies(
+    async productionline(
         @Arg('filter') filter: ProductionLineFilter
     ): Promise<ProductionLineList> {
         return await Paginate.paginate({
