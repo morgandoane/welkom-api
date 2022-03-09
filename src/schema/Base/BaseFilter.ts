@@ -22,7 +22,13 @@ export class BaseFilter extends PaginateArg {
     > {
         const query: FilterQuery<DocumentType<Base>> = {};
 
-        if (this.deleted !== undefined) query.deleted = this.deleted;
+        if (this.deleted !== undefined) {
+            if (this.deleted == true) {
+                query.deleted = true;
+            } else {
+                query.deleted = { $ne: true };
+            }
+        }
         if (this.created_by !== undefined) query.created_by = this.created_by;
         if (this.date_created !== undefined)
             query.date_created = {

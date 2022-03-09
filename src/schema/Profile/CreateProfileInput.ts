@@ -33,7 +33,6 @@ export class CreateProfileInput {
             throw new UserInputError('Please provide a username or email.');
 
         return {
-            ...context.base,
             ...this,
             roles: [this.role],
             name: `${this.given_name} ${this.family_name}`,

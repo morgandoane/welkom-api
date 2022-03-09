@@ -1,3 +1,6 @@
+import { LocationLoader } from './../Location/Location';
+import { CompanyLoader } from './../Company/Company';
+import { Company } from '@src/schema/Company/Company';
 import { MyContextLoader } from './../../contextual/MyContext';
 import { UpdateTeamInput } from './UpdateTeamInput';
 import { TeamFilter } from './TeamFilter';
@@ -9,9 +12,11 @@ import { createUploadEnabledResolver } from '../UploadEnabled/UploadEnabledResol
 import {
     Arg,
     Ctx,
+    FieldResolver,
     Mutation,
     Query,
     Resolver,
+    Root,
     UseMiddleware,
 } from 'type-graphql';
 import { Permitted } from '@src/auth/middleware/Permitted';
@@ -19,6 +24,7 @@ import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
 import { Team, TeamLoader, TeamModel } from './Team';
 import { CreateTeamInput } from './CreateTeamInput';
 import { UserRole } from '@src/auth/UserRole';
+import { Location } from '../Location/Location';
 
 const UploadEnabledResolver = createUploadEnabledResolver();
 
@@ -53,7 +59,7 @@ export class TeamResolvers extends UploadEnabledResolver {
         for (const member of res.members) {
             MyContextLoader.clear(member);
         }
-        return res;
+        return res.toJSON() as unknown as Team;
     }
 
     @UseMiddleware(Permitted({ type: 'role', role: UserRole.Manager }))
@@ -74,6 +80,17 @@ export class TeamResolvers extends UploadEnabledResolver {
 
         TeamLoader.clear(id);
 
-        return res;
+        return res.toJSON() as unknown as Team;
+    }
+
+    @FieldResolver(() => Company)
+    async company(@Root() { company }: Team): Promise<Company> {
+        return await CompanyLoader.load(company, true);
+    }
+
+    @FieldResolver(() => Location)
+    async location(@Root() { location }: Team): Promise<Location> {
+        if (!location) return null;
+        return await LocationLoader.load(location, true);
     }
 }

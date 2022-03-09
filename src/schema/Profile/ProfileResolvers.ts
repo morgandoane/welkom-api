@@ -2,6 +2,7 @@ import { loaderResult } from './../../utils/loaderResult';
 import {
     assignUserRole,
     AuthProvider,
+    synchronizeProfiles,
     UserLoader,
 } from './../../services/AuthProvider/AuthProvider';
 import { UpdateProfileInput } from './UpdateProfileInput';
@@ -27,6 +28,7 @@ import { UserRole } from '@src/auth/UserRole';
 import { UserInputError } from 'apollo-server-express';
 import { CreateUserData, User, UserData } from 'auth0';
 import { getId } from '@src/utils/getId';
+import { es } from 'date-fns/locale';
 
 const UploadEnabledResolver = createUploadEnabledResolver();
 
@@ -35,12 +37,13 @@ export class ProfileResolvers extends UploadEnabledResolver {
     @UseMiddleware(Permitted({ type: 'role', role: UserRole.Manager }))
     @Query(() => ProfileList)
     async profiles(@Arg('filter') filter: ProfileFilter): Promise<ProfileList> {
+        // await synchronizeProfiles();
         return await Paginate.paginate({
             model: ProfileModel,
             query: await filter.serializeProfileFilter(),
             skip: filter.skip,
             take: filter.take,
-            sort: { date_created: -1 },
+            sort: { family_name: 1 },
         });
     }
 
@@ -62,13 +65,22 @@ export class ProfileResolvers extends UploadEnabledResolver {
         @Arg('data', () => CreateProfileInput)
         data: CreateProfileInput
     ): Promise<Profile> {
-        const userData: UserData<AppMetaData, UserMetaData> = {
-            ...(await data.validateProfile(context)),
-        };
+        const userData = await data.validateProfile(context);
 
         const createUserData: CreateUserData = {
             connection: 'WELKOM',
-            ...userData,
+            given_name: userData.given_name,
+            family_name: userData.family_name,
+            username:
+                userData.username ||
+                `${userData.given_name[0]}.${userData.family_name}`.substring(
+                    0,
+                    14
+                ),
+            email:
+                userData.email ||
+                `${userData.given_name[0]}.${userData.family_name}@littledutchboy.com`,
+            password: data.temporary_password,
         };
 
         const auth0res = (await AuthProvider.createUser(createUserData).catch(
@@ -92,7 +104,7 @@ export class ProfileResolvers extends UploadEnabledResolver {
 
         const res = await ProfileModel.create(profile);
 
-        return res;
+        return res.toJSON();
     }
 
     @UseMiddleware(
@@ -103,13 +115,16 @@ export class ProfileResolvers extends UploadEnabledResolver {
     )
     @Mutation(() => Profile)
     async updateProfile(
-        @Arg('id', () => ObjectIdScalar) id: Ref<Profile>,
+        @Ctx() context: Context,
+        @Arg('id', () => String) id: string,
         @Arg('data', () => UpdateProfileInput)
         data: UpdateProfileInput
     ): Promise<Profile> {
-        const update = await data.serializeProfileUpdate();
+        const { roles, ...update } = await data.serializeProfileUpdate();
 
         await AuthProvider.updateUser({ id: id.toString() }, update);
+
+        await assignUserRole(context, id, roles[0]);
 
         const { password, ...rest } = update;
 
