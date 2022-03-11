@@ -1,5 +1,4 @@
 import { UploadEnabled } from './../UploadEnabled/UploadEnabled';
-import { PalletConfiguration } from './../PalletConfiguration/PalletConfiguration';
 import { Names } from './../Names/Names';
 import { Base } from '@src/schema/Base/Base';
 import { modelOptions, getModelForClass, prop } from '@typegoose/typegoose';
@@ -30,11 +29,6 @@ export class Item extends UploadEnabled {
     @Field()
     @prop({ required: true, min: 0 })
     per_base_unit!: number;
-
-    @MinLength(1)
-    @Field(() => [PalletConfiguration])
-    @prop({ required: true, type: () => PalletConfiguration, minLength: 1 })
-    pallet_configurations!: PalletConfiguration[];
 }
 
 export const ItemModel = getModelForClass(Item);

@@ -6,14 +6,15 @@ import { Company } from '../Company/Company';
 import { Location } from '../Location/Location';
 import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
 import { getId } from '@src/utils/getId';
+import { setMinutes, setHours } from 'date-fns';
 
 @InputType()
 export class AppointmentInput {
     @Field()
     date!: Date;
 
-    @Field()
-    time_sensitive!: boolean;
+    @Field({ nullable: true })
+    time!: number | null;
 
     @Field(() => ObjectIdScalar)
     company!: Ref<Company>;
@@ -27,9 +28,19 @@ export class AppointmentInput {
             ? null
             : await CompanyLoader.load(this.company.toString(), true);
 
+        let dateVal = this.date;
+
+        if (this.time) {
+            const hours = this.time % 60;
+            const minutes = this.time - (this.time % 60);
+            dateVal = setMinutes(dateVal, minutes);
+            dateVal = setHours(dateVal, hours);
+        }
+
         return {
             ...getId(),
             ...this,
+            date: dateVal,
             company: company._id,
             location: location ? location._id : null,
         };

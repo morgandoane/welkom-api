@@ -27,6 +27,7 @@ import { LotContentResolvers } from './schema/LotContent/LotContentResolvers';
 import { MiscItemResolvers } from './schema/Item/extensions/Misc/MiscItemResolvers';
 import { MyContextResolvers } from './contextual/MyContextResolvers';
 import { OrganizationResolvers } from './schema/Organization/OrganizationResolvers';
+import { OrderResolvers } from './schema/Order/OrderResolvers';
 import { PackagingResolvers } from './schema/Item/extensions/Packaging/PackagingResolvers';
 import { ProductResolvers } from './schema/Item/extensions/Product/ProductResolvers';
 import { UnitResolvers } from './schema/Unit/UnitResolvers';
@@ -43,6 +44,12 @@ import { ExpensedUnionResolvers } from './schema/Unions/ExpensedUnion';
 import { BaseUnionResolvers } from './schema/Unions/BaseUnion';
 import { HoldResolvers } from './schema/Hold/HoldResolvers';
 import { UploadEnabledResolvers } from './schema/Unions/UploadEnabledUnion';
+import { OrderQueueLineResolvers } from './schema/OrderQueueLine/OrderQueueLineResolvers';
+import { OrderQueueResolvers } from './schema/OrderQueue/OrderQueueResolvers';
+import { OrderAppointmentResolvers } from './schema/OrderAppointment/OrderAppointmentResolvers';
+import { UserPreferenceResolvers } from './schema/UserPreference/UserPreferenceResolvers';
+import { ItemResolver } from './schema/Item/ItemResolver';
+import { CodeResolvers } from './schema/Code/CodeResolers';
 
 import { mongoose } from '@typegoose/typegoose';
 import { AuthProvider } from './services/AuthProvider/AuthProvider';
@@ -72,6 +79,7 @@ import { ApolloServer } from 'apollo-server-express';
                 BatchLotContentResolvers,
                 BolContentResolvers,
                 BolResolvers,
+                CodeResolvers,
                 CompanyResolvers,
                 DesignResolvers,
                 ExpenseResolvers,
@@ -81,6 +89,7 @@ import { ApolloServer } from 'apollo-server-express';
                 FulfillmentResolvers,
                 HoldResolvers,
                 IngredientResolvers,
+                ItemResolver,
                 ItemUnionResolvers,
                 ItineraryResolvers,
                 LocationResolvers,
@@ -88,6 +97,10 @@ import { ApolloServer } from 'apollo-server-express';
                 LotContentResolvers,
                 MiscItemResolvers,
                 MyContextResolvers,
+                OrderResolvers,
+                OrderAppointmentResolvers,
+                OrderQueueResolvers,
+                OrderQueueLineResolvers,
                 OrganizationResolvers,
                 PackagingResolvers,
                 ProductResolvers,
@@ -101,6 +114,7 @@ import { ApolloServer } from 'apollo-server-express';
                 TeamResolvers,
                 UnitResolvers,
                 UploadEnabledResolvers,
+                UserPreferenceResolvers,
             ],
             validate: true,
         });

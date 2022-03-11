@@ -9,6 +9,9 @@ export class CompanyFilter extends UploadEnabledFilter {
     @Field({ nullable: true })
     name?: string;
 
+    @Field({ nullable: true })
+    internal?: boolean;
+
     public async serializeCompanyFilter(): Promise<
         FilterQuery<DocumentType<Company>>
     > {
@@ -17,6 +20,7 @@ export class CompanyFilter extends UploadEnabledFilter {
         } as FilterQuery<DocumentType<Company>>;
 
         if (this.name) query.name = { $regex: new RegExp(this.name, 'i') };
+        if (this.internal) query.internal = this.internal;
 
         return query;
     }

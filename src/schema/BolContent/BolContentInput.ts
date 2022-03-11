@@ -1,6 +1,5 @@
 import { UnitLoader } from './../Unit/Unit';
 import { ItemLoader } from './../Item/Item';
-import { PalletConfigurationInput } from './../PalletConfiguration/PalletConfigurationInput';
 import { Ref } from '@typegoose/typegoose';
 import { Field, InputType } from 'type-graphql';
 import { Item } from '../Item/Item';
@@ -22,8 +21,8 @@ export class BolContentInput {
     @Field(() => ObjectIdScalar)
     client_unit!: Ref<Unit>;
 
-    @Field(() => PalletConfigurationInput)
-    pallet_configuration!: PalletConfigurationInput;
+    @Field({ nullable: true })
+    per_pallet!: number | null;
 
     public async validateBolContentInput(): Promise<BolContent> {
         const {
@@ -75,7 +74,6 @@ export class BolContentInput {
             item,
             client_unit,
             client_quantity: this.client_quantity,
-            pallet_configuration: this.pallet_configuration,
             quantity,
         };
 

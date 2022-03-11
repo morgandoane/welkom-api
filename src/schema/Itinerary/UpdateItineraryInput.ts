@@ -15,9 +15,6 @@ export class UpdateItineraryInput {
     @Field(() => ObjectIdScalar, { nullable: true })
     carrier?: Ref<Company> | null;
 
-    @Field(() => ObjectIdScalar, { nullable: true })
-    commissioned_by?: Ref<Company>;
-
     public async serializeItineraryUpdate(): Promise<Partial<Itinerary>> {
         const res: Partial<Itinerary> = {};
 
@@ -31,13 +28,6 @@ export class UpdateItineraryInput {
                 const carrier = await CompanyLoader.load(this.carrier, true);
                 res.carrier = carrier._id;
             }
-        }
-        if (this.commissioned_by) {
-            const commissioned_by = await CompanyLoader.load(
-                this.commissioned_by,
-                true
-            );
-            res.commissioned_by = commissioned_by._id;
         }
 
         return res;

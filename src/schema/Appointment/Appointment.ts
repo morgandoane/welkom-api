@@ -10,9 +10,9 @@ export class Appointment extends Identified {
     @prop({ required: true })
     date!: Date;
 
-    @Field()
-    @prop({ required: true, default: false })
-    time_sensitive!: boolean;
+    @Field({ nullable: true })
+    @prop({ required: false })
+    time!: number | null;
 
     @Field(() => Company)
     @prop({ required: true, ref: () => Company })

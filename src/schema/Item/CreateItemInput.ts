@@ -1,7 +1,5 @@
 import { Context } from './../../auth/context';
-import { PalletConfigurationInput } from './../PalletConfiguration/PalletConfigurationInput';
 import { NamesInput } from './../Names/NamesInput';
-import { Min, MinLength } from 'class-validator';
 import { Field, InputType } from 'type-graphql';
 import { BaseUnit } from '../Unit/BaseUnit';
 import { Item } from './Item';
@@ -19,9 +17,6 @@ export class CreateItemInput {
     // Volume = X Gallons / 1 Pound
     @Field()
     per_base_unit!: number;
-
-    @Field(() => [PalletConfigurationInput])
-    pallet_configurations!: PalletConfigurationInput[];
 
     public async validateItem(context: Context): Promise<Item> {
         const item: Item = { ...context.base, ...this };

@@ -1,3 +1,4 @@
+import { OrderModel } from './../../schema/Order/Order';
 import { LotModel } from './../../schema/Lot/Lot';
 import { ItineraryModel } from '@src/schema/Itinerary/Itinerary';
 import crypto from 'crypto';
@@ -6,6 +7,7 @@ export enum CodeType {
     BOL = 'B',
     ITIN = 'I',
     LOT = 'L',
+    PO = 'PO',
 }
 
 export class CodeGenerator {
@@ -45,6 +47,13 @@ export class CodeGenerator {
                 if (match) return await this.obtain(type);
                 else return codeAttempt;
             }
+            case CodeType.PO: {
+                const match = await OrderModel.findOne({
+                    po: codeAttempt,
+                });
+                if (match) return await this.obtain(type);
+                else return codeAttempt;
+            }
         }
     }
 
@@ -56,6 +65,13 @@ export class CodeGenerator {
             case CodeType.BOL: {
                 const match = await ItineraryModel.findOne({
                     'bols.code': type + attempt,
+                });
+                if (match) return true;
+                else return false;
+            }
+            case CodeType.PO: {
+                const match = await OrderModel.findOne({
+                    po: type + attempt,
                 });
                 if (match) return true;
                 else return false;

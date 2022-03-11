@@ -13,10 +13,6 @@ export class Itinerary extends Expensed {
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
     carrier!: Ref<Company> | null;
-
-    @Field(() => Company)
-    @prop({ required: true, ref: () => Company })
-    commissioned_by!: Ref<Company>;
 }
 
 export const ItineraryModel = getModelForClass(Itinerary);

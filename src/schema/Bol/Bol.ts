@@ -1,3 +1,4 @@
+import { OrderAppointment } from './../OrderAppointment/OrderAppointment';
 import { Appointment } from '../Appointment/Appointment';
 import { BolContent } from './../BolContent/BolContent';
 import {
@@ -18,9 +19,9 @@ import { Itinerary } from '../Itinerary/Itinerary';
     },
 })
 export class Bol extends UploadEnabled {
-    @Field(() => Itinerary)
-    @prop({ required: true, ref: () => Itinerary })
-    itinerary!: Ref<Itinerary>;
+    @Field(() => Itinerary, { nullable: true })
+    @prop({ required: false, ref: () => Itinerary })
+    itinerary!: Ref<Itinerary> | null;
 
     @Field({ nullable: true })
     @prop({ required: false })
@@ -34,9 +35,12 @@ export class Bol extends UploadEnabled {
     @prop({ required: true })
     from!: Appointment;
 
-    @Field(() => Appointment)
-    @prop({ required: true })
-    to!: Appointment;
+    @Field(() => OrderAppointment)
+    @prop({
+        required: true,
+        ref: () => OrderAppointment,
+    })
+    to!: Ref<OrderAppointment>;
 }
 
 export const BolModel = getModelForClass(Bol);

@@ -209,9 +209,7 @@ export const calculateLotExpenses = async (
                 const lotPalletCounts: Record<string, number> = {};
 
                 for (const content of fulfillment.contents) {
-                    const palletCount =
-                        content.quantity /
-                        content.pallet_configuration.capacity;
+                    const palletCount = content.quantity / content.per_pallet;
 
                     if (content.lot.toString() in lotPalletCounts) {
                         lotPalletCounts[content.lot.toString()] += palletCount;

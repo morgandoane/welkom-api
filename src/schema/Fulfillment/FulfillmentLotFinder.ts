@@ -1,4 +1,3 @@
-import { PalletConfigurationInput } from './../PalletConfiguration/PalletConfigurationInput';
 import { FulfillmentContent } from './../FulfillmentContent/FulfillmentContent';
 import { QualityCheckModel } from './../QualityCheck/QualityCheck';
 import { QualityCheckResponseInput } from './../QualityCheckResponse/QualityCheckResponseInput';
@@ -38,11 +37,12 @@ export class FulfillmentLotFinder {
     @Field()
     client_quantity!: number;
 
+    @Min(0)
+    @Field()
+    per_pallet!: number;
+
     @Field(() => ObjectIdScalar)
     client_unit!: Ref<Unit>;
-
-    @Field(() => PalletConfigurationInput)
-    pallet_configuration!: PalletConfigurationInput;
 
     @Field(() => [QualityCheckResponseInput])
     quality_check_responses!: QualityCheckResponseInput[];
@@ -125,8 +125,8 @@ export class FulfillmentLotFinder {
             return async () => ({
                 lot: match,
                 content: {
-                    pallet_configuration: this.pallet_configuration,
                     quantity,
+                    per_pallet: this.per_pallet,
                     client_quantity: this.client_quantity,
                     client_unit: this.client_unit,
                     quality_check_responses,
@@ -153,8 +153,8 @@ export class FulfillmentLotFinder {
         return async () => ({
             lot: await LotModel.create(newLot),
             content: {
-                pallet_configuration: this.pallet_configuration,
                 quantity,
+                per_pallet: this.per_pallet,
                 client_quantity: this.client_quantity,
                 client_unit: this.client_unit,
                 quality_check_responses,

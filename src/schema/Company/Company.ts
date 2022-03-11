@@ -20,6 +20,9 @@ export class Company extends UploadEnabled {
     @Field(() => [Contact])
     @prop({ required: true, type: () => Contact })
     contacts!: Contact[];
+
+    @prop({ required: false, default: false })
+    internal?: boolean;
 }
 
 export const CompanyModel = getModelForClass(Company);

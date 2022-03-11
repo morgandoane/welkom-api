@@ -2,7 +2,7 @@
   "name": "welkom-api",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/app.js",
+  "main": "src/app.js",
   "_moduleAliases": {
     "@src": "dist"
   },

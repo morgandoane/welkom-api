@@ -95,11 +95,4 @@ export class ItineraryResolvers extends UploadEnabledResolver {
         if (!carrier) return null;
         return await CompanyLoader.load(carrier, true);
     }
-
-    @FieldResolver(() => Company)
-    async commissioned_by(
-        @Root() { commissioned_by }: Itinerary
-    ): Promise<Company> {
-        return await CompanyLoader.load(commissioned_by, true);
-    }
 }

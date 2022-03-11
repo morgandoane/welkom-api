@@ -2,6 +2,9 @@ import { AppointmentInput } from '../Appointment/AppointmentInput';
 import { BolContentInput } from '../BolContent/BolContentInput';
 import { Field, InputType } from 'type-graphql';
 import { Bol } from './Bol';
+import { Ref } from '@typegoose/typegoose';
+import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
+import { OrderAppointment } from '../OrderAppointment/OrderAppointment';
 
 @InputType()
 export class UpdateBolInput {
@@ -17,8 +20,8 @@ export class UpdateBolInput {
     @Field(() => AppointmentInput, { nullable: true })
     from?: AppointmentInput;
 
-    @Field(() => AppointmentInput, { nullable: true })
-    to?: AppointmentInput;
+    @Field(() => ObjectIdScalar)
+    to!: Ref<OrderAppointment>;
 
     public async serializeBolUpdate(): Promise<Partial<Bol>> {
         const bol: Partial<Bol> = {};
@@ -36,7 +39,7 @@ export class UpdateBolInput {
             bol.from = await this.from.validateAppointment();
         }
         if (this.to) {
-            bol.to = await this.to.validateAppointment();
+            bol.to = this.to;
         }
 
         return bol;
