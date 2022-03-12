@@ -37,7 +37,7 @@ export class OrderResolvers extends UploadEnabledResolver {
             query: await filter.serializeOrderFilter(),
             skip: filter.skip,
             take: filter.take,
-            sort: { date_created: -1 },
+            sort: { 'appointments.date': -1 },
         });
     }
 

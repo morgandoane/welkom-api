@@ -7,6 +7,7 @@ import { FilterQuery } from 'mongoose';
 import { DocumentType, Ref } from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
 import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
+import { Item } from '../Item/Item';
 
 @InputType()
 export class OrderFilter extends UploadEnabledFilter {
@@ -20,7 +21,7 @@ export class OrderFilter extends UploadEnabledFilter {
     vendor?: Ref<Company>;
 
     @Field(() => ObjectIdScalar, { nullable: true })
-    item?: Ref<Company>;
+    item?: Ref<Item>;
 
     @Field(() => DateRangeInput, { nullable: true })
     date_range?: DateRangeInput;
@@ -35,9 +36,9 @@ export class OrderFilter extends UploadEnabledFilter {
         if (this.po) query.po = { $regex: new RegExp(this.po, 'i') };
         if (this.customer) query.customer = this.customer;
         if (this.vendor) query.vendor = this.vendor;
-        if (this.item) query['lines.content.item'] = this.item;
+        if (this.item) query['appointments.contents.item'] = this.item;
         if (this.date_range)
-            query['lines.appointment.date'] = {
+            query['appointments.date'] = {
                 $gte: startOfDay(this.date_range.start),
                 $lte: endOfDay(this.date_range.end),
             };

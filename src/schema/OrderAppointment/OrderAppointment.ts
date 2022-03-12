@@ -15,7 +15,7 @@ export class OrderAppointment extends UploadEnabled {
     @prop({ required: true })
     date!: Date;
 
-    @Field(() => ObjectIdScalar)
+    @Field(() => Location)
     @prop({ required: true, ref: () => Location })
     location!: Ref<Location>;
 
