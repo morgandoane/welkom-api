@@ -26,4 +26,8 @@ export class Base extends Identified {
     @Field({ nullable: true })
     @prop({ required: false })
     note?: string;
+
+    @Field({ nullable: true })
+    @prop({ required: false })
+    issue?: string;
 }

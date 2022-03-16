@@ -1,3 +1,4 @@
+import { Order } from './../Order/Order';
 import { Expensed } from './../Expensed/Expensed';
 import { getModelForClass, prop, Ref } from '@typegoose/typegoose';
 import { Field, ObjectType } from 'type-graphql';
@@ -13,6 +14,10 @@ export class Itinerary extends Expensed {
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
     carrier!: Ref<Company> | null;
+
+    @Field(() => Order, { nullable: true })
+    @prop({ required: false, ref: () => Order })
+    order_link!: Ref<Order> | null;
 }
 
 export const ItineraryModel = getModelForClass(Itinerary);

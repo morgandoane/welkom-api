@@ -9,26 +9,41 @@ import { Company } from '../Company/Company';
 
 @InputType()
 export class UpdateOrderInput {
-    @Field()
+    @Field({ nullable: true })
     po?: string;
 
-    @Field(() => ObjectIdScalar)
+    @Field({ nullable: true })
+    deleted?: boolean;
+
+    @Field(() => ObjectIdScalar, { nullable: true })
     customer?: Ref<Company>;
 
-    @Field(() => ObjectIdScalar)
+    @Field(() => ObjectIdScalar, { nullable: true })
     vendor?: Ref<Company>;
 
-    public async serializeOrderUpdate(): Promise<Partial<Order>> {
+    @Field(() => [OrderAppointmentInput], { nullable: true })
+    appointments?: OrderAppointmentInput[];
+
+    public async serializeOrderUpdate(
+        context: Context
+    ): Promise<Partial<Order>> {
         const order: Partial<Order> = {};
 
+        if (this.deleted !== undefined) order.deleted = this.deleted;
         if (this.po !== undefined) order.po = this.po;
+        if (this.appointments)
+            order.appointments = await Promise.all(
+                this.appointments.map((apt) =>
+                    apt.validateOrderAppointmentInput(context)
+                )
+            );
         if (this.customer) {
             const customer = await CompanyLoader.load(this.customer, true);
             order.customer = customer._id;
         }
         if (this.vendor) {
             const vendor = await CompanyLoader.load(this.vendor, true);
-            order.customer = vendor._id;
+            order.vendor = vendor._id;
         }
 
         return order;

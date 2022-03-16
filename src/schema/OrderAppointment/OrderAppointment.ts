@@ -19,7 +19,7 @@ export class OrderAppointment extends UploadEnabled {
     @prop({ required: true, ref: () => Location })
     location!: Ref<Location>;
 
-    @Field()
-    @prop({ required: true, default: false })
-    deleted!: boolean;
+    @Field({ nullable: true })
+    @prop({ required: false })
+    time!: number | null;
 }

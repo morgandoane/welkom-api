@@ -50,6 +50,7 @@ import { OrderAppointmentResolvers } from './schema/OrderAppointment/OrderAppoin
 import { UserPreferenceResolvers } from './schema/UserPreference/UserPreferenceResolvers';
 import { ItemResolver } from './schema/Item/ItemResolver';
 import { CodeResolvers } from './schema/Code/CodeResolers';
+import { BolAppointmentResolvers } from './schema/BolAppointment/BolAppointmentResolvers';
 
 import { mongoose } from '@typegoose/typegoose';
 import { AuthProvider } from './services/AuthProvider/AuthProvider';
@@ -77,6 +78,7 @@ import { ApolloServer } from 'apollo-server-express';
                 BaseUnionResolvers,
                 BatchResolvers,
                 BatchLotContentResolvers,
+                BolAppointmentResolvers,
                 BolContentResolvers,
                 BolResolvers,
                 CodeResolvers,

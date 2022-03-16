@@ -1,4 +1,4 @@
-import { OrderAppointment } from './../OrderAppointment/OrderAppointment';
+import { BolAppointment } from './../BolAppointment/BolAppointment';
 import { Appointment } from '../Appointment/Appointment';
 import { BolContent } from './../BolContent/BolContent';
 import {
@@ -35,12 +35,9 @@ export class Bol extends UploadEnabled {
     @prop({ required: true })
     from!: Appointment;
 
-    @Field(() => OrderAppointment)
-    @prop({
-        required: true,
-        ref: () => OrderAppointment,
-    })
-    to!: Ref<OrderAppointment>;
+    @Field(() => BolAppointment)
+    @prop({ required: true })
+    to!: BolAppointment;
 }
 
 export const BolModel = getModelForClass(Bol);

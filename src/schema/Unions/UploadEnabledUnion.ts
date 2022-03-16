@@ -1,3 +1,4 @@
+import { Order } from './../Order/Order';
 import { Recipe } from '../Recipe/Recipe';
 import { Product } from '../Item/extensions/Product/Product';
 import { ProductionLine } from '../ProductionLine/ProductionLine';
@@ -43,6 +44,7 @@ export const UploadEnabledUnion = createUnionType({
             Product,
             Recipe,
             ProductionLine,
+            Order,
         ] as const,
 });
 

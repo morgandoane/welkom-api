@@ -1,3 +1,8 @@
+import { FulfillmentType } from '@src/schema/Fulfillment/Fulfillment';
+import { FulfillmentModel } from './../Fulfillment/Fulfillment';
+import { Itinerary, ItineraryModel } from '@src/schema/Itinerary/Itinerary';
+import { ItineraryLoader } from './../Itinerary/Itinerary';
+import { Bol, BolModel, BolLoader } from './../Bol/Bol';
 import { CompanyLoader } from './../Company/Company';
 import { Company } from '@src/schema/Company/Company';
 import { Paginate } from '../Pagination/Pagination';
@@ -22,6 +27,7 @@ import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
 import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
 import { UpdateOrderInput } from './UpdateOrderInput';
+import { getId } from '@src/utils/getId';
 
 const UploadEnabledResolver = createUploadEnabledResolver();
 
@@ -61,6 +67,47 @@ export class OrderResolvers extends UploadEnabledResolver {
     ): Promise<Order> {
         const order = await data.validateOrder(context);
         const orderRes = await OrderModel.create(order);
+
+        const itineraries: Itinerary[] = [];
+        const bols: Bol[] = [];
+
+        for (const apt of order.appointments) {
+            const itin: Itinerary = {
+                ...context.base,
+                code: null,
+                carrier: null,
+                order_link: order._id,
+                expenses: [],
+            };
+            const bol: Bol = {
+                ...context.base,
+                itinerary: itin._id,
+                code: null,
+                contents: [],
+                from: {
+                    ...getId(),
+                    company: order.customer,
+                    date: apt.date,
+                    time: null,
+                    location: null,
+                },
+                to: {
+                    ...getId(),
+                    company: order.vendor,
+                    date: apt.date,
+                    time: apt.time,
+                    location: apt.location,
+                    order_appointment: apt._id,
+                },
+            };
+
+            itineraries.push(itin);
+            bols.push(bol);
+        }
+
+        await ItineraryModel.create(itineraries);
+        await BolModel.create(bols);
+
         return orderRes.toJSON() as unknown as Order;
     }
 
@@ -69,14 +116,75 @@ export class OrderResolvers extends UploadEnabledResolver {
     )
     @Mutation(() => Order)
     async updateOrder(
+        @Ctx() context: Context,
         @Arg('id', () => ObjectIdScalar) id: Ref<Order>,
         @Arg('data', () => UpdateOrderInput) data: UpdateOrderInput
     ): Promise<Order> {
         const res = await OrderModel.findByIdAndUpdate(
             id,
-            await data.serializeOrderUpdate(),
+            await data.serializeOrderUpdate(context),
             { new: true }
         );
+
+        const needsUpdate = await ItineraryModel.find({ order_link: res._id });
+
+        for (const itin of needsUpdate) {
+            const bols = await BolModel.find({ itinerary: itin._id });
+
+            ItineraryLoader.clear(itin._id.toString());
+
+            for (const bol of bols) {
+                const fulfillments = await FulfillmentModel.find({
+                    bol: bol._id,
+                    type: FulfillmentType.Receipt,
+                });
+
+                await BolModel.findByIdAndUpdate(
+                    bol._id,
+                    fulfillments.length == 0
+                        ? {
+                              deleted: true,
+                          }
+                        : {
+                              issue: 'This BOL was received prior to an update of the parent Order. This may cause unforseen issues.',
+                          }
+                );
+
+                BolLoader.clear(bol._id.toString());
+
+                for (const {
+                    contents,
+                    date,
+                    location,
+                    time,
+                    _id: order_appointment,
+                } of res.appointments) {
+                    const bol: Bol = {
+                        ...context.base,
+                        contents,
+                        itinerary: itin._id,
+                        code: null,
+                        from: {
+                            ...getId(),
+                            company: res.vendor,
+                            date,
+                            location,
+                            time,
+                        },
+                        to: {
+                            ...getId(),
+                            company: res.customer,
+                            date,
+                            location,
+                            time,
+                            order_appointment,
+                        },
+                    };
+
+                    await BolModel.create(bol);
+                }
+            }
+        }
 
         OrderLoader.clear(id);
 

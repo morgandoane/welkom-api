@@ -117,14 +117,27 @@ export class OrderQueueLine {
             ],
             date: dateVal,
             location: this.destination,
+            time: this.time,
             ...context.base,
         };
 
         order.appointments.push(orderAppointment);
 
+        const fromCompany = await CompanyLoader.load(order.vendor, true);
+
+        const itinerary: Itinerary = {
+            ...context.base,
+            expenses: [],
+            carrier: fromCompany._id,
+            code: await CodeGenerator.generate(CodeType.ITIN),
+            order_link: order._id,
+        };
+
+        itineraries.push(itinerary);
+
         const bol: Bol = {
             ...context.base,
-            itinerary: null,
+            itinerary: itinerary._id,
             code: '',
             contents: [],
             from: {
@@ -134,22 +147,15 @@ export class OrderQueueLine {
                 location: null,
                 time: this.time,
             },
-            to: orderAppointment._id,
+            to: {
+                ...getId(),
+                date: dateVal,
+                company: order.customer,
+                location: this.destination,
+                time: this.time,
+                order_appointment: orderAppointment._id,
+            },
         };
-
-        const fromCompany = await CompanyLoader.load(order.vendor, true);
-
-        if (fromCompany.internal == true) {
-            // intenral order, create an itinerary
-            const itinerary: Itinerary = {
-                ...context.base,
-                expenses: [],
-                carrier: fromCompany._id,
-                code: await CodeGenerator.generate(CodeType.ITIN),
-            };
-
-            itineraries.push(itinerary);
-        }
 
         bols.push(bol);
 

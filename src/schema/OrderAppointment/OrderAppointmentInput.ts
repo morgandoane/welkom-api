@@ -15,11 +15,11 @@ export class OrderAppointmentInput {
     @Field()
     date!: Date;
 
-    @Field({ nullable: true, defaultValue: false })
-    deleted!: boolean;
-
     @Field(() => ObjectIdScalar, { nullable: true })
     location!: Ref<Location> | null;
+
+    @Field({ nullable: true })
+    time!: number | null;
 
     public async validateOrderAppointmentInput(
         context: Context
@@ -30,7 +30,7 @@ export class OrderAppointmentInput {
             ...context.base,
             date: this.date,
             location: this.location,
-            deleted: this.deleted,
+            time: this.time,
             contents: await Promise.all(
                 this.contents.map((content) =>
                     content.validateBolContentInput()

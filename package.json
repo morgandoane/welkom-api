@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/app.js",
   "_moduleAliases": {
-    "@src": "dist"
+    "@src": "src"
   },
   "scripts": {
     "dev": "nodemon",
