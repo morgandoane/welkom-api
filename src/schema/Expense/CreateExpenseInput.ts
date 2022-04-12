@@ -2,12 +2,10 @@ import { LotLoader } from './../Lot/Lot';
 import { ItineraryLoader } from './../Itinerary/Itinerary';
 import { CompanyLoader } from './../Company/Company';
 import { Context } from './../../auth/context';
-import { Ref } from '@typegoose/typegoose';
+import { Ref, mongoose } from '@typegoose/typegoose';
 import { Min } from 'class-validator';
 import { Field, InputType } from 'type-graphql';
 import { Company } from '../Company/Company';
-import { Itinerary } from '../Itinerary/Itinerary';
-import { Lot } from '../Lot/Lot';
 import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
 import { ExpenseClass } from './ExpenseClass';
 import { Expense } from './Expense';
@@ -28,7 +26,7 @@ export class CreateExpenseInput {
     expense_class!: ExpenseClass;
 
     @Field(() => ObjectIdScalar)
-    against!: Ref<Lot | Itinerary>;
+    against!: mongoose.Types.ObjectId;
 
     public async validateExpense(context: Context): Promise<Expense> {
         const vendor = await CompanyLoader.load(this.vendor, true);
@@ -42,6 +40,7 @@ export class CreateExpenseInput {
             ...context.base,
             ...this,
         };
+
         return expense;
     }
 }

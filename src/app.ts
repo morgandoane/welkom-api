@@ -51,6 +51,10 @@ import { UserPreferenceResolvers } from './schema/UserPreference/UserPreferenceR
 import { ItemResolver } from './schema/Item/ItemResolver';
 import { CodeResolvers } from './schema/Code/CodeResolers';
 import { BolAppointmentResolvers } from './schema/BolAppointment/BolAppointmentResolvers';
+import {
+    ItineraryScheduleStageResolvers,
+    ItinerarySchedulePathResolvers,
+} from './schema/ItinerarySchedule/ItineraryScheduleResolvers';
 
 import { mongoose } from '@typegoose/typegoose';
 import { AuthProvider } from './services/AuthProvider/AuthProvider';
@@ -117,6 +121,8 @@ import { ApolloServer } from 'apollo-server-express';
                 UnitResolvers,
                 UploadEnabledResolvers,
                 UserPreferenceResolvers,
+                ItineraryScheduleStageResolvers,
+                ItinerarySchedulePathResolvers,
             ],
             validate: true,
         });

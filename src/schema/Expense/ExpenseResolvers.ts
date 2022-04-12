@@ -16,17 +16,13 @@ import {
     Root,
     UseMiddleware,
 } from 'type-graphql';
-import {
-    Expense,
-    ExpenseModel,
-    ExpenseLoader,
-    ExpenseModifier,
-} from './Expense';
+import { Expense, ExpenseModel, ExpenseLoader } from './Expense';
 import { Company } from '../Company/Company';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
 import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
 import { UpdateExpenseInput } from './UpdateExpenseInput';
+import { ExpenseModifier } from './ExpenseModifider';
 
 const UploadEnabledResolver = createUploadEnabledResolver();
 

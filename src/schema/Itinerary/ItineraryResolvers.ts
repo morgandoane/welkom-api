@@ -1,3 +1,6 @@
+import { ItinerarySchedule } from './../ItinerarySchedule/ItinerarySchedule';
+import { Bol, BolModel } from './../Bol/Bol';
+import { OrderLoader } from './../Order/Order';
 import { UpdateItineraryInput } from './UpdateItineraryInput';
 import { ItineraryFilter } from './ItineraryFilter';
 import { ItineraryList } from './ItineraryList';
@@ -18,9 +21,16 @@ import {
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
 import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
-import { Itinerary, ItineraryLoader, ItineraryModel } from './Itinerary';
+import {
+    Itinerary,
+    ItineraryLoader,
+    ItineraryModel,
+    ItineraryType,
+} from './Itinerary';
 import { CreateItineraryInput } from './CreateItineraryInput';
 import { Company, CompanyLoader } from '../Company/Company';
+import { Order } from '../Order/Order';
+import { BolStatus } from '../Bol/BolStatus';
 
 const UploadEnabledResolver = createUploadEnabledResolver();
 
@@ -65,7 +75,7 @@ export class ItineraryResolvers extends UploadEnabledResolver {
     ): Promise<Itinerary> {
         const itinerary = await data.validateItinerary(context);
         const res = await ItineraryModel.create(itinerary);
-        return res;
+        return res.toJSON() as unknown as Itinerary;
     }
 
     @UseMiddleware(
@@ -87,12 +97,29 @@ export class ItineraryResolvers extends UploadEnabledResolver {
 
         ItineraryLoader.clear(id);
 
-        return res;
+        return res.toJSON() as unknown as Itinerary;
     }
 
     @FieldResolver(() => Company, { nullable: true })
     async carrier(@Root() { carrier }: Itinerary): Promise<Company> {
         if (!carrier) return null;
         return await CompanyLoader.load(carrier, true);
+    }
+
+    @FieldResolver(() => Order, { nullable: true })
+    async order_link(@Root() { order_link }: Itinerary): Promise<Order> {
+        if (!order_link) return null;
+        return await OrderLoader.load(order_link, true);
+    }
+
+    @FieldResolver(() => [Bol], { nullable: true })
+    async bols(@Root() { _id: itinerary }: Itinerary): Promise<Bol[]> {
+        const docs = await BolModel.find({ itinerary });
+        return docs.map((doc) => doc.toJSON() as unknown as Bol);
+    }
+
+    @FieldResolver(() => ItinerarySchedule)
+    async schedule(@Root() itinerary: Itinerary): Promise<ItinerarySchedule> {
+        return await ItinerarySchedule.fromItinerary(itinerary);
     }
 }

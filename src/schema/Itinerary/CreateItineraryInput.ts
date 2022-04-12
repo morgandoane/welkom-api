@@ -6,6 +6,7 @@ import { Company } from '../Company/Company';
 import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
 import { Itinerary } from './Itinerary';
 import { Order } from '../Order/Order';
+import { ItineraryStatus } from './ItineraryStatus';
 
 @InputType()
 export class CreateItineraryInput {
@@ -29,6 +30,8 @@ export class CreateItineraryInput {
             expense_summaries: [],
             expenses: [],
             order_link: this.order_link || null,
+            bols: [],
+            status: ItineraryStatus.Pending,
         };
 
         return res;

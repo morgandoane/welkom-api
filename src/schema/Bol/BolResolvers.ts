@@ -1,3 +1,4 @@
+import { ItineraryModel } from '@src/schema/Itinerary/Itinerary';
 import { Itinerary, ItineraryLoader } from './../Itinerary/Itinerary';
 import { Paginate } from '../Pagination/Pagination';
 import { BolFilter } from './BolFilter';
@@ -16,11 +17,12 @@ import {
     Root,
     UseMiddleware,
 } from 'type-graphql';
-import { Bol, BolModel, BolLoader } from './Bol';
+import { Bol } from './Bol';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
 import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
 import { UpdateBolInput } from './UpdateBolInput';
+import { BolModel, BolLoader } from './BolModel';
 
 const UploadEnabledResolver = createUploadEnabledResolver();
 
@@ -58,6 +60,14 @@ export class BolResolvers extends UploadEnabledResolver {
     ): Promise<Bol> {
         const bol = await data.validateBol(context);
         const bolRes = await BolModel.create(bol);
+        const itinRes = await ItineraryModel.findOneAndUpdate(
+            { _id: bolRes.itinerary },
+            {
+                $addToSet: { bols: bolRes._id },
+            },
+            { new: true }
+        );
+        ItineraryLoader.clear(itinRes._id.toString());
         return bolRes;
     }
 
@@ -75,6 +85,14 @@ export class BolResolvers extends UploadEnabledResolver {
             { new: true }
         );
 
+        const itinRes = await ItineraryModel.findOneAndUpdate(
+            { _id: res.itinerary },
+            {
+                $addToSet: { bols: res._id },
+            },
+            { new: true }
+        );
+        ItineraryLoader.clear(itinRes._id.toString());
         BolLoader.clear(id);
 
         return res;

@@ -4,9 +4,9 @@ import { ItineraryModel } from '@src/schema/Itinerary/Itinerary';
 import crypto from 'crypto';
 
 export enum CodeType {
-    BOL = 'B',
-    ITIN = 'I',
-    LOT = 'L',
+    BOL = 'BOL',
+    ITIN = 'ITIN',
+    LOT = 'LOT',
     PO = 'PO',
 }
 

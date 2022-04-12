@@ -6,7 +6,6 @@ import {
 } from './../ProductionLine/ProductionLine';
 import { Item, ItemLoader } from '@src/schema/Item/Item';
 import { ExpenseClass } from './../Expense/ExpenseClass';
-import { ExpenseModifier } from './../Expense/Expense';
 import { Paginate } from '../Pagination/Pagination';
 import { LotFilter } from './LotFilter';
 import { LotList } from './LotList';
@@ -29,6 +28,7 @@ import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
 import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
 import { UpdateLotInput } from './UpdateLotInput';
+import { ExpenseModifier } from '../Expense/ExpenseModifider';
 
 const UploadEnabledResolver = createUploadEnabledResolver();
 

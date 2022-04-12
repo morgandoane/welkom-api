@@ -1,3 +1,4 @@
+import { CloudStorageError } from './../../services/CloudStorage/CloudStorageError';
 import { Identified } from './../Base/Base';
 import { prop, Ref } from '@typegoose/typegoose';
 import { Min } from 'class-validator';
@@ -22,8 +23,7 @@ export class LotContent extends Identified {
     @prop({ required: true, enum: BaseUnit })
     base_unit!: BaseUnit;
 
-    @Min(0)
-    @Field()
+    @Min(0)disk CloudStorageErrorgoen    @Field()
     @prop({ required: true, min: 0 })
     client_quantity!: number;
 

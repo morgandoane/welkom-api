@@ -25,7 +25,7 @@ export class PaginateArg {
 
 export interface _PaginateArg<T> {
     model: ModelType<DocumentType<T>>;
-    query: FilterQuery<T>;
+    query: FilterQuery<T> | FilterQuery<T>[];
     sort: Partial<Record<string, -1 | 1>>;
     skip: number;
     take: number;
@@ -46,7 +46,9 @@ export class Paginate {
     }: _PaginateArg<T>): Promise<PaginationResult<T>> => {
         const res = await model.aggregate([
             { $sort: sort },
-            { $match: query },
+            ...(query instanceof Array
+                ? [...query.map((q) => ({ $match: q }))]
+                : [{ $match: query }]),
             {
                 $facet: {
                     stage1: [{ $group: { _id: null, count: { $sum: 1 } } }],

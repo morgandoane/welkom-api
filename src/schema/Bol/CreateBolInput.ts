@@ -9,6 +9,7 @@ import { Itinerary } from '../Itinerary/Itinerary';
 import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
 import { Bol } from './Bol';
 import { Order } from '../Order/Order';
+import { BolStatus } from './BolStatus';
 
 @InputType()
 export class CreateBolInput {
@@ -40,6 +41,7 @@ export class CreateBolInput {
             contents: [],
             from: await this.from.validateAppointment(),
             to: await this.to.validateBolAppointment(),
+            status: BolStatus.Pending,
         };
 
         for (const content of this.contents) {

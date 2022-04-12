@@ -28,6 +28,7 @@ import { Permission } from '@src/auth/permissions';
 import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
 import { UpdateOrderInput } from './UpdateOrderInput';
 import { getId } from '@src/utils/getId';
+import { BolStatus } from '../Bol/BolStatus';
 
 const UploadEnabledResolver = createUploadEnabledResolver();
 
@@ -71,14 +72,17 @@ export class OrderResolvers extends UploadEnabledResolver {
         const itineraries: Itinerary[] = [];
         const bols: Bol[] = [];
 
+        const itin: Itinerary = {
+            ...context.base,
+            code: null,
+            carrier: null,
+            order_link: order._id,
+            expenses: [],
+        };
+
+        itineraries.push(itin);
+
         for (const apt of order.appointments) {
-            const itin: Itinerary = {
-                ...context.base,
-                code: null,
-                carrier: null,
-                order_link: order._id,
-                expenses: [],
-            };
             const bol: Bol = {
                 ...context.base,
                 itinerary: itin._id,
@@ -86,22 +90,22 @@ export class OrderResolvers extends UploadEnabledResolver {
                 contents: [],
                 from: {
                     ...getId(),
-                    company: order.customer,
+                    company: order.vendor,
                     date: apt.date,
                     time: null,
                     location: null,
                 },
                 to: {
                     ...getId(),
-                    company: order.vendor,
+                    company: order.customer,
                     date: apt.date,
                     time: apt.time,
                     location: apt.location,
                     order_appointment: apt._id,
                 },
+                status: BolStatus.Pending,
             };
 
-            itineraries.push(itin);
             bols.push(bol);
         }
 
@@ -179,6 +183,7 @@ export class OrderResolvers extends UploadEnabledResolver {
                             time,
                             order_appointment,
                         },
+                        status: BolStatus.Pending,
                     };
 
                     await BolModel.create(bol);

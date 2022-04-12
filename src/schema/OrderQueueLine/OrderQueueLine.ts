@@ -1,7 +1,3 @@
-import {
-    CodeGenerator,
-    CodeType,
-} from './../../services/CodeGeneration/CodeGeneration';
 import { CompanyLoader } from './../Company/Company';
 import { UnitClass } from './../Unit/UnitClass';
 import { Unit, UnitLoader } from './../Unit/Unit';
@@ -19,6 +15,7 @@ import { getId } from '@src/utils/getId';
 import { Location } from '../Location/Location';
 import { setHours, setMinutes } from 'date-fns';
 import { BaseUnit } from '../Unit/BaseUnit';
+import { BolStatus } from '../Bol/BolStatus';
 
 @ObjectType()
 export class OrderQueueLine {
@@ -129,16 +126,14 @@ export class OrderQueueLine {
             ...context.base,
             expenses: [],
             carrier: fromCompany._id,
-            code: await CodeGenerator.generate(CodeType.ITIN),
+            code: null,
             order_link: order._id,
         };
-
-        itineraries.push(itinerary);
 
         const bol: Bol = {
             ...context.base,
             itinerary: itinerary._id,
-            code: '',
+            code: null,
             contents: [],
             from: {
                 ...getId(),
@@ -155,7 +150,10 @@ export class OrderQueueLine {
                 time: this.time,
                 order_appointment: orderAppointment._id,
             },
+            status: BolStatus.Pending,
         };
+
+        itineraries.push(itinerary);
 
         bols.push(bol);
 

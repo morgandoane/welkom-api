@@ -148,8 +148,8 @@ export class OrderQueueResolvers extends BaseResolvers {
 
         for (const { order, bols, itineraries } of data) {
             await OrderModel.create(order);
-            await BolModel.create(bols);
             await ItineraryModel.create(itineraries);
+            await BolModel.create(bols);
         }
 
         await OrderQueueModel.deleteMany({

@@ -1,3 +1,4 @@
+import { ItineraryStopStatus } from './../schema/ItinerarySchedule/ItinerarySchedule';
 import { DesignCategory, DesignLocation } from './../schema/Design/Design';
 import { StorageBucket } from './../services/CloudStorage/CloudStorage';
 import { FolderClass } from './../schema/Folder/Folder';
@@ -12,6 +13,9 @@ import { QualityCheckClass } from '@src/schema/QualityCheck/QualityCheck';
 import { ExpenseClass } from '@src/schema/Expense/ExpenseClass';
 import { FulfillmentType } from '@src/schema/Fulfillment/Fulfillment';
 import { IngredientUnitClass } from '@src/schema/Item/extensions/Ingredient/Ingredient';
+import { ItineraryType } from '@src/schema/Itinerary/Itinerary';
+import { ItineraryStatus } from '@src/schema/Itinerary/ItineraryStatus';
+import { BolStatus } from '@src/schema/Bol/BolStatus';
 
 export const registerEnums = (): void => {
     registerEnumType(Permission, { name: 'Permission' });
@@ -28,4 +32,8 @@ export const registerEnums = (): void => {
     registerEnumType(DesignCategory, { name: 'DesignCategory' });
     registerEnumType(DesignLocation, { name: 'DesignLocation' });
     registerEnumType(IngredientUnitClass, { name: 'IngredientUnitClass' });
+    registerEnumType(ItineraryStopStatus, { name: 'ItineraryStopStatus' });
+    registerEnumType(ItineraryType, { name: 'ItineraryType' });
+    registerEnumType(ItineraryStatus, { name: 'ItineraryStatus' });
+    registerEnumType(BolStatus, { name: 'BolStatus' });
 };

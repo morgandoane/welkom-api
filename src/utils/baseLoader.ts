@@ -59,6 +59,13 @@ export class AppDataLoader<
         this._loader.clear(key.toString());
     }
 
+    public prime(
+        key: string | mongoose.Types.ObjectId | Ref<unknown>,
+        doc: DocumentType<T>
+    ): void {
+        this._loader.prime(key.toString(), doc);
+    }
+
     public clearAll(): void {
         this._loader.clearAll();
     }
