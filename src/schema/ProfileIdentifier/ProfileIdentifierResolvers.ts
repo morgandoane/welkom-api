@@ -4,7 +4,6 @@ import { Permitted } from '@src/auth/middleware/Permitted';
 import { createBaseResolver } from './../Base/BaseResolvers';
 import { ProfileIdentifier, ProfileIdentifierModel } from './ProfileIdentifier';
 import { Arg, Ctx, Mutation, Resolver, UseMiddleware } from 'type-graphql';
-import { Permission } from '@src/auth/permissions';
 import { UserRole } from '@src/auth/UserRole';
 
 const BaseResolver = createBaseResolver();
@@ -19,7 +18,7 @@ export class ProfileIdentifierResolvers extends BaseResolver {
         const doc = await data.validate(context);
         await ProfileIdentifierModel.deleteMany({ profile: data.profile });
         const res = await ProfileIdentifierModel.create(doc);
-        return res.toJSON();
+        return res.toJSON() as unknown as ProfileIdentifier;
     }
 
     @UseMiddleware(Permitted({ type: 'role', role: UserRole.Manager }))

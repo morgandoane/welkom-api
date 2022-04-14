@@ -69,7 +69,7 @@ export class RecipeResolvers extends BaseResolver {
     ): Promise<Recipe> {
         const doc = await data.validateRecipeInput(context);
         const res = await RecipeModel.create(doc);
-        return res.toJSON();
+        return res.toJSON() as unknown as Recipe;
     }
 
     @UseMiddleware(
@@ -86,7 +86,7 @@ export class RecipeResolvers extends BaseResolver {
             new: true,
         });
         RecipeLoader.clear(id.toString());
-        return res.toJSON();
+        return res.toJSON() as unknown as Recipe;
     }
 
     @FieldResolver(() => Item)
@@ -103,7 +103,7 @@ export class RecipeResolvers extends BaseResolver {
             .sort({ date_created: -1 })
             .limit(1);
 
-        if (latest[0]) return latest[0].toJSON();
+        if (latest[0]) return latest[0].toJSON() as unknown as RecipeVersion;
         else return null;
     }
 

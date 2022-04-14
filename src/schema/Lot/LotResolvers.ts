@@ -32,7 +32,7 @@ export class LotResolvers extends BaseResolvers {
         const query = await filter.serialize();
         const doc = await LotModel.findOne({ ...query });
         if (!doc) return null;
-        else return doc.toJSON();
+        else return doc.toJSON() as unknown as Lot;
     }
 
     @UseMiddleware(
@@ -44,7 +44,7 @@ export class LotResolvers extends BaseResolvers {
     ): Promise<Lot[]> {
         const query = await filter.serialize();
         const docs = await LotModel.find({ ...query });
-        return docs.map((doc) => doc.toJSON());
+        return docs.map((doc) => doc.toJSON() as unknown as Lot);
     }
 
     @FieldResolver(() => Item)
@@ -70,6 +70,6 @@ export class LotResolvers extends BaseResolvers {
             against: _id.toString(),
             deleted: false,
         });
-        return res.map((doc) => doc.toJSON());
+        return res.map((doc) => doc.toJSON() as unknown as Expense);
     }
 }

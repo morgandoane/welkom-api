@@ -1,5 +1,4 @@
 import { Verified } from './../Verified/Verified';
-import { Base } from './../Base/Base';
 import { Bol, BolModel } from './../Bol/Bol';
 import { loaderResult } from './../../utils/loaderResult';
 import { LotLoader } from './../Lot/Lot';
@@ -17,7 +16,7 @@ import { Field, ObjectType } from 'type-graphql';
 import { Location } from '../Location/Location';
 import { Lot } from '../Lot/Lot';
 import { Item } from '../Item/Item';
-import { Verification } from '../Verification/Verification';
+import { ObjectId } from 'mongoose';
 
 export enum FulfillmentType {
     Shipment = 'Shipment',
@@ -47,7 +46,7 @@ export enum FulfillmentType {
 export class Fulfillment extends Verified {
     @Field(() => Bol)
     @prop({ required: true, ref: 'Bol' })
-    bol!: Ref<Bol>;
+    bol!: Ref<Bol> | ObjectId;
 
     @Field(() => FulfillmentType)
     @prop({ required: true, enum: FulfillmentType })
@@ -55,21 +54,21 @@ export class Fulfillment extends Verified {
 
     @Field(() => [Lot])
     @prop({ required: true, ref: 'Lot' })
-    lots!: Ref<Lot>[];
+    lots!: (Ref<Lot> | ObjectId)[];
 
     // denormalized
     // set upon save
     @Field(() => [Item])
     @prop({ required: true, ref: () => Item })
-    items?: Ref<Item>[];
+    items?: (Ref<Item> | ObjectId)[];
 
     @Field(() => Company)
     @prop({ required: true, ref: () => Company })
-    company!: Ref<Company>;
+    company!: Ref<Company> | ObjectId;
 
     @Field(() => Location)
     @prop({ required: true, ref: () => Location })
-    location!: Ref<Location>;
+    location!: Ref<Location> | ObjectId;
 }
 
 export const FulfillmentModel = getModelForClass(Fulfillment);

@@ -67,7 +67,7 @@ export class RecipeVersionResolvers extends BaseResolver {
         const doc = await data.validateRecipeVersion(context);
         const res = await RecipeVersionModel.create(doc);
         RecipeLoader.clear(data.recipe.toString());
-        return res.toJSON();
+        return res.toJSON() as unknown as RecipeVersion;
     }
 
     @FieldResolver(() => Recipe)

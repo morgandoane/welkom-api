@@ -19,7 +19,7 @@ export const getBaseLoader = <
         return keys.map(
             (key) =>
                 [...res.map((d) => d.toJSON())].find(
-                    (r) => r._id.toString() === key
+                    (r) => (r._id as ObjectId).toString() === key
                 ) || new Error('Failed to find item with id ' + key)
         ) as (DocumentType<T> | Error)[];
     });

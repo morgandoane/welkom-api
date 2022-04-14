@@ -1,15 +1,18 @@
+import { Ref } from '@typegoose/typegoose';
 import { Field, InputType } from 'type-graphql';
+import { Batch } from '../Batch/Batch';
+import { ObjectIdScalar } from '../ObjectIdScalar';
 
 @InputType()
 export class BatchLineInput {
-    @Field()
-    batch!: string;
+    @Field(() => ObjectIdScalar)
+    batch!: Ref<Batch>;
 
     @Field()
     code_or_id!: string;
 
-    @Field(() => [String])
-    active_steps!: string[];
+    @Field(() => [ObjectIdScalar])
+    active_steps!: Ref<Batch>[];
 
     @Field({ nullable: true })
     crumb?: boolean;

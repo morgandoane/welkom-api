@@ -9,7 +9,7 @@ import {
     prop,
     Ref,
 } from '@typegoose/typegoose';
-import { Order } from '../Order/Order';
+import { ObjectId } from 'mongoose';
 
 @ObjectType()
 @modelOptions({
@@ -22,16 +22,15 @@ export class Itinerary extends Base {
     @prop({ required: true })
     code!: string;
 
-    @Field(() => [Order])
     @prop({ required: true, ref: 'Order' })
-    orders!: Ref<Order>[];
+    orders!: ObjectId[];
 
     @Field(() => [Bol])
     bols?: Bol[];
 
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
-    carrier?: Ref<Company>;
+    carrier?: Ref<Company> | ObjectId;
 }
 
 export const ItineraryModel = getModelForClass(Itinerary);

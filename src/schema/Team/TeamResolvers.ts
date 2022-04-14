@@ -70,7 +70,7 @@ export class TeamResolvers extends BaseResolver {
     ): Promise<Team> {
         const team = await data.serialize(context);
         const doc = await TeamModel.create(team);
-        return doc.toJSON();
+        return doc.toJSON() as unknown as Team;
     }
 
     @UseMiddleware(
@@ -95,7 +95,7 @@ export class TeamResolvers extends BaseResolver {
 
         TeamLoader.clear(id.toString());
 
-        return res.toJSON();
+        return res.toJSON() as unknown as Team;
     }
 
     @FieldResolver(() => Company)

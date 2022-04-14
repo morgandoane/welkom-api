@@ -81,7 +81,7 @@ export class QualityCheckResolvers extends BaseResolver {
             await data.validate(context)
         );
 
-        return doc.toJSON();
+        return doc.toJSON() as unknown as QualityCheck;
     }
 
     @UseMiddleware(
@@ -103,7 +103,7 @@ export class QualityCheckResolvers extends BaseResolver {
             { new: true }
         );
 
-        return res.toJSON();
+        return res.toJSON() as unknown as QualityCheck;
     }
 
     @FieldResolver(() => Item)

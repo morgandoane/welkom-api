@@ -38,7 +38,7 @@ export class MixingCardResolvers extends BaseResolver {
     @Query(() => [MixingCard])
     async mixingCards(): Promise<MixingCard[]> {
         const res = await MixingCardModel.find({ deleted: false });
-        return res.map((doc) => doc.toJSON());
+        return res.map((doc) => doc.toJSON() as unknown as MixingCard);
     }
 
     @UseMiddleware(
@@ -49,7 +49,7 @@ export class MixingCardResolvers extends BaseResolver {
         @Arg('id', () => ObjectIdScalar) id: ObjectId
     ): Promise<MixingCard> {
         const res = await MixingCardModel.findById(id.toString());
-        return res.toJSON();
+        return res.toJSON() as unknown as MixingCard;
     }
 
     @UseMiddleware(
@@ -62,7 +62,7 @@ export class MixingCardResolvers extends BaseResolver {
             profile: context.base.created_by,
         });
         if (!res) return null;
-        else return res.toJSON();
+        else return res.toJSON() as unknown as MixingCard;
     }
 
     @UseMiddleware(
@@ -78,7 +78,7 @@ export class MixingCardResolvers extends BaseResolver {
     ): Promise<MixingCard> {
         const doc = await data.validateCard(context);
         const res = await MixingCardModel.create(doc);
-        return res.toJSON();
+        return res.toJSON() as unknown as MixingCard;
     }
 
     @UseMiddleware(
@@ -99,7 +99,7 @@ export class MixingCardResolvers extends BaseResolver {
             update
         );
 
-        return res.toJSON();
+        return res.toJSON() as unknown as MixingCard;
     }
 
     @FieldResolver(() => Location)

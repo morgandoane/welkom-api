@@ -74,12 +74,7 @@ import https from 'https';
         registerEnums();
 
         mongoose.Promise = global.Promise;
-        await mongoose.connect(env.ATLAS_URL, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            useFindAndModify: false,
-            useCreateIndex: true,
-        });
+        await mongoose.connect(env.ATLAS_URL, {});
 
         // Setup GraphQL with Apollo
         const schema = await buildSchema({

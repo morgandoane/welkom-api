@@ -46,7 +46,7 @@ export class BucketLotResolvers extends BaseResolvers {
     ): Promise<BucketLot> {
         const doc = await data.validateBucketLot(context);
         const res = await BucketLotModel.create(doc);
-        return res.toJSON();
+        return res.toJSON() as unknown as BucketLot;
     }
 
     @Mutation(() => BucketLot)

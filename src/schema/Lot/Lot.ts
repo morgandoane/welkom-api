@@ -8,13 +8,13 @@ import {
     modelOptions,
     prop,
     Ref,
-    Severity,
 } from '@typegoose/typegoose';
 import { Location } from '../Location/Location';
 import { Company } from '../Company/Company';
 import { Field, ObjectType } from 'type-graphql';
-import { LotContent } from '../Content/Content';
+import { LotContent } from '../Content/LotContent';
 import { QualityCheckResponse } from '../QualityCheckResponse/QualityCheckResponse';
+import { ObjectId } from 'mongoose';
 
 @ObjectType()
 @index({ code: 1 })
@@ -38,7 +38,7 @@ export class Lot extends Base {
 
     @Field(() => Item)
     @prop({ required: true, ref: () => Item })
-    item!: Ref<Item>;
+    item!: Ref<Item> | ObjectId;
 
     @Field(() => [QualityCheckResponse])
     @prop({ required: true, type: () => [QualityCheckResponse] })
@@ -46,11 +46,11 @@ export class Lot extends Base {
 
     @Field(() => Location, { nullable: true })
     @prop({ required: false, ref: () => Location })
-    location?: Ref<Location>;
+    location?: Ref<Location> | ObjectId;
 
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
-    company?: Ref<Company>;
+    company?: Ref<Company> | ObjectId;
 
     @Field(() => [LotContent])
     @prop({ required: true, type: () => LotContent })
@@ -58,5 +58,4 @@ export class Lot extends Base {
 }
 
 export const LotModel = getModelForClass(Lot);
-
 export const LotLoader = getBaseLoader(LotModel);

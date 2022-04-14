@@ -1,4 +1,3 @@
-import { LotContent } from './../Content/Content';
 import { prop, mongoose, getModelForClass, Ref } from '@typegoose/typegoose';
 import { Field, ObjectType, ID } from 'type-graphql';
 import Dataloader from 'dataloader';
@@ -6,6 +5,8 @@ import { Company } from '../Company/Company';
 import { Location } from '../Location/Location';
 import { Item } from '../Item/Item';
 import { ProductionLine } from '../ProductionLine/ProductionLine';
+import { LotContent } from '../Content/LotContent';
+import { ObjectId } from 'mongoose';
 
 @ObjectType()
 export class PalletCard {
@@ -23,15 +24,15 @@ export class PalletCard {
 
     @Field(() => Item)
     @prop({ required: true, ref: () => Item })
-    item!: Ref<Item>;
+    item!: Ref<Item> | ObjectId;
 
     @Field(() => Company)
     @prop({ required: true, ref: () => Company })
-    company!: Ref<Company>;
+    company!: Ref<Company> | ObjectId;
 
     @Field(() => Location)
     @prop({ required: true, ref: () => Location })
-    location!: Ref<Location>;
+    location!: Ref<Location> | ObjectId;
 
     @Field({ nullable: true, defaultValue: false })
     @prop({ required: false })

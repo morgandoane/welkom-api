@@ -4,12 +4,14 @@ import { Field, InputType } from 'type-graphql';
 import { Bol, BolStatus } from './Bol';
 import { BolAppointmentInput } from './BolAppointment';
 import { loaderResult } from '@src/utils/loaderResult';
-import { ItineraryLoader } from '../Itinerary/Itinerary';
+import { Itinerary, ItineraryLoader } from '../Itinerary/Itinerary';
+import { Ref } from '@typegoose/typegoose';
+import { ObjectIdScalar } from '../ObjectIdScalar';
 
 @InputType()
 export class CreateBolInput {
-    @Field()
-    itinerary!: string;
+    @Field(() => ObjectIdScalar)
+    itinerary!: Ref<Itinerary>;
 
     @Field()
     code!: string;
@@ -25,7 +27,7 @@ export class CreateBolInput {
 
     public async validateBol(context: Context): Promise<Bol> {
         const itinerary = loaderResult(
-            await ItineraryLoader.load(this.itinerary)
+            await ItineraryLoader.load(this.itinerary.toString())
         );
 
         const bol: Bol = {

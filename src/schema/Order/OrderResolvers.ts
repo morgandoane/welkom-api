@@ -134,9 +134,9 @@ export class OrderResolvers extends BaseResolvers {
         );
         if (duplicate)
             throw new UserInputError(`PO code ${data.code} is already taken.`);
-        return await (
+        return (await (
             await OrderModel.create(await data.validateOrder(context))
-        ).toJSON();
+        ).toJSON()) as unknown as Order;
     }
 
     @UseMiddleware(
@@ -159,7 +159,7 @@ export class OrderResolvers extends BaseResolvers {
             { new: true }
         );
         OrderLoader.prime(res._id.toString(), res);
-        return res.toJSON();
+        return res.toJSON() as unknown as Order;
     }
 
     @FieldResolver(() => Company)
@@ -181,7 +181,7 @@ export class OrderResolvers extends BaseResolvers {
             deleted: false,
         });
 
-        return res.map((doc) => doc.toObject());
+        return res.map((doc) => doc.toObject() as unknown as Itinerary);
     }
 
     @FieldResolver(() => [AppFile])
@@ -203,6 +203,6 @@ export class OrderResolvers extends BaseResolvers {
             against: _id.toString(),
             deleted: false,
         });
-        return res.map((doc) => doc.toJSON());
+        return res.map((doc) => doc.toJSON() as unknown as Expense);
     }
 }

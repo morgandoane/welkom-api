@@ -1,9 +1,7 @@
 import { AppStorage } from './../../services/CloudStorage/CloudStorage';
 import { UserLoader } from '@src/services/AuthProvider/AuthProvider';
 import { ProfileModel } from './../Profile/Profile';
-import { BolFile } from './../AppFile/extensons/BolFile/BolFile';
-import { Order, OrderLoader, OrderModel } from './../Order/Order';
-import { Pagination } from './../Pagination/Pagination';
+import { Order, OrderModel } from './../Order/Order';
 import { BolFilter } from './BolFilter';
 import { BolList } from './BolList';
 import { Context } from './../../auth/context';
@@ -13,16 +11,10 @@ import {
     FulfillmentModel,
     FulfillmentType,
 } from './../Fulfillment/Fulfillment';
-import {
-    Itinerary,
-    ItineraryLoader,
-    ItineraryModel,
-} from './../Itinerary/Itinerary';
+import { Itinerary, ItineraryLoader } from './../Itinerary/Itinerary';
 import { UpdateBolInput, CreateBolInput } from './BolInput';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { ObjectId } from 'mongoose';
-import { LocationLoader } from './../Location/Location';
-import { CompanyLoader } from './../Company/Company';
 import {
     Arg,
     Ctx,
@@ -80,7 +72,7 @@ export class BolResolvers extends BaseResolvers {
         @Ctx() context: Context
     ): Promise<Bol> {
         const res = await BolModel.create(await data.validateBol(context));
-        return res.toJSON();
+        return res.toJSON() as unknown as Bol;
     }
 
     @UseMiddleware(
@@ -99,7 +91,7 @@ export class BolResolvers extends BaseResolvers {
 
         BolLoader.clear(id.toString());
 
-        return res.toJSON();
+        return res.toJSON() as unknown as Bol;
     }
 
     @FieldResolver(() => [Fulfillment])
@@ -114,7 +106,7 @@ export class BolResolvers extends BaseResolvers {
             type: FulfillmentType.Shipment,
         });
 
-        return docs.map((doc) => doc.toJSON()) as Fulfillment[];
+        return docs.map((doc) => doc.toJSON() as unknown as Fulfillment);
     }
 
     @FieldResolver(() => [Fulfillment])
@@ -129,7 +121,7 @@ export class BolResolvers extends BaseResolvers {
             type: FulfillmentType.Receipt,
         });
 
-        return docs.map((doc) => doc.toJSON()) as Fulfillment[];
+        return docs.map((doc) => doc.toJSON() as unknown as Fulfillment);
     }
 
     @FieldResolver(() => Itinerary)
@@ -147,7 +139,7 @@ export class BolResolvers extends BaseResolvers {
             _id: { $in: itineraryDoc.orders.map((o) => o.toString()) },
         });
 
-        return res.map((doc) => doc.toJSON());
+        return res.map((doc) => doc.toJSON() as unknown as Order);
     }
 
     @FieldResolver(() => AppFile, { nullable: true })
@@ -263,6 +255,6 @@ export class BolResolvers extends BaseResolvers {
             against: _id.toString(),
             deleted: false,
         });
-        return res.map((doc) => doc.toJSON());
+        return res.map((doc) => doc.toJSON() as unknown as Expense);
     }
 }

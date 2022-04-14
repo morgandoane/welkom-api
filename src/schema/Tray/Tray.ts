@@ -10,6 +10,7 @@ import {
 import { Field, ID, ObjectType } from 'type-graphql';
 import { Lot } from '../Lot/Lot';
 import { Location } from '../Location/Location';
+import { ObjectId } from 'mongoose';
 
 @ObjectType()
 @modelOptions({
@@ -20,7 +21,7 @@ import { Location } from '../Location/Location';
 export class Tray {
     @Field(() => ID)
     @prop({ required: true, type: () => mongoose.Types.ObjectId })
-    _id!: mongoose.Types.ObjectId;
+    _id!: ObjectId;
 
     @Field()
     @prop({ required: true })
@@ -36,16 +37,16 @@ export class Tray {
 
     @Field(() => String)
     @prop({ required: true, ref: () => Lot })
-    location!: Ref<Location>;
+    location!: Ref<Location> | ObjectId;
 
     @Field(() => [Lot])
     @prop({ required: true, ref: () => Lot })
-    lots!: Ref<Lot>[];
+    lots!: (Ref<Lot> | ObjectId)[];
 
     // denormalized
     @Field(() => [String])
     @prop({ required: false, ref: () => Item })
-    items?: Ref<Item>[];
+    items?: (Ref<Item> | ObjectId)[];
 }
 
 export const TrayModel = getModelForClass(Tray);

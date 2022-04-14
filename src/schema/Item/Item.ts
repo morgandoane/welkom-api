@@ -10,6 +10,7 @@ import {
     Ref,
 } from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
+import { ObjectId } from 'mongoose';
 
 export enum ItemType {
     Product = 'Product',
@@ -49,11 +50,11 @@ export class Item extends Base {
 
     @Field(() => Unit, { nullable: true })
     @prop({ required: false, ref: () => Unit })
-    default_unit?: Ref<Unit>;
+    default_unit?: Ref<Unit> | ObjectId;
 
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
-    default_vendor?: Ref<Company>;
+    default_vendor?: Ref<Company> | ObjectId;
 
     @Field()
     @prop({ required: true })

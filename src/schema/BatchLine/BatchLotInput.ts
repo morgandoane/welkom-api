@@ -1,13 +1,18 @@
+import { Ref } from '@typegoose/typegoose';
 import { Field, InputType } from 'type-graphql';
+import { Batch } from '../Batch/Batch';
+import { Lot } from '../Lot/Lot';
+import { ObjectIdScalar } from '../ObjectIdScalar';
+import { RecipeStep } from '../RecipeStep/RecipeStep';
 
 @InputType()
 export class BatchLotInput {
-    @Field()
-    batch: string;
+    @Field(() => ObjectIdScalar)
+    batch: Ref<Batch>;
 
-    @Field({ nullable: true })
-    recipe_step?: string;
+    @Field(() => ObjectIdScalar, { nullable: true })
+    recipe_step?: Ref<RecipeStep>;
 
-    @Field({ nullable: true })
-    lot?: string;
+    @Field(() => ObjectIdScalar, { nullable: true })
+    lot?: Ref<Lot>;
 }

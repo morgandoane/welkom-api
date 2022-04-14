@@ -1,8 +1,7 @@
-import { DateGroup } from './../DateGroup/DateGroup';
 import { ItineraryModel } from '@src/schema/Itinerary/Itinerary';
 import { BolModel } from './../Bol/Bol';
 import { Itinerary } from './../Itinerary/Itinerary';
-import { OrderContent } from './../Content/Content';
+import { OrderContent } from './../Content/OrderContent';
 import { Base } from './../Base/Base';
 import { getBaseLoader } from './../Loader';
 import { Field, ObjectType } from 'type-graphql';
@@ -15,6 +14,7 @@ import {
 } from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
 import { Expense } from '../Expense/Expense';
+import { ObjectId } from 'mongoose';
 
 @ObjectType()
 @modelOptions({
@@ -49,11 +49,11 @@ export class Order extends Base {
 
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
-    customer?: Ref<Company>;
+    customer?: Ref<Company> | ObjectId;
 
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
-    vendor?: Ref<Company>;
+    vendor?: Ref<Company> | ObjectId;
 
     @Field(() => [OrderContent])
     @prop({ required: true, type: () => OrderContent })

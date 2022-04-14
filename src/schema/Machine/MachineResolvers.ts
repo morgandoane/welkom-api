@@ -62,7 +62,7 @@ export class MachineResolvers extends BaseResolvers {
         @Arg('data', () => CreateMachineInput) data: CreateMachineInput
     ): Promise<Machine> {
         const doc = await MachineModel.create({ ...data, ...context.base });
-        return doc.toJSON();
+        return doc.toJSON() as unknown as Machine;
     }
 
     @UseMiddleware(
@@ -85,7 +85,7 @@ export class MachineResolvers extends BaseResolvers {
                 new: true,
             }
         );
-        return doc.toJSON();
+        return doc.toJSON() as unknown as Machine;
     }
 
     @FieldResolver(() => [AppFile])

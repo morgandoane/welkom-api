@@ -1,9 +1,7 @@
 import { UserInputError } from 'apollo-server-errors';
 import { RecipeLoader } from './../Recipe/Recipe';
 import { RecipeVersionLoader } from './../RecipeVersion/RecipeVersion';
-import { ItemLoader } from './../Item/Item';
 import { mongoose } from '@typegoose/typegoose';
-import { UserLoader } from './../../services/AuthProvider/AuthProvider';
 import { loaderResult } from './../../utils/loaderResult';
 import { Field, ID, InputType } from 'type-graphql';
 import { MixingCardLine } from './MixingCardLine';

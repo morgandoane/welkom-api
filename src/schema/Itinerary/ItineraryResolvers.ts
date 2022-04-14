@@ -1,7 +1,7 @@
 import { Order, OrderLoader } from './../Order/Order';
 import { ObjectId } from 'mongoose';
 import { createBaseResolver } from './../Base/BaseResolvers';
-import { Bol, BolLoader, BolModel } from './../Bol/Bol';
+import { Bol, BolModel } from './../Bol/Bol';
 import { Context } from './../../auth/context';
 import { CreateItineraryInput, UpdateItineraryInput } from './ItineraryInputs';
 import { loaderResult } from './../../utils/loaderResult';
@@ -75,7 +75,7 @@ export class ItineraryResolvers extends BaseResolvers {
     ): Promise<Itinerary> {
         const doc = await data.validateItinerary(context);
         const res = await ItineraryModel.create(doc);
-        return res.toJSON();
+        return res.toJSON() as unknown as Itinerary;
     }
 
     @UseMiddleware(
@@ -94,7 +94,7 @@ export class ItineraryResolvers extends BaseResolvers {
         const newDoc = await data.validateUpdate(context, doc);
         ItineraryLoader.clear(id.toString());
         await newDoc.save();
-        return newDoc.toJSON();
+        return newDoc.toJSON() as unknown as Itinerary;
     }
 
     @FieldResolver(() => Company)
@@ -113,7 +113,7 @@ export class ItineraryResolvers extends BaseResolvers {
             itinerary: _id,
             deleted: show_deleted ? undefined : false,
         });
-        return bols.map((bol) => bol.toJSON());
+        return bols.map((bol) => bol.toJSON() as unknown as Bol);
     }
 
     @FieldResolver(() => [Order])

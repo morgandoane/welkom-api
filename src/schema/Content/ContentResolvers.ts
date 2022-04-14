@@ -1,5 +1,4 @@
 import { RecipeVersionModel } from './../RecipeVersion/RecipeVersion';
-import { RecipeModel } from './../Recipe/Recipe';
 import { RecipeStep } from './../RecipeStep/RecipeStep';
 import { ProceduralLotContent } from './../Lot/extensions/ProceduralLot/ProceduralLot';
 import { LocationLoader } from './../Location/Location';
@@ -7,18 +6,15 @@ import { LotLoader } from './../Lot/Lot';
 import { Item, ItemLoader } from './../Item/Item';
 import { loaderResult } from './../../utils/loaderResult';
 import { Unit, UnitLoader } from './../Unit/Unit';
-import {
-    BolItemContent,
-    Content,
-    ItemContent,
-    ItemPluralContent,
-    LotContent,
-    OrderContent,
-} from './Content';
-import { DocumentType } from '@typegoose/typegoose';
 import { FieldResolver, Resolver, Root, ResolverInterface } from 'type-graphql';
 import { Lot } from '../Lot/Lot';
 import { Location } from '../Location/Location';
+import { Content } from './Content';
+import { BolItemContent } from './BolItemContent';
+import { ItemContent } from './ItemContent';
+import { ItemPluralContent } from './ItemPluralContent';
+import { LotContent } from './LotContent';
+import { OrderContent } from './OrderContent';
 
 @Resolver(() => Content)
 export class ContentResolver {

@@ -4,7 +4,7 @@ import { LotModel } from '../../Lot';
 import { getDiscriminatorModelForClass, prop, Ref } from '@typegoose/typegoose';
 import { Lot } from '../../Lot';
 import { Field, ObjectType } from 'type-graphql';
-import { LotContent } from '@src/schema/Content/Content';
+import { LotContent } from '@src/schema/Content/LotContent';
 
 @ObjectType()
 export class ProceduralLotContent extends LotContent {

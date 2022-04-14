@@ -3,11 +3,10 @@ import { Context } from '@src/auth/context';
 import { Permission } from '@src/auth/permissions';
 import { LocationLoader } from './../Location/Location';
 import { CompanyLoader } from './../Company/Company';
-import { mongoose, DocumentType } from '@typegoose/typegoose';
+import { mongoose } from '@typegoose/typegoose';
 import { Field, InputType } from 'type-graphql';
 import { Team } from './Team';
 import { loaderResult } from '@src/utils/loaderResult';
-import { UpdateQuery } from 'mongoose';
 
 @InputType()
 export class CreateTeamInput {

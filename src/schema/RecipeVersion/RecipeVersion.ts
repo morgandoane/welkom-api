@@ -9,6 +9,7 @@ import {
     prop,
     Ref,
 } from '@typegoose/typegoose';
+import { ObjectId } from 'mongoose';
 
 @ObjectType()
 @modelOptions({
@@ -19,7 +20,7 @@ import {
 export class RecipeVersion extends Base {
     @Field(() => Recipe)
     @prop({ required: true, ref: 'Recipe' })
-    recipe!: Ref<Recipe>;
+    recipe!: Ref<Recipe> | ObjectId;
 
     @Field(() => [RecipeSection])
     @prop({ required: true, type: () => RecipeSection })

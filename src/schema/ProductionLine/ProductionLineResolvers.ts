@@ -28,7 +28,7 @@ export class ProductionLineResolvers extends BaseResolver {
     @Query(() => [ProductionLine])
     async productionLines(): Promise<ProductionLine[]> {
         const res = await ProductionLineModel.find({ deleted: false });
-        return res.map((doc) => doc.toJSON());
+        return res.map((doc) => doc.toJSON() as unknown as ProductionLine);
     }
 
     @UseMiddleware(Permitted({ type: 'role', role: UserRole.Manager }))
@@ -40,7 +40,7 @@ export class ProductionLineResolvers extends BaseResolver {
     ): Promise<ProductionLine> {
         const doc = await data.validate(context);
         const res = await ProductionLineModel.create(doc);
-        return res.toJSON();
+        return res.toJSON() as unknown as ProductionLine;
     }
 
     @FieldResolver(() => Location)

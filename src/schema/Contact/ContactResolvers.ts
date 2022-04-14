@@ -1,5 +1,5 @@
 import { UserInputError } from 'apollo-server-errors';
-import { CompanyLoader, CompanyModel } from './../Company/Company';
+import { CompanyModel } from './../Company/Company';
 import { Context } from './../../auth/context';
 import { ContactInput } from './ContactInputs';
 import { Paginate } from './../Paginate';
@@ -20,6 +20,7 @@ import {
 } from 'type-graphql';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
+import { Ref } from '@typegoose/typegoose';
 
 const BaseResolvers = createBaseResolver();
 
@@ -32,9 +33,9 @@ export class ContactResolvers extends BaseResolvers {
     async contact(
         @Arg('id', () => ObjectIdScalar) id: ObjectId
     ): Promise<Contact> {
-        return await loaderResult(
+        return (await loaderResult(
             await ContactLoader.load(id.toString())
-        ).toJSON();
+        ).toJSON()) as unknown as Contact;
     }
 
     @UseMiddleware(
@@ -73,10 +74,10 @@ export class ContactResolvers extends BaseResolvers {
             throw e;
         });
 
-        company.contacts.push(res._id);
+        company.contacts.push(res._id as unknown as Ref<Contact>);
         await company.save();
 
-        return res.toJSON();
+        return res.toJSON() as unknown as Contact;
     }
 
     @UseMiddleware(
@@ -109,7 +110,7 @@ export class ContactResolvers extends BaseResolvers {
 
         ContactLoader.clearAll();
 
-        return doc.toJSON();
+        return doc.toJSON() as unknown as Contact;
     }
 
     @UseMiddleware(

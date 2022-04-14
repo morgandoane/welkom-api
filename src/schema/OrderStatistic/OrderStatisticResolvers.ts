@@ -4,18 +4,13 @@ import { OrderModel } from './../Order/Order';
 import { Item, ItemLoader } from './../Item/Item';
 import { OrderStatisticFilter } from './OrderStatisticsFilter';
 import { Permitted } from '@src/auth/middleware/Permitted';
-import {
-    OrderStatistic,
-    OrderStatisticRange,
-    OrderStatisticRangeQuantity,
-} from './OrderStatistic';
+import { OrderStatistic, OrderStatisticRange } from './OrderStatistic';
 import { Arg, Query, Resolver, UseMiddleware } from 'type-graphql';
 import { UserRole } from '@src/auth/UserRole';
 import { Ref } from '@typegoose/typegoose';
 import { Unit } from '../Unit/Unit';
 import { Company } from '../Company/Company';
 import { getMonth } from 'date-fns';
-import { KeyObject } from 'crypto';
 
 export interface OrderStatisticResult {
     _id: string;

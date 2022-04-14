@@ -1,6 +1,5 @@
 import {
     ProductionLine,
-    ProductionLineLoader,
     ProductionLineModel,
 } from './../ProductionLine/ProductionLine';
 import { ObjectIdScalar } from './../ObjectIdScalar';
@@ -115,9 +114,9 @@ export class LocationResolvers extends BaseResolver {
         @Arg('data') data: CreateLocationInput,
         @Ctx() { base }: Context
     ): Promise<Location> {
-        return await (
+        return (await (
             await LocationModel.create({ ...data, ...base })
-        ).toJSON();
+        ).toJSON()) as unknown as Location;
     }
 
     @UseMiddleware(
@@ -132,13 +131,13 @@ export class LocationResolvers extends BaseResolver {
         @Arg('data') data: UpdateLocationInput,
         @Ctx() { base }: Context
     ): Promise<Location> {
-        return await (
+        return (await (
             await LocationModel.findOneAndUpdate(
                 { _id: _id.toString() },
                 { ...data },
                 { upsert: true, new: true }
             )
-        ).toJSON();
+        ).toJSON()) as unknown as Location;
     }
 
     @FieldResolver(() => [ProductionLine])
@@ -150,6 +149,6 @@ export class LocationResolvers extends BaseResolver {
             location: _id,
         });
 
-        return res.map((r) => r.toJSON());
+        return res.map((r) => r.toJSON() as unknown as ProductionLine);
     }
 }

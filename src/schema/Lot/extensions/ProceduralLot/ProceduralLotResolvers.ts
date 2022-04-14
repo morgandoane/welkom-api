@@ -72,7 +72,7 @@ export class ProceduralLotResolvers extends BaseResolvers {
     ): Promise<ProceduralLot> {
         const doc = await data.validateProceduralLot(context);
         const res = await ProceduralLotModel.create(doc);
-        return res.toJSON();
+        return res.toJSON() as unknown as ProceduralLot;
     }
 
     @UseMiddleware(

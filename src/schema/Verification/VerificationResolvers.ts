@@ -38,6 +38,6 @@ export class VerificationResolvers extends BaseResolver {
 
         VerificationLoader.prime(id.toString(), res);
 
-        return res.toJSON();
+        return res.toJSON() as unknown as Verification;
     }
 }

@@ -1,11 +1,10 @@
 import { Expense } from './../Expense/Expense';
 import { Profile } from '@src/schema/Profile/Profile';
 import { Itinerary } from './../Itinerary/Itinerary';
-import { BolItemContent } from './../Content/Content';
-import { LotLoader, LotModel } from './../Lot/Lot';
-import { Item, ItemLoader } from './../Item/Item';
+import { BolItemContent } from './../Content/BolItemContent';
+import { LotModel } from './../Lot/Lot';
+import { ItemLoader } from './../Item/Item';
 import { UnitLoader } from './../Unit/Unit';
-import { LocationLoader } from './../Location/Location';
 import { getBaseLoader } from './../Loader';
 import { Base } from './../Base/Base';
 import { FulfillmentModel, FulfillmentType } from '../Fulfillment/Fulfillment';
@@ -17,10 +16,10 @@ import {
     Severity,
     pre,
 } from '@typegoose/typegoose';
-import { createUnionType, Field, ObjectType } from 'type-graphql';
+import { Field, ObjectType } from 'type-graphql';
 import { loaderResult } from '@src/utils/loaderResult';
-import { Order } from '../Order/Order';
 import { BolAppointment } from './BolAppointment';
+import { ObjectId } from 'mongoose';
 
 export enum BolStatus {
     Pending = 'Pending',
@@ -126,7 +125,7 @@ export class BolSignature {
 export class Bol extends Base {
     @Field(() => Itinerary)
     @prop({ required: true, ref: 'Itinerary' })
-    itinerary!: Ref<Itinerary>;
+    itinerary!: Ref<Itinerary> | ObjectId;
 
     @Field({ nullable: true })
     @prop({ required: false })

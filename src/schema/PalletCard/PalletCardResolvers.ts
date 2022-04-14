@@ -29,7 +29,7 @@ import {
 } from 'type-graphql';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
-import { LotContent } from '../Content/Content';
+import { LotContent } from '../Content/LotContent';
 import { BucketLotModel } from '../Lot/extensions/BucketLot/BucketLot';
 import { ProductionLine } from '../ProductionLine/ProductionLine';
 import { Company } from '../Company/Company';
@@ -48,7 +48,7 @@ export class PalletCardResolvers {
         });
 
         if (!card) return null;
-        else return card.toJSON();
+        else return card.toJSON() as unknown as PalletCard;
     }
 
     @UseMiddleware(
@@ -63,7 +63,7 @@ export class PalletCardResolvers {
             await data.validatePalletCard(context)
         );
 
-        return res.toJSON();
+        return res.toJSON() as unknown as PalletCard;
     }
 
     @UseMiddleware(
@@ -84,7 +84,7 @@ export class PalletCardResolvers {
 
         PalletCardProfileLoader.clear(res.profile);
 
-        return res.toJSON();
+        return res.toJSON() as unknown as PalletCard;
     }
 
     @UseMiddleware(
@@ -116,7 +116,7 @@ export class PalletCardResolvers {
             card.contents.push({
                 quantity: 0,
                 unit: primitiveUnit._id,
-                lot: lot._id,
+                lot: lot._id as unknown as ObjectId,
             });
 
         await card.save();
@@ -143,7 +143,7 @@ export class PalletCardResolvers {
         await BucketLotModel.create(lot);
         const palletRes = await PalletModel.create(pallet);
 
-        return palletRes.toJSON();
+        return palletRes.toJSON() as unknown as Pallet;
     }
 
     @UseMiddleware(

@@ -63,7 +63,7 @@ export class ExpenseResolvers extends BaseResolvers {
     ): Promise<Expense> {
         const res = await ExpenseModel.create(await data.validate(context));
 
-        return res.toJSON();
+        return res.toJSON() as unknown as Expense;
     }
 
     @UseMiddleware(
@@ -99,7 +99,7 @@ export class ExpenseResolvers extends BaseResolvers {
 
         ExpenseLoader.clear(id.toString());
 
-        return res.toJSON();
+        return res.toJSON() as unknown as Expense;
     }
 
     @FieldResolver(() => Company)

@@ -87,7 +87,7 @@ export class BatchResolvers extends BaseResolvers {
             );
         }
 
-        return batchDoc.toJSON();
+        return batchDoc.toJSON() as unknown as Batch;
     }
 
     @UseMiddleware(
@@ -154,7 +154,7 @@ export class BatchResolvers extends BaseResolvers {
 
         BatchLoader.clear(batch._id.toString());
 
-        return batch.toJSON();
+        return batch.toJSON() as unknown as Batch;
     }
 
     @FieldResolver(() => ProceduralLot)

@@ -1,5 +1,4 @@
 import { PalletCard } from './../PalletCard/PalletCard';
-import { RecipeVersionList } from './../RecipeVersion/RecipeVersionList';
 import { BatchModel } from './../Batch/Batch';
 import { getPrimitiveUnit } from './../../utils/getPrimitiveUnit';
 import { TrayModel } from './../Tray/Tray';
@@ -20,8 +19,9 @@ import { addHours } from 'date-fns';
 import { mongoose } from '@typegoose/typegoose';
 import { UnitClass } from '../Unit/Unit';
 import { RecipeVersionLoader } from '../RecipeVersion/RecipeVersion';
-import { Content, LotContent } from '../Content/Content';
+import { Content } from '../Content/Content';
 import { ObjectId } from 'mongoose';
+import { LotContent } from '../Content/LotContent';
 
 @InputType()
 export class CreatePalletInput {
@@ -133,7 +133,7 @@ export class CreatePalletInput {
                     const unit = await getPrimitiveUnit(unit_class, context);
                     for (const trayLot of tray.lots) {
                         lot.contents.push({
-                            lot: trayLot,
+                            lot: trayLot as unknown as ObjectId,
                             quantity: 0,
                             unit: unit._id,
                         });
@@ -158,7 +158,7 @@ export class CreatePalletInput {
             const unit = await getPrimitiveUnit(UnitClass.Weight, context);
             for (const batch of batches) {
                 lot.contents.push({
-                    lot: batch._id,
+                    lot: batch._id as unknown as ObjectId,
                     quantity: 0,
                     unit: unit._id,
                 });

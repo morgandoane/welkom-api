@@ -1,18 +1,16 @@
 import { ProductionLine } from './../ProductionLine/ProductionLine';
 import { getBaseLoader } from './../Loader';
-import { createUnionType, Field, ObjectType } from 'type-graphql';
+import { Field, ObjectType } from 'type-graphql';
 import { Address } from '../Address/Address';
 import {
-    DocumentType,
     getModelForClass,
     modelOptions,
-    mongoose,
     prop,
     Ref,
 } from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
 import { Base } from '../Base/Base';
-import DataLoader from 'dataloader';
+import { ObjectId } from 'mongoose';
 
 @ObjectType()
 @modelOptions({
@@ -23,7 +21,7 @@ import DataLoader from 'dataloader';
 export class Location extends Base {
     @Field(() => Company)
     @prop({ required: true, ref: 'Company' })
-    company!: Ref<Company>;
+    company!: Ref<Company> | ObjectId;
 
     @Field(() => Address, { nullable: true })
     @prop({ required: false })

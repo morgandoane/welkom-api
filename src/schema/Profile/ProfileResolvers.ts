@@ -3,7 +3,6 @@ import {
     ProfileIdentifierModel,
 } from './../ProfileIdentifier/ProfileIdentifier';
 import { UserRole } from '@src/auth/UserRole';
-import { ForbiddenError } from 'apollo-server-express';
 import { randomNumber } from './../../utils/randomNumber';
 import { Paginate } from '@src/schema/Paginate';
 import { ProfileFilter } from './ProfileFilter';
@@ -258,6 +257,6 @@ export class ProfileResolvers {
 
         if (!identifier) return null;
 
-        return identifier.toJSON();
+        return identifier.toJSON() as unknown as ProfileIdentifier;
     }
 }

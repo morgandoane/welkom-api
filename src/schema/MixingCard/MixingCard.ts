@@ -5,16 +5,17 @@ import { Location } from '../Location/Location';
 import { prop, Ref, getModelForClass } from '@typegoose/typegoose';
 import { Field, ObjectType } from 'type-graphql';
 import { MixingCardLine } from '../MixingCardLine/MixingCardLine';
+import { ObjectId } from 'mongoose';
 
 @ObjectType()
 export class MixingCard extends Base {
     @Field(() => Location)
     @prop({ required: true, ref: () => Location })
-    location!: Ref<Location>;
+    location!: Ref<Location> | ObjectId;
 
     @Field(() => ProductionLine, { nullable: true })
     @prop({ required: false, ref: () => ProductionLine })
-    production_line?: Ref<ProductionLine>;
+    production_line?: Ref<ProductionLine> | ObjectId;
 
     @Field(() => Profile)
     @prop({ required: true })

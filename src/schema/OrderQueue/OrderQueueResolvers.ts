@@ -35,7 +35,7 @@ export class OrderQueueResolvers {
             author: base.created_by,
         });
 
-        if (match[0]) return match[0].toJSON();
+        if (match[0]) return match[0].toJSON() as unknown as OrderQueue;
         else return null;
     }
 
@@ -68,7 +68,7 @@ export class OrderQueueResolvers {
                 { new: true }
             );
 
-            return res.toJSON();
+            return res.toJSON() as unknown as OrderQueue;
         } else {
             const newQueue: OrderQueue = {
                 _id: new mongoose.Types.ObjectId(),
@@ -77,7 +77,7 @@ export class OrderQueueResolvers {
             };
 
             const doc = await PersonalOrderQueueModel.create(newQueue);
-            return doc.toJSON();
+            return doc.toJSON() as unknown as OrderQueue;
         }
     }
 
@@ -136,7 +136,7 @@ export class OrderQueueResolvers {
 
         const doc = await OrderQueueRecordModel.create(newQueue);
 
-        return doc.toJSON();
+        return doc.toJSON() as unknown as OrderQueue;
     }
 
     @UseMiddleware(

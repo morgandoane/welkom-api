@@ -9,6 +9,7 @@ import {
     modelOptions,
 } from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
+import { ObjectId } from 'mongoose';
 
 export enum ExpenseKey {
     Bol = 'Bol',
@@ -38,11 +39,11 @@ export class Expense extends Base {
 
     @Field(() => Company)
     @prop({ required: true, ref: () => Company })
-    customer!: Ref<Company>;
+    customer!: Ref<Company> | ObjectId;
 
     @Field(() => Company)
     @prop({ required: true, ref: () => Company })
-    vendor!: Ref<Company>;
+    vendor!: Ref<Company> | ObjectId;
 
     @Field({ nullable: true })
     @prop({ required: false })

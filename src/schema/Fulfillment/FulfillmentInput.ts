@@ -126,12 +126,15 @@ export class FulfillmentInput {
             };
 
             for (const lotfinder of lots) {
-                const lot = await lotfinder.execute(context, item._id);
+                const lot = await lotfinder.execute(
+                    context,
+                    item._id.toString()
+                );
                 const unit = loaderResult(
                     await UnitLoader.load(lotfinder.unit)
                 );
                 fulfillmentLot.contents.push({
-                    lot: lot._id,
+                    lot: lot._id as unknown as ObjectId,
                     quantity: lotfinder.quantity,
                     unit: unit._id,
                 });

@@ -9,6 +9,7 @@ import {
 import { Base } from '@src/schema/Base/Base';
 import { Field, ObjectType } from 'type-graphql';
 import { Item } from '../Item/Item';
+import { ObjectId } from 'mongoose';
 
 @ObjectType()
 @modelOptions({
@@ -19,7 +20,7 @@ import { Item } from '../Item/Item';
 export class QualityCheck extends Base {
     @Field(() => Item)
     @prop({ required: true, ref: () => Item })
-    item!: Ref<Item>;
+    item!: Ref<Item> | ObjectId;
 
     @Field(() => Prompt)
     @prop({ required: true })

@@ -36,7 +36,7 @@ export class FolderResolvers extends BaseResolvers {
     ): Promise<Folder> {
         if (!id) return Folder.fromNull(context);
         const doc = await FolderModel.findById(id.toString());
-        return doc.toJSON();
+        return doc.toJSON() as unknown as Folder;
     }
 
     @UseMiddleware(
@@ -52,7 +52,7 @@ export class FolderResolvers extends BaseResolvers {
     ): Promise<Folder> {
         const doc = await data.validate(context);
         const res = await FolderModel.create(doc);
-        return res.toJSON();
+        return res.toJSON() as unknown as Folder;
     }
 
     @UseMiddleware(
@@ -74,7 +74,7 @@ export class FolderResolvers extends BaseResolvers {
 
         FolderLoader.clearAll();
 
-        return res.toJSON();
+        return res.toJSON() as unknown as Folder;
     }
 
     @FieldResolver(() => Folder)
@@ -90,7 +90,7 @@ export class FolderResolvers extends BaseResolvers {
             folder: name == 'Home' ? null : _id,
         }).sort({ name: 1 });
 
-        return res.map((r) => r.toJSON());
+        return res.map((r) => r.toJSON() as unknown as Recipe);
     }
 
     @FieldResolver(() => [Folder])
@@ -100,7 +100,7 @@ export class FolderResolvers extends BaseResolvers {
             parent: name == 'Home' ? null : _id,
         }).sort({ name: 1 });
 
-        return res.map((r) => r.toJSON());
+        return res.map((r) => r.toJSON() as unknown as Folder);
     }
 
     @FieldResolver(() => [Folder])

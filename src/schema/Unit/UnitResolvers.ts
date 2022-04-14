@@ -64,7 +64,9 @@ export class UnitResolvers extends BaseResolvers {
         @Arg('data') data: CreateUnitInput
     ): Promise<Unit> {
         const doc: Unit = { ...base, ...data };
-        return await (await UnitModel.create(doc)).toJSON();
+        return (await (
+            await UnitModel.create(doc)
+        ).toJSON()) as unknown as Unit;
     }
 
     @UseMiddleware(
@@ -93,6 +95,6 @@ export class UnitResolvers extends BaseResolvers {
         doc.modified_by = base.modified_by;
         UnitLoader.clear(doc._id.toString());
         await doc.save();
-        return doc.toJSON();
+        return doc.toJSON() as unknown as Unit;
     }
 }

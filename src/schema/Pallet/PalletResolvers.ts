@@ -44,7 +44,7 @@ export class PalletResolvers extends BaseResolver {
         await BucketLotModel.create(lot);
         const palletRes = await PalletModel.create(pallet);
 
-        return palletRes.toJSON();
+        return palletRes.toJSON() as unknown as Pallet;
     }
 
     @FieldResolver(() => BucketLot)

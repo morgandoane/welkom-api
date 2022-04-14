@@ -1,6 +1,6 @@
-import { ItemContent, ItemPluralContent } from './../Content/Content';
 import { mongoose, prop } from '@typegoose/typegoose';
 import { Field, ObjectType, ID } from 'type-graphql';
+import { ItemPluralContent } from '../Content/ItemPluralContent';
 
 @ObjectType()
 export class RecipeSection {

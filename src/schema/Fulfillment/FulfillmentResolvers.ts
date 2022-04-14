@@ -1,4 +1,3 @@
-import { mongoose } from '@typegoose/typegoose';
 import { UserInputError } from 'apollo-server-errors';
 import { createVerifiedResolver } from './../Verified/VerifiedResolvers';
 import { CreateVerificationInput } from './../Verification/VerificationInput';
@@ -15,7 +14,7 @@ import { Context } from './../../auth/context';
 import { Paginate } from './../Paginate';
 import { FulfillmentFilter } from './FulfillmentFilter';
 import { FulfillmentList } from './FulfillmentList';
-import { Lot, LotLoader, LotModel } from './../Lot/Lot';
+import { Lot, LotLoader } from './../Lot/Lot';
 import { FulfillmentInput, UpdateFulfillmentInput } from './FulfillmentInput';
 import { Location, LocationLoader } from './../Location/Location';
 import { loaderResult } from './../../utils/loaderResult';
@@ -23,7 +22,6 @@ import {
     Fulfillment,
     FulfillmentModel,
     FulfillmentLoader,
-    FulfillmentType,
 } from './Fulfillment';
 import {
     Arg,
@@ -105,7 +103,7 @@ export class FulfillmentResolvers extends VerifiedResolvers {
         );
         BolLoader.clear(bol._id.toString());
 
-        return res.toJSON() as Fulfillment;
+        return res.toJSON() as unknown as Fulfillment;
     }
 
     @UseMiddleware(
@@ -146,7 +144,7 @@ export class FulfillmentResolvers extends VerifiedResolvers {
         );
         BolLoader.clear(bol._id.toString());
 
-        return res.toJSON() as Fulfillment;
+        return res.toJSON() as unknown as Fulfillment;
     }
 
     @UseMiddleware(

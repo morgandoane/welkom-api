@@ -11,6 +11,7 @@ import {
 import { Field, ObjectType } from 'type-graphql';
 import { Item } from '../Item/Item';
 import { Location } from '../Location/Location';
+import { ObjectId } from 'mongoose';
 
 @modelOptions({
     schemaOptions: {
@@ -21,21 +22,21 @@ import { Location } from '../Location/Location';
 export class Pallet extends Base {
     @Field(() => BucketLot)
     @prop({ required: true, ref: () => BucketLot })
-    lot!: Ref<BucketLot>;
+    lot!: Ref<BucketLot> | ObjectId;
 
     // denormalized
     @Field(() => Item)
     @prop({ required: true, ref: () => Item })
-    item!: Ref<Item>;
+    item!: Ref<Item> | ObjectId;
 
     // denormalized
     @Field(() => Location)
     @prop({ required: true, ref: () => Location })
-    location!: Ref<Location>;
+    location!: Ref<Location> | ObjectId;
 
     @Field(() => RecipeVersion, { nullable: true })
     @prop({ required: false, ref: () => RecipeVersion })
-    recipe_version?: Ref<RecipeVersion>;
+    recipe_version?: Ref<RecipeVersion> | ObjectId;
 }
 
 export const PalletModel = getModelForClass(Pallet);

@@ -11,6 +11,7 @@ import { Field, ObjectType } from 'type-graphql';
 import { Base } from '../Base/Base';
 import { Folder } from '../Folder/Folder';
 import { Item } from '../Item/Item';
+import { ObjectId } from 'mongoose';
 
 @modelOptions({
     schemaOptions: {
@@ -25,11 +26,11 @@ export class Recipe extends Base {
 
     @Field(() => Item)
     @prop({ required: true, ref: () => Item })
-    item!: Ref<Item>;
+    item!: Ref<Item> | ObjectId;
 
     @Field(() => Folder, { nullable: true })
     @prop({ required: false, ref: () => Folder })
-    folder?: Ref<Folder>;
+    folder?: Ref<Folder> | ObjectId;
 
     @Field(() => [DateGroup])
     version_date_groups?: DateGroup[];

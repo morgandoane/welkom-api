@@ -12,6 +12,7 @@ import {
     Severity,
 } from '@typegoose/typegoose';
 import { Field, ObjectType } from 'type-graphql';
+import { ObjectId } from 'mongoose';
 
 @modelOptions({
     schemaOptions: {
@@ -33,7 +34,7 @@ export class Team extends Base {
 
     @Field(() => Company)
     @prop({ required: true, ref: () => Company })
-    company!: Ref<Company>;
+    company!: Ref<Company> | ObjectId;
 
     @Field(() => [Profile])
     @prop({ required: true, type: () => String })
@@ -41,7 +42,7 @@ export class Team extends Base {
 
     @Field(() => Location, { nullable: true })
     @prop({ required: false, ref: () => Location })
-    location?: Ref<Location>;
+    location?: Ref<Location> | ObjectId;
 
     @Field(() => [Permission])
     @prop({ required: true })

@@ -4,6 +4,8 @@ import { prop, Ref, mongoose } from '@typegoose/typegoose';
 import { Field, ObjectType, InputType, ID } from 'type-graphql';
 import { Company } from '../Company/Company';
 import { loaderResult } from '@src/utils/loaderResult';
+import { ObjectIdScalar } from '../ObjectIdScalar';
+import { ObjectId } from 'mongoose';
 
 @ObjectType()
 export class BolAppointment {
@@ -13,11 +15,11 @@ export class BolAppointment {
 
     @Field(() => Company)
     @prop({ required: true, ref: () => Company })
-    company!: Ref<Company>;
+    company!: Ref<Company> | ObjectId;
 
     @Field(() => Location, { nullable: true })
     @prop({ required: false, ref: () => Location })
-    location?: Ref<Location>;
+    location?: Ref<Location> | ObjectId;
 
     @Field()
     @prop({ required: true })
@@ -30,11 +32,11 @@ export class BolAppointment {
 
 @InputType()
 export class BolAppointmentInput {
-    @Field()
-    company!: string;
+    @Field(() => ObjectIdScalar)
+    company!: Ref<Company>;
 
-    @Field({ nullable: true })
-    location?: string;
+    @Field(() => ObjectIdScalar, { nullable: true })
+    location?: Ref<Location>;
 
     @Field()
     date!: Date;
@@ -43,10 +45,12 @@ export class BolAppointmentInput {
     time_sensitive?: boolean;
 
     public async validateAppointment(): Promise<BolAppointment> {
-        const company = loaderResult(await CompanyLoader.load(this.company));
+        const company = loaderResult(
+            await CompanyLoader.load(this.company.toString())
+        );
         if (this.location) {
             const location = loaderResult(
-                await LocationLoader.load(this.location)
+                await LocationLoader.load(this.location.toString())
             );
         }
 
@@ -55,7 +59,7 @@ export class BolAppointmentInput {
             company: company._id,
             date: this.date,
             location: this.location
-                ? new mongoose.Types.ObjectId(this.location)
+                ? new mongoose.Types.ObjectId(this.location.toString())
                 : undefined,
             time_sensitive: this.time_sensitive ? true : false,
         };

@@ -1,13 +1,9 @@
 import { getBaseLoader } from './../../../Loader';
 import { Field, ObjectType } from 'type-graphql';
 import { LotModel } from '../../Lot';
-import {
-    getDiscriminatorModelForClass,
-    getModelForClass,
-    prop,
-} from '@typegoose/typegoose';
+import { getDiscriminatorModelForClass, prop } from '@typegoose/typegoose';
 import { Lot } from '../../Lot';
-import { LotContent } from '@src/schema/Content/Content';
+import { LotContent } from '@src/schema/Content/LotContent';
 
 @ObjectType()
 export class BucketLotContent extends LotContent {}

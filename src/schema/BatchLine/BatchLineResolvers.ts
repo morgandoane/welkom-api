@@ -18,7 +18,6 @@ import { BatchLineInput } from './BatchLineInput';
 import { mongoose, DocumentType, Ref } from '@typegoose/typegoose';
 import { FilterQuery, ObjectId } from 'mongoose';
 import { ProceduralLotContentInput } from '../Content/ContentInputs';
-import { Item } from '../Item/Item';
 
 @Resolver(() => BatchLine)
 export class BatchLineResolvers {
@@ -38,7 +37,9 @@ export class BatchLineResolvers {
             .map((s) => s.steps)
             .flat();
         const potentialSteps = steps.filter((s) =>
-            input.active_steps.includes(s._id.toString())
+            input.active_steps
+                .map((t) => t.toString())
+                .includes(s._id.toString())
         );
 
         const potentialItems: string[] = [];
@@ -79,7 +80,7 @@ export class BatchLineResolvers {
             );
 
             return {
-                lot: lot.toJSON(),
+                lot: lot.toJSON() as unknown as Lot,
                 steps,
             };
         });
@@ -109,7 +110,7 @@ export class BatchLineResolvers {
         ProceduralLotLoader.clear(batch.lot.toString());
         BatchLoader.clear(batch._id.toString());
 
-        return update.toJSON();
+        return update.toJSON() as unknown as ProceduralLot;
     }
 
     @UseMiddleware(
@@ -130,6 +131,6 @@ export class BatchLineResolvers {
 
         ProceduralLotLoader.clear(batch.lot.toString());
 
-        return update.toJSON();
+        return update.toJSON() as unknown as ProceduralLot;
     }
 }

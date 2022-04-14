@@ -1,8 +1,4 @@
-import { LotModel } from './../Lot/Lot';
-import { TeamModel } from './../Team/Team';
-import { UserRole } from '@src/auth/UserRole';
-import { loaderResult } from '@src/utils/loaderResult';
-import { Contact, ContactLoader, ContactModel } from './../Contact/Contact';
+import { Contact, ContactModel } from './../Contact/Contact';
 import { createBaseResolver } from './../Base/BaseResolvers';
 import { LocationModel } from './../Location/Location';
 import { ObjectIdScalar } from './../ObjectIdScalar';
@@ -10,7 +6,7 @@ import { CompanyFilter } from './CompanyFilter';
 import { CompanyList } from './CompanyList';
 import { Context } from '@src/auth/context';
 import { CreateCompanyInput, UpdateCompanyInput } from './CompanyInput';
-import { Company, CompanyModel, CompanyLoader } from './Company';
+import { Company, CompanyModel } from './Company';
 import {
     Arg,
     Mutation,
@@ -22,11 +18,10 @@ import {
     UseMiddleware,
 } from 'type-graphql';
 import { Paginate } from '../Paginate';
-import { FilterQuery, ObjectId } from 'mongoose';
+import { ObjectId } from 'mongoose';
 import { Location } from '../Location/Location';
 import { AppFile } from '../AppFile/AppFile';
 import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
-import { Ref, mongoose } from '@typegoose/typegoose';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
 
@@ -72,7 +67,7 @@ export class CompanyResolvers extends BaseResolver {
     ): Promise<Company> {
         const doc: Company = { ...base, name: data.name, contacts: [] };
         const res = await CompanyModel.create(doc);
-        return res.toJSON();
+        return res.toJSON() as unknown as Company;
     }
 
     @UseMiddleware(
@@ -90,7 +85,7 @@ export class CompanyResolvers extends BaseResolver {
         doc.modified_by = context.base.modified_by;
         doc.date_modified = context.base.date_modified;
         await doc.save();
-        return doc.toJSON();
+        return doc.toJSON() as unknown as Company;
     }
 
     @FieldResolver(() => [Location])
@@ -107,7 +102,7 @@ export class CompanyResolvers extends BaseResolver {
             deleted: false,
             _id: { $in: (contacts ? contacts : []).map((c) => c.toString()) },
         });
-        return res.map((doc) => doc.toJSON());
+        return res.map((doc) => doc.toJSON() as unknown as Contact);
     }
 
     @FieldResolver(() => [AppFile])

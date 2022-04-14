@@ -1,5 +1,5 @@
 import { Lot, LotLoader, LotModel } from './../Lot/Lot';
-import { Location, LocationLoader } from './../Location/Location';
+import { LocationLoader } from './../Location/Location';
 import { CodeType } from '@src/services/CodeGeneration/CodeGeneration';
 import { CodeGenerator } from './../../services/CodeGeneration/CodeGeneration';
 import { CreateTraysArg } from './CreateTraysArg';
@@ -57,7 +57,7 @@ export class TrayResolvers {
         for (const index of Array.from(Array(count).keys())) {
             const doc: Tray = {
                 date_created: new Date(),
-                _id: new mongoose.Types.ObjectId(),
+                _id: new mongoose.Types.ObjectId() as unknown as ObjectId,
                 code: await CodeGenerator.generate(CodeType.TR),
                 lots: [],
                 location: locationDoc._id,
@@ -70,7 +70,7 @@ export class TrayResolvers {
 
         const res = await TrayModel.create(docs);
 
-        return res.map((doc) => doc.toJSON() as Tray);
+        return res.map((doc) => doc.toJSON() as unknown as Tray);
     }
 
     @UseMiddleware(Permitted())
@@ -90,7 +90,7 @@ export class TrayResolvers {
 
         TrayLoader.clear(id.toString());
 
-        return res.toJSON() as Tray;
+        return res.toJSON() as unknown as Tray;
     }
 
     @FieldResolver(() => String)

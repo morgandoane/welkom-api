@@ -26,6 +26,7 @@ import { Bol } from '../Bol/Bol';
 import { Company } from '../Company/Company';
 import { loaderResult } from '@src/utils/loaderResult';
 import { getCompaniesForProfile } from '@src/utils/getCompaniesForProfile';
+import { ObjectId } from 'mongoose';
 
 @ObjectType()
 export class OrderQueueContent {
@@ -35,19 +36,19 @@ export class OrderQueueContent {
 
     @Field(() => Company, { nullable: true })
     @prop({ required: false, ref: () => Company })
-    vendor?: Ref<Company>;
+    vendor?: Ref<Company> | ObjectId;
 
     @Field(() => Location, { nullable: true })
     @prop({ required: false, ref: () => Location })
-    vendor_location?: Ref<Location>;
+    vendor_location?: Ref<Location> | ObjectId;
 
     @Field(() => Item, { nullable: true })
     @prop({ required: false, ref: () => Item })
-    item?: Ref<Item>;
+    item?: Ref<Item> | ObjectId;
 
     @Field(() => Unit, { nullable: true })
     @prop({ required: false, ref: () => Unit })
-    unit?: Ref<Unit>;
+    unit?: Ref<Unit> | ObjectId;
 
     @Field({ nullable: true })
     @prop({ required: false })
@@ -55,7 +56,7 @@ export class OrderQueueContent {
 
     @Field(() => Location, { nullable: true })
     @prop({ required: false, ref: () => Location })
-    location?: Ref<Location>;
+    location?: Ref<Location> | ObjectId;
 
     @Field(() => Date, { nullable: true })
     @prop({ required: false })
@@ -133,7 +134,7 @@ export class OrderQueueTemplate extends OrderQueue {
             created_by: this.author,
             date_created: this.date,
             code: await CodeGenerator.generate(CodeType.ITIN),
-            orders: [order._id],
+            orders: [order._id as unknown as ObjectId],
             carrier: content.vendor,
         };
 

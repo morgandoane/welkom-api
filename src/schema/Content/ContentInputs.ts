@@ -1,6 +1,3 @@
-import { UserInputError } from 'apollo-server-errors';
-import { RecipeVersionModel } from './../RecipeVersion/RecipeVersion';
-import { RecipeModel } from './../Recipe/Recipe';
 import { mongoose } from '@typegoose/typegoose';
 import { ProceduralLotContent } from './../Lot/extensions/ProceduralLot/ProceduralLot';
 import { LocationLoader } from './../Location/Location';
@@ -10,15 +7,13 @@ import { loaderResult } from './../../utils/loaderResult';
 import { ObjectId } from 'mongoose';
 import { ObjectIdScalar } from './../ObjectIdScalar';
 import { Field, InputType } from 'type-graphql';
-import {
-    Content,
-    ItemContent,
-    ItemPluralContent,
-    LotContent,
-    OrderContent,
-} from './Content';
 import { LotLoader } from '../Lot/Lot';
 import { BucketLotContent } from '../Lot/extensions/BucketLot/BucketLot';
+import { Content } from './Content';
+import { ItemContent } from './ItemContent';
+import { ItemPluralContent } from './ItemPluralContent';
+import { OrderContent } from './OrderContent';
+import { LotContent } from './LotContent';
 
 @InputType()
 export class ContentInput {
@@ -101,7 +96,7 @@ export class LotContentInput extends ContentInput {
         const lot = loaderResult(await LotLoader.load(this.lot.toString()));
         return {
             ...content,
-            lot: lot._id,
+            lot: lot._id as unknown as ObjectId,
         };
     }
 }
