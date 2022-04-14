@@ -1,4 +1,4 @@
-import { BolLoader } from './../Bol/Bol';
+import { BolLoader } from './../Bol/BolModel';
 import { Paginate } from '../Pagination/Pagination';
 import { FulfillmentFilter } from './FulfillmentFilter';
 import { FulfillmentList } from './FulfillmentList';

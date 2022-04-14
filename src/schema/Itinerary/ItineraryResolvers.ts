@@ -1,5 +1,6 @@
 import { ItinerarySchedule } from './../ItinerarySchedule/ItinerarySchedule';
-import { Bol, BolModel } from './../Bol/Bol';
+import { Bol } from './../Bol/Bol';
+import { BolModel } from './../Bol/BolModel';
 import { OrderLoader } from './../Order/Order';
 import { UpdateItineraryInput } from './UpdateItineraryInput';
 import { ItineraryFilter } from './ItineraryFilter';

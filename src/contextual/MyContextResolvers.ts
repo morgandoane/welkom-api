@@ -14,7 +14,7 @@ import { FulfillmentLoader } from './../schema/Fulfillment/Fulfillment';
 import { FolderLoader } from './../schema/Folder/Folder';
 import { ExpenseLoader } from './../schema/Expense/Expense';
 import { CompanyLoader } from './../schema/Company/Company';
-import { BolLoader } from './../schema/Bol/Bol';
+import { BolLoader } from './../schema/Bol/BolModel';
 import { BatchLoader } from './../schema/Batch/Batch';
 import { Context } from '@src/auth/context';
 import { Permitted } from '@src/auth/middleware/Permitted';

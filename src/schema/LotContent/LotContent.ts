@@ -1,17 +1,14 @@
-import { CloudStorageError } from './../../services/CloudStorage/CloudStorageError';
 import { Identified } from './../Base/Base';
-import { prop, Ref } from '@typegoose/typegoose';
+import { mongoose, prop, Ref } from '@typegoose/typegoose';
 import { Min } from 'class-validator';
 import { Field, ObjectType } from 'type-graphql';
-import { Lot } from '../Lot/Lot';
 import { BaseUnit } from '../Unit/BaseUnit';
 import { Unit } from '../Unit/Unit';
 
 @ObjectType()
 export class LotContent extends Identified {
-    @Field(() => Lot)
     @prop({ required: true, ref: 'Lot' })
-    lot!: Ref<Lot>;
+    lot!: mongoose.Types.ObjectId;
 
     @Min(0)
     @Field()
@@ -23,7 +20,8 @@ export class LotContent extends Identified {
     @prop({ required: true, enum: BaseUnit })
     base_unit!: BaseUnit;
 
-    @Min(0)disk CloudStorageErrorgoen    @Field()
+    @Min(0)
+    @Field()
     @prop({ required: true, min: 0 })
     client_quantity!: number;
 

@@ -2,7 +2,7 @@ import { OrderQueuePreference } from './../UserPreference/categories/OrderQueueP
 import { UserPreference } from './../UserPreference/UserPreference';
 import { OrderQueueInput } from './OrderQueueInput';
 import { ItineraryModel } from '@src/schema/Itinerary/Itinerary';
-import { BolModel } from './../Bol/Bol';
+import { BolModel } from './../Bol/BolModel';
 import { OrderModel } from './../Order/Order';
 import { UserInputError } from 'apollo-server-core';
 import { Permitted } from '@src/auth/middleware/Permitted';

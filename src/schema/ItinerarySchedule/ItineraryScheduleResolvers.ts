@@ -1,4 +1,4 @@
-import { BolLoader } from './../Bol/Bol';
+import { BolLoader } from './../Bol/BolModel';
 import { LocationLoader } from './../Location/Location';
 import { CompanyLoader } from './../Company/Company';
 import { Company } from '@src/schema/Company/Company';

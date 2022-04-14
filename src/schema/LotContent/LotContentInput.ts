@@ -1,10 +1,9 @@
 import { ItemLoader } from '@src/schema/Item/Item';
 import { LotLoader } from './../Lot/Lot';
 import { LotContent } from './LotContent';
-import { Ref } from '@typegoose/typegoose';
+import { mongoose, Ref } from '@typegoose/typegoose';
 import { Min } from 'class-validator';
 import { Field, InputType } from 'type-graphql';
-import { Lot } from '../Lot/Lot';
 import { ObjectIdScalar } from '../ObjectIdScalar/ObjectIdScalar';
 import { BaseUnit } from '../Unit/BaseUnit';
 import { Unit } from '../Unit/Unit';
@@ -14,7 +13,7 @@ import { UserInputError } from 'apollo-server-core';
 @InputType()
 export class LotContentInput {
     @Field(() => ObjectIdScalar)
-    lot!: Ref<Lot>;
+    lot!: mongoose.Types.ObjectId;
 
     @Min(0)
     @Field()

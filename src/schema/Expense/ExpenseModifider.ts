@@ -1,5 +1,5 @@
 import { mongoose, Ref } from '@typegoose/typegoose';
-import { BolModel } from '../Bol/Bol';
+import { BolModel } from '../Bol/BolModel';
 import { FulfillmentModel } from '../Fulfillment/Fulfillment';
 import { Itinerary, ItineraryLoader } from '../Itinerary/Itinerary';
 import { Lot, LotLoader, LotModel } from '../Lot/Lot';

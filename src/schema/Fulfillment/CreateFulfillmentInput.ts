@@ -1,4 +1,4 @@
-import { BolLoader } from './../Bol/Bol';
+import { BolLoader } from './../Bol/BolModel';
 import { Context } from './../../auth/context';
 import { FulfillmentLotFinder } from './FulfillmentLotFinder';
 import { prop, Ref } from '@typegoose/typegoose';
