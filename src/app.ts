@@ -24,7 +24,6 @@ import { ExpenseResolvers } from './schema/Expense/ExpenseResolvers';
 import { FolderResolvers } from './schema/Folder/FolderResolvers';
 import { FulfillmentResolvers } from './schema/Fulfillment/FulfillmentResolvers';
 import { ItemResolvers } from './schema/Item/ItemResolvers';
-import { ItemCategoryResolvers } from './schema/ItemCategory/ItemCategoryResolvers';
 import { ItineraryResolvers } from './schema/Itinerary/ItineraryResolvers';
 import { LocationResolvers } from './schema/Location/LocationResolvers';
 import { LotResolvers } from './schema/Lot/LotResolvers';
@@ -66,6 +65,7 @@ import createContext from './auth/middleware/ContextMiddleware';
 
 import fs from 'fs';
 import https from 'https';
+import { ItemCategoryResolvers } from './schema/ItemCategory/ItemCategoryResolvers';
 
 (async () => {
     try {
