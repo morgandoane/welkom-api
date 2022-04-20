@@ -15,12 +15,15 @@ import { DocumentType, mongoose } from '@typegoose/typegoose';
 import { endOfDay, startOfDay } from 'date-fns';
 import { loaderResult } from '@src/utils/loaderResult';
 import { FulfillmentModel } from '../Fulfillment/Fulfillment';
+import { LotModel } from '../Lot/Lot';
 
 @InputType()
 export class BolFilter extends BaseFilter {
     @Field({ nullable: true }) code?: string;
 
     @Field({ nullable: true }) order_code?: string;
+
+    @Field({ nullable: true }) lot_code?: string;
 
     @Field(() => ObjectIdScalar, { nullable: true }) order?: ObjectId;
 
@@ -163,6 +166,31 @@ export class BolFilter extends BaseFilter {
                         $in: validFulfillments.map(
                             (f) => new mongoose.Types.ObjectId(f.bol.toString())
                         ),
+                    },
+                },
+            ];
+        }
+
+        if (this.lot_code) {
+            const rootLots = await LotModel.find({
+                code: { $regex: new RegExp(this.lot_code, 'i') },
+                deleted: false,
+            }).select('_id');
+
+            const fulfillmentLots = await LotModel.find({
+                'contents.lot': { $in: rootLots.map((l) => l._id) },
+            }).select('_id');
+
+            const potentialFulfillments = await FulfillmentModel.find({
+                deleted: false,
+                lots: { $in: fulfillmentLots.map((l) => l._id) },
+            });
+
+            res.$and = [
+                ...(res.$and || []),
+                {
+                    _id: {
+                        $in: potentialFulfillments.map((f) => f.bol),
                     },
                 },
             ];
