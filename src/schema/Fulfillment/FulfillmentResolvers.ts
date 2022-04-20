@@ -37,6 +37,11 @@ import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
 import { AppFile } from '../AppFile/AppFile';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
+import {
+    FlashFulfillmentInput,
+    UpdateFlashFulfillmentInput,
+} from './FlashFulfillmentInput';
+import { ItineraryModel } from '../Itinerary/Itinerary';
 
 const VerifiedResolvers = createVerifiedResolver();
 
@@ -177,6 +182,63 @@ export class FulfillmentResolvers extends VerifiedResolvers {
         FulfillmentLoader.clear(id.toString());
 
         return loaderResult(await FulfillmentLoader.load(id.toString()));
+    }
+
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.FlashFulfillment,
+        })
+    )
+    @Mutation(() => Fulfillment)
+    async flashFulfillment(
+        @Ctx() context: Context,
+        @Arg('data', () => FlashFulfillmentInput)
+        data: FlashFulfillmentInput
+    ): Promise<Fulfillment> {
+        const { itinerary, bol, fulfillment } =
+            await data.validateFlashFulfillment(context);
+
+        await ItineraryModel.create(itinerary);
+        await BolModel.create(bol);
+        const res = await FulfillmentModel.create(fulfillment);
+
+        return res.toJSON() as unknown as Fulfillment;
+    }
+
+    @UseMiddleware(
+        Permitted({
+            type: 'permission',
+            permission: Permission.FlashFulfillment,
+        })
+    )
+    @Mutation(() => Fulfillment)
+    async updateFlashFulfillment(
+        @Ctx() context: Context,
+        @Arg('id', () => ObjectIdScalar) id: ObjectId,
+        @Arg('data', () => UpdateFlashFulfillmentInput)
+        data: UpdateFlashFulfillmentInput
+    ): Promise<Fulfillment> {
+        const {
+            fulfillment_update: {
+                doc: { _id: fulfill_id, ...filfillUpdate },
+            },
+            bol_update: {
+                doc: { _id: bol_id, ...bolUpdate },
+            },
+            itinerary_update: {
+                doc: { _id: itin_id, ...itinUpdate },
+            },
+        } = await data.validateFlashFulfillmentUpdate(context, id);
+
+        await ItineraryModel.findByIdAndUpdate(itin_id, itinUpdate);
+        await BolModel.findByIdAndUpdate(bol_id, bolUpdate);
+        const res = await FulfillmentModel.findByIdAndUpdate(
+            fulfill_id,
+            filfillUpdate
+        );
+
+        return res.toJSON() as unknown as Fulfillment;
     }
 
     @FieldResolver(() => Location)

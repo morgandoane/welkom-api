@@ -6,6 +6,8 @@ import { Context } from '@src/auth/context';
 import { Field, InputType } from 'type-graphql';
 import { UnitClass } from '../Unit/Unit';
 import { Item, ItemType } from './Item';
+import { ObjectId } from 'mongoose';
+import { ObjectIdScalar } from '../ObjectIdScalar';
 
 @InputType()
 export class CreateItemInput {
@@ -33,6 +35,9 @@ export class CreateItemInput {
     @Field({ nullable: true })
     upc?: string;
 
+    @Field(() => ObjectIdScalar, { nullable: true })
+    category?: ObjectId;
+
     public async validateItemInput({ base }: Context): Promise<Partial<Item>> {
         const item: Item = {
             ...base,
@@ -43,6 +48,7 @@ export class CreateItemInput {
             type: this.type || null,
             upc: this.upc || null,
             conversions: [],
+            category: this.category,
         };
 
         if (this.unit_class !== UnitClass.Volume && this.to_base_unit !== 1) {
@@ -93,6 +99,9 @@ export class UpdateItemInput {
     @Field(() => UnitClass, { nullable: true })
     unit_class?: UnitClass;
 
+    @Field(() => ObjectIdScalar, { nullable: true })
+    category?: ObjectId;
+
     public async serializeItemUpdate({
         base,
     }: Context): Promise<Partial<Item>> {
@@ -102,6 +111,7 @@ export class UpdateItemInput {
         };
 
         if (this.upc !== undefined) item.upc = this.upc;
+        if (this.category !== undefined) item.category = this.category;
 
         if (this.type !== undefined) {
             item.type = this.type;

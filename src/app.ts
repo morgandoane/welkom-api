@@ -24,6 +24,7 @@ import { ExpenseResolvers } from './schema/Expense/ExpenseResolvers';
 import { FolderResolvers } from './schema/Folder/FolderResolvers';
 import { FulfillmentResolvers } from './schema/Fulfillment/FulfillmentResolvers';
 import { ItemResolvers } from './schema/Item/ItemResolvers';
+import { ItemCategoryResolvers } from './schema/ItemCategory/ItemCategoryResolvers';
 import { ItineraryResolvers } from './schema/Itinerary/ItineraryResolvers';
 import { LocationResolvers } from './schema/Location/LocationResolvers';
 import { LotResolvers } from './schema/Lot/LotResolvers';
@@ -97,6 +98,7 @@ import https from 'https';
                 FolderResolvers,
                 FulfillmentResolvers,
                 ItemResolvers,
+                ItemCategoryResolvers,
                 ItemContentResolver,
                 ItemPluralContentResolver,
                 ItineraryResolvers,

@@ -25,6 +25,7 @@ import { StorageBucket } from '@src/services/CloudStorage/CloudStorage';
 import { Permitted } from '@src/auth/middleware/Permitted';
 import { Permission } from '@src/auth/permissions';
 import { Company } from '../Company/Company';
+import { ItemCategory, ItemCategoryLoader } from '../ItemCategory/ItemCategory';
 
 const BaseResolvers = createBaseResolver();
 
@@ -94,6 +95,7 @@ export class ItemResolvers extends BaseResolvers {
         item.date_modified = update.date_modified;
         item.modified_by = update.modified_by;
 
+        if (update.category !== undefined) item.category = update.category;
         if (update.english) item.english = update.english;
         if (update.spanish) item.spanish = update.spanish;
         if (update.default_unit) item.default_unit = update.default_unit;
@@ -135,6 +137,15 @@ export class ItemResolvers extends BaseResolvers {
         if (!default_unit) return null;
         else
             return loaderResult(await UnitLoader.load(default_unit.toString()));
+    }
+
+    @FieldResolver(() => Unit)
+    async category(@Root() { category }: Item): Promise<ItemCategory | null> {
+        if (!category) return null;
+        else
+            return loaderResult(
+                await ItemCategoryLoader.load(category.toString())
+            );
     }
 
     @FieldResolver(() => Number)

@@ -1,7 +1,8 @@
 import { BaseFilter } from './../Base/BaseFilter';
-import { FilterQuery } from 'mongoose';
+import { FilterQuery, ObjectId } from 'mongoose';
 import { Field, InputType } from 'type-graphql';
 import { Item, ItemType } from './Item';
+import { ObjectIdScalar } from '../ObjectIdScalar';
 
 @InputType()
 export class ItemFilter extends BaseFilter {
@@ -17,6 +18,9 @@ export class ItemFilter extends BaseFilter {
     @Field({ nullable: true })
     upc?: string;
 
+    @Field(() => ObjectIdScalar, { nullable: true })
+    category?: ObjectId | null;
+
     serializeItemFilter(): FilterQuery<Item> {
         const query: FilterQuery<Item> = this.serializeBaseFilter();
 
@@ -27,7 +31,7 @@ export class ItemFilter extends BaseFilter {
                 };
             else query.upc = null;
         }
-
+        if (this.category !== undefined) query.category = this.category;
         if (this.type !== undefined) {
             if (this.type) query.type = this.type;
             else

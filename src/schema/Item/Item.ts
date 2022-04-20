@@ -11,6 +11,7 @@ import {
 } from '@typegoose/typegoose';
 import { Company } from '../Company/Company';
 import { ObjectId } from 'mongoose';
+import { ItemCategory } from '../ItemCategory/ItemCategory';
 
 export enum ItemType {
     Product = 'Product',
@@ -27,6 +28,10 @@ export class Item extends Base {
     @Field(() => UnitClass)
     @prop({ required: true, enum: UnitClass })
     unit_class!: UnitClass;
+
+    @Field(() => ItemCategory, { nullable: true })
+    @prop({ required: false })
+    category?: Ref<ItemCategory> | ObjectId;
 
     @Field(() => ItemType, { nullable: true })
     @prop({ required: false })

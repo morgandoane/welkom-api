@@ -35,6 +35,7 @@ export enum Permission {
     CreateFulfillment = 'CreateFulfillment',
     UpdateFulfillment = 'UpdateFulfillment',
     VerifyFulfillment = 'VerifyFulfillment',
+    FlashFulfillment = 'FlashFulfillment',
 
     GetItems = 'GetItems',
     CreateItem = 'CreateItem',
