@@ -171,30 +171,30 @@ export class BolFilter extends BaseFilter {
             ];
         }
 
-        if (this.lot_code) {
-            const rootLots = await LotModel.find({
-                code: { $regex: new RegExp(this.lot_code, 'i') },
-                deleted: false,
-            }).select('_id');
+        // if (this.lot_code) {
+        //     const rootLots = await LotModel.find({
+        //         code: { $regex: new RegExp(this.lot_code, 'i') },
+        //         deleted: false,
+        //     }).select('_id');
 
-            const fulfillmentLots = await LotModel.find({
-                'contents.lot': { $in: rootLots.map((l) => l._id) },
-            }).select('_id');
+        //     const fulfillmentLots = await LotModel.find({
+        //         'contents.lot': { $in: rootLots.map((l) => l._id) },
+        //     }).select('_id');
 
-            const potentialFulfillments = await FulfillmentModel.find({
-                deleted: false,
-                lots: { $in: fulfillmentLots.map((l) => l._id) },
-            });
+        //     const potentialFulfillments = await FulfillmentModel.find({
+        //         deleted: false,
+        //         lots: { $in: fulfillmentLots.map((l) => l._id) },
+        //     });
 
-            res.$and = [
-                ...(res.$and || []),
-                {
-                    _id: {
-                        $in: potentialFulfillments.map((f) => f.bol),
-                    },
-                },
-            ];
-        }
+        //     res.$and = [
+        //         ...(res.$and || []),
+        //         {
+        //             _id: {
+        //                 $in: potentialFulfillments.map((f) => f.bol),
+        //             },
+        //         },
+        //     ];
+        // }
 
         return res;
     }
